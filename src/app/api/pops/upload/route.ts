@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { popQueue } from '@/lib/queue'
 import { v4 as uuidv4 } from 'uuid'
 
+export const runtime = 'nodejs'
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -33,6 +35,7 @@ export async function POST(request: NextRequest) {
         titulo: file.name.replace(/\.[^/.]+$/, ''),
         setor: 'Farmácia',
         status: 'RASCUNHO',
+        conteudo: '', // Campo obrigatório, será preenchido pelo worker
         filePath,
         autorId: 'default-user-id'
       }

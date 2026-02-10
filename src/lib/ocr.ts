@@ -1,7 +1,3 @@
-import Tesseract from 'tesseract.js'
-import pdfParse from 'pdf-parse'
-import mammoth from 'mammoth'
-import JSZip from 'jszip'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
@@ -11,22 +7,31 @@ export async function extractTextFromBuffer(filePath: string): Promise<string> {
   
   if (ext === '.pdf') {
     try {
+      const mod = await import('pdf-parse')
+      const pdfParse = (mod as any).default ?? (mod as any)
       const data = await pdfParse(buffer)
       return data.text
     } catch {
-      const image = await Tesseract.recognize(buffer, 'por')
-      return image.data.text
+      const { createWorker } = await import('tesseract.js')
+      const worker = await createWorker('por')
+      const { data: { text } } = await worker.recognize(buffer)
+      await worker.terminate()
+      return text
     }
   }
   
   if (ext === '.docx') {
-    const result = await mammoth.extractRawText({ buffer })
+    const { extractRawText } = await import('mammoth')
+    const result = await extractRawText({ buffer })
     return result.value
   }
   
   if (['.png', '.jpg', '.jpeg'].includes(ext)) {
-    const image = await Tesseract.recognize(buffer, 'por')
-    return image.data.text
+    const { createWorker } = await import('tesseract.js')
+    const worker = await createWorker('por')
+    const { data: { text } } = await worker.recognize(buffer)
+    await worker.terminate()
+    return text
   }
   
   throw new Error('Formato de arquivo não suportado')
