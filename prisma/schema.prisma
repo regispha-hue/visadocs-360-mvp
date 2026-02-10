@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(OPERADOR)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  popsCreated   Pop[]     @relation("PopAuthor")
+  reviews       Review[]
+
+  @@map("users")
+}
+
+model Pop {
+  id          String     @id @default(uuid())
+  codigo      String     @unique
+  titulo      String
+  setor       String
+  status      PopStatus  @default(RASCUNHO)
+  versao      String     @default("Rev00")
+  conteudo    String     @db.Text
+  metadados   Json?
+  filePath    String?
+  
+  autorId     String
+  autor       User       @relation("PopAuthor", fields: [autorId], references: [id])
+  reviews     Review[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("pops")
+}
+
+model Review {
+  id          String        @id @default(uuid())
+  popId       String
+  pop         Pop           @relation(fields: [popId], references: [id], onDelete: Cascade)
+  revisorId   String
+  revisor     User          @relation(fields: [revisorId], references: [id])
+  status      ReviewStatus
+  comentario  String?       @db.Text
+  createdAt   DateTime      @default(now())
+
+  @@map("reviews")
+}
+
+enum UserRole {
+  ADMIN
+  RT
+  ANALISTA_CQ
+  OPERADOR
+}
+
+enum PopStatus {
+  RASCUNHO
+  PROCESSANDO
+  EM_REVISAO
+  APROVADO
+  REJEITADO
+  ARQUIVADO
+}
+
+enum ReviewStatus {
+  APROVADO
+  REJEITADO
+  PENDENTE_CORRECAO
+}
