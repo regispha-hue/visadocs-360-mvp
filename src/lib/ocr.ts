@@ -10,14 +10,17 @@ export async function extractTextFromBuffer(filePath: string): Promise<string> {
   const ext = path.extname(filePath).toLowerCase()
   
   if (ext === '.pdf') {
-    try {
-      const data = await pdfParse(buffer)
-      return data.text
-    } catch {
-      const image = await Tesseract.recognize(buffer, 'por')
-      return image.data.text
-    }
+  try {
+    const parse = (pdfParse as any)
+    const fn = parse?.default ?? parse
+    const data = await fn(buffer)
+    return data.text
+  } catch {
+    const image = await Tesseract.recognize(buffer, 'por')
+    return image.data.text
   }
+}
+
   
   if (ext === '.docx') {
     const result = await mammoth.extractRawText({ buffer })
