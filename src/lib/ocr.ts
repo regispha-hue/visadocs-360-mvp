@@ -1,5 +1,5 @@
 import Tesseract from 'tesseract.js'
-import * as pdfParse from "pdf-parse";
+import pdfParse from "pdf-parse";
 import mammoth from 'mammoth'
 import JSZip from 'jszip'
 import { readFile } from 'fs/promises'
