@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const runtime = 'nodejs'
+
 export async function GET() {
   try {
     const pops = await prisma.pop.findMany({

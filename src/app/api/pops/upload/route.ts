@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
         codigo: `POP-${Date.now()}`,
         titulo: file.name.replace(/\.[^/.]+$/, ''),
         setor: 'Farmácia',
-        conteudo: "PENDENTE",
         status: 'RASCUNHO',
         conteudo: '', // Campo obrigatório, será preenchido pelo worker
         filePath,
