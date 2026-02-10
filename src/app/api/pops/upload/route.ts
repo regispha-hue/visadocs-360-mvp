@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         conteudo: "PENDENTE",
         status: 'RASCUNHO',
         filePath,
-        autorId: 'default-user-id'
+        autorId: 'default-user-id',
       }
     })
 
