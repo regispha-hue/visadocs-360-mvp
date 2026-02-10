@@ -6,6 +6,7 @@ import { popQueue } from '@/lib/queue'
 import { v4 as uuidv4 } from 'uuid'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
