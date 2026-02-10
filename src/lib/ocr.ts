@@ -1,5 +1,4 @@
 import Tesseract from 'tesseract.js'
-import pdfParse from "pdf-parse";
 import mammoth from 'mammoth'
 import JSZip from 'jszip'
 import { readFile } from 'fs/promises'
@@ -11,9 +10,9 @@ export async function extractTextFromBuffer(filePath: string): Promise<string> {
   
   if (ext === '.pdf') {
   try {
-    const parse = (pdfParse as any)
-    const fn = parse?.default ?? parse
-    const data = await fn(buffer)
+    const mod = await import('pdf-parse')
+    const pdfParse: any = (mod as any).default ?? (mod as any)
+    const data = await pdfParse(buffer)
     return data.text
   } catch {
     const image = await Tesseract.recognize(buffer, 'por')
