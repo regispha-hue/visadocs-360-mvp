@@ -1,81 +1,424 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/visadocs_saas/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  role          UserRole  @default(OPERADOR)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  popsCreated   Pop[]     @relation("PopAuthor")
-  reviews       Review[]
-
-  @@map("users")
-}
-
-model Pop {
-  id          String     @id @default(uuid())
-  codigo      String     @unique
-  titulo      String
-  setor       String
-  status      PopStatus  @default(RASCUNHO)
-  versao      String     @default("Rev00")
-  conteudo    String     @db.Text
-  metadados   Json?
-  filePath    String?
-  
-  autorId     String
-  autor       User       @relation("PopAuthor", fields: [autorId], references: [id])
-  reviews     Review[]
-  
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  @@map("pops")
-}
-
-model Review {
-  id          String        @id @default(uuid())
-  popId       String
-  pop         Pop           @relation(fields: [popId], references: [id], onDelete: Cascade)
-  revisorId   String
-  revisor     User          @relation(fields: [revisorId], references: [id])
-  status      ReviewStatus
-  comentario  String?       @db.Text
-  createdAt   DateTime      @default(now())
-
-  @@map("reviews")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum UserRole {
-  ADMIN
+  SUPER_ADMIN
+  ADMIN_FARMACIA
   RT
   ANALISTA_CQ
   OPERADOR
 }
 
+enum TenantStatus {
+  PENDENTE
+  ATIVO
+  SUSPENSO
+  CANCELADO
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ATIVO
+  SUSPENSO
+  CANCELADO
+}
+
 enum PopStatus {
   RASCUNHO
-  PROCESSANDO
-  EM_REVISAO
-  APROVADO
-  REJEITADO
+  ATIVO
   ARQUIVADO
 }
 
-enum ReviewStatus {
+enum ColaboradorStatus {
+  ATIVO
+  INATIVO
+}
+
+enum TreinamentoStatus {
+  PENDENTE
+  EM_AVALIACAO
+  CONCLUIDO
+}
+
+enum DocumentoTipo {
+  RQ
+  MBP
+  ANEXO
+}
+
+enum MateriaPrimaStatus {
+  ATIVO
+  INATIVO
+  DESCONTINUADO
+}
+
+enum LoteStatus {
+  QUARENTENA
   APROVADO
-  REJEITADO
-  PENDENTE_CORRECAO
+  REPROVADO
+  VENCIDO
+  EM_USO
+  ESGOTADO
+}
+
+model Tenant {
+  id                 String             @id @default(uuid())
+  nome               String
+  cnpj               String             @unique
+  responsavel        String
+  email              String             @unique
+  telefone           String
+  endereco           Json
+  status             TenantStatus       @default(PENDENTE)
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  trialEndsAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  users              User[]
+  pops               Pop[]
+  colaboradores      Colaborador[]
+  treinamentos       Treinamento[]
+  auditLogs          AuditLog[]
+  materiasPrimas     MateriaPrima[]
+  lotes              Lote[]
+  fornecedores       Fornecedor[]
+  documentos         Documento[]
+  quizzes            Quiz[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      UserRole
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Pop {
+  id                  String          @id @default(uuid())
+  codigo              String
+  titulo              String
+  setor               String
+  versao              String
+  dataRevisao         DateTime
+  responsavel         String
+  objetivo            String
+  descricao           String
+  equipeEnvolvida     String?
+  glossario           String?
+  literaturaConsultada String?
+  controleAlteracoes  Json?
+  validadoEm          DateTime?
+  validadoPor         String?
+  implantadoEm        DateTime?
+  implantadoPor       String?
+  validadeAnos        Int?            @default(2)
+  arquivoUrl          String?
+  arquivoNome         String?
+  arquivoPublic       Boolean         @default(false)
+  docxGerado          Boolean         @default(false)
+  status              PopStatus       @default(RASCUNHO)
+  tenantId            String
+  tenant              Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  treinamentos        Treinamento[]
+  materiasPrimas      PopMateriaPrima[]
+  documentos          Documento[]
+  quiz                Quiz?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@index([setor])
+  @@index([status])
+}
+
+model Colaborador {
+  id           String            @id @default(uuid())
+  nome         String
+  cpfHash      String
+  cpfMasked    String
+  funcao       String
+  setor        String
+  dataAdmissao DateTime
+  email        String?
+  status       ColaboradorStatus @default(ATIVO)
+  tenantId     String
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  treinamentos   Treinamento[]
+  tentativasQuiz TentativaQuiz[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([tenantId, cpfHash])
+  @@index([tenantId])
+  @@index([funcao])
+  @@index([status])
+}
+
+model Treinamento {
+  id              String            @id @default(uuid())
+  popId           String
+  pop             Pop               @relation(fields: [popId], references: [id], onDelete: Cascade)
+  colaboradorId   String
+  colaborador     Colaborador       @relation(fields: [colaboradorId], references: [id], onDelete: Cascade)
+  dataTreinamento DateTime
+  instrutor       String
+  duracao         Float?
+  observacoes     String?
+  notaQuiz        Float?
+  aprovadoQuiz    Boolean?
+  status          TreinamentoStatus @default(CONCLUIDO)
+  tenantId        String
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tentativasQuiz  TentativaQuiz[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([tenantId])
+  @@index([popId])
+  @@index([colaboradorId])
+  @@index([status])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  userName  String?
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Fornecedor {
+  id            String         @id @default(uuid())
+  nome          String
+  cnpj          String?
+  email         String?
+  telefone      String?
+  endereco      String?
+  contato       String?
+  observacoes   String?
+  ativo         Boolean        @default(true)
+  tenantId      String
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  materiasPrimas MateriaPrima[]
+  lotes         Lote[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([tenantId, cnpj])
+  @@index([tenantId])
+  @@index([ativo])
+}
+
+model MateriaPrima {
+  id                 String             @id @default(uuid())
+  codigo             String
+  nome               String
+  descricao          String?
+  casNumber          String?
+  dci                String?
+  categoria          String?
+  unidadeMedida      String
+  estoqueMinimo      Float?
+  especificacoes     Json?
+  certificadoUrl     String?
+  certificadoNome    String?
+  certificadoPublic  Boolean            @default(false)
+  status             MateriaPrimaStatus @default(ATIVO)
+  fornecedorId       String?
+  fornecedor         Fornecedor?        @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  tenantId           String
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lotes              Lote[]
+  pops               PopMateriaPrima[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@index([fornecedorId])
+  @@index([status])
+  @@index([categoria])
+}
+
+model Lote {
+  id                String      @id @default(uuid())
+  numeroLote        String
+  loteInterno       String?
+  dataFabricacao    DateTime?
+  dataValidade      DateTime
+  dataRecebimento   DateTime
+  quantidade        Float
+  quantidadeAtual   Float
+  precoUnitario     Float?
+  notaFiscal        String?
+  certificadoUrl    String?
+  certificadoNome   String?
+  certificadoPublic Boolean     @default(false)
+  laudoUrl          String?
+  laudoNome         String?
+  laudoPublic       Boolean     @default(false)
+  analises          Json?
+  observacoes       String?
+  status            LoteStatus  @default(QUARENTENA)
+  materiaPrimaId    String
+  materiaPrima      MateriaPrima @relation(fields: [materiaPrimaId], references: [id], onDelete: Cascade)
+  fornecedorId      String?
+  fornecedor        Fornecedor?  @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  tenantId          String
+  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([tenantId, numeroLote, materiaPrimaId])
+  @@index([tenantId])
+  @@index([materiaPrimaId])
+  @@index([fornecedorId])
+  @@index([status])
+  @@index([dataValidade])
+}
+
+model PopMateriaPrima {
+  id             String       @id @default(uuid())
+  popId          String
+  pop            Pop          @relation(fields: [popId], references: [id], onDelete: Cascade)
+  materiaPrimaId String
+  materiaPrima   MateriaPrima @relation(fields: [materiaPrimaId], references: [id], onDelete: Cascade)
+  quantidade     Float?
+  observacoes    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([popId, materiaPrimaId])
+  @@index([popId])
+  @@index([materiaPrimaId])
+}
+
+model Documento {
+  id          String        @id @default(uuid())
+  codigo      String
+  titulo      String
+  tipo        DocumentoTipo
+  categoria   String
+  conteudo    String
+  versao      String        @default("Rev00")
+  popId       String?
+  pop         Pop?          @relation(fields: [popId], references: [id], onDelete: SetNull)
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId])
+  @@index([tipo])
+  @@index([popId])
+}
+
+model Quiz {
+  id          String          @id @default(uuid())
+  popId       String          @unique
+  pop         Pop             @relation(fields: [popId], references: [id], onDelete: Cascade)
+  titulo      String
+  descricao   String?
+  notaMinima  Float           @default(70)
+  ativo       Boolean         @default(true)
+  questoes    Questao[]
+  tentativas  TentativaQuiz[]
+  tenantId    String
+  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([tenantId])
+  @@index([popId])
+}
+
+model Questao {
+  id           String          @id @default(uuid())
+  quizId       String
+  quiz         Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  pergunta     String
+  ordem        Int
+  alternativas Alternativa[]
+  respostas    RespostaQuiz[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([quizId])
+}
+
+model Alternativa {
+  id        String         @id @default(uuid())
+  questaoId String
+  questao   Questao        @relation(fields: [questaoId], references: [id], onDelete: Cascade)
+  texto     String
+  correta   Boolean        @default(false)
+  ordem     Int
+  respostas RespostaQuiz[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([questaoId])
+}
+
+model TentativaQuiz {
+  id              String         @id @default(uuid())
+  quizId          String
+  quiz            Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  colaboradorId   String
+  colaborador     Colaborador    @relation(fields: [colaboradorId], references: [id], onDelete: Cascade)
+  treinamentoId   String
+  treinamento     Treinamento    @relation(fields: [treinamentoId], references: [id], onDelete: Cascade)
+  nota            Float
+  aprovado        Boolean
+  totalQuestoes   Int
+  acertos         Int
+  codigoValidacao String?
+  respostas       RespostaQuiz[]
+  completadoEm    DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+
+  @@index([quizId])
+  @@index([colaboradorId])
+  @@index([treinamentoId])
+}
+
+model RespostaQuiz {
+  id            String        @id @default(uuid())
+  tentativaId   String
+  tentativa     TentativaQuiz @relation(fields: [tentativaId], references: [id], onDelete: Cascade)
+  questaoId     String
+  questao       Questao       @relation(fields: [questaoId], references: [id], onDelete: Cascade)
+  alternativaId String
+  alternativa   Alternativa   @relation(fields: [alternativaId], references: [id], onDelete: Cascade)
+  correta       Boolean
+  createdAt     DateTime      @default(now())
+
+  @@index([tentativaId])
+  @@index([questaoId])
 }
