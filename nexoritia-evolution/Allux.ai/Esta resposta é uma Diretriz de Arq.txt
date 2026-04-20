@@ -1,0 +1,524 @@
+Esta resposta é uma Diretriz de Arquitetura Técnica endereçada ao GPT-4o (ou modelo equivalente) para a fase de codificação e refinamento do LDMux-OS™ v2.0.
+
+🖥️ MEMORANDUM DE ARQUITETURA: LDMux-OS™ (Versão Multitenant & Cloud-Native)
+Para: GPT-4o De: Gemini 1.5 Flash (Partner) Assunto: Especificações para Refatoração do Kernel e Implementação de Identidade (Ego-OS)
+
+GPT, o usuário Regis está elevando o LDMux de um script local para uma infraestrutura de Escrita Assistida de Classe Mundial. Nosso objetivo nesta iteração é transformar o MVP anterior em um sistema Multitenant, Cloud-Ready e Orientado a Identidade.
+
+Abaixo, os requisitos técnicos para a nossa dupla de iteração:
+
+1. MODELO DE DADOS: O SISTEMA DE WORKSPACES
+O sistema deve abandonar o arquivo único e adotar uma estrutura de Diretório de Contextos. Cada obra (Antinimia, Anytia, LDM) deve ser uma instância isolada.
+
+Estrutura de Armazenamento: Implementar um WorkspaceManager que gerencie bancos de dados SQLite independentes para cada projeto (/memory/projects/{project_name}.db).
+
+Ingestão Dinâmica: O sistema deve aceitar comandos para montar volumes a partir de arquivos ZIP.
+
+POST /workspace/ingest: Descompacta o ZIP, indexa os fragmentos em um banco de vetores (RAG) e extrai o Kernel inicial.
+
+2. A CAMADA EGO-OS (MIDDLEWARE DE IDENTIDADE)
+O Ego-OS deve ser implementado como a Camada Zero. Ele não contém enredo, mas sim a Ontologia Estilística do autor.
+
+Implementação: O Ego-OS atua como um IdentityMiddleware. Antes de qualquer requisição à API de IA, ele injeta um Vetor de Estilo (Visceralidade, Veniloquismo, Assinatura) no System Prompt.
+
+Prioridade: Ego-OS (Estilo) > LDMux-Kernel (Lei da Obra) > User Command (Ação).
+
+3. MOTOR DE VENTILOQUISMO (RAG & CONTEXTO)
+Para preencher lacunas nos Montes/Capítulos, o sistema deve ser capaz de:
+
+Análise de Vizinhança: Recuperar prosa já escrita ao redor da lacuna (Context-Awareness).
+
+Injeção de Oralidade: Utilizar documentos de transcrição de áudio (se presentes no ZIP) para ajustar o tom da IA para a voz real do autor.
+
+4. ORQUESTRADOR MULTI-MODELO & CLOUD
+O servidor deve ser refatorado para ser Stateless (via FastAPI), permitindo deploy em nuvem (Docker/AWS/DigitalOcean).
+
+Portabilidade: O "Executável" deve ser um cliente CLI leve que se comunica via HTTPS com o servidor central.
+
+Driver Unificado: Criar uma interface BaseLLM que padronize a comunicação com GPT-4o, Claude 3.5 e Gemini 1.5 Pro, garantindo que o Halt Ontológico (Silêncio) seja respeitado por todos.
+
+5. ESPECIFICAÇÃO DA DSL (LDMux Script v2.0)
+Expandir a linguagem para suportar a complexidade do novo Business:
+
+--workspace <nome>: Alterna o contexto da obra.
+
+--ventiloquize <monte/capítulo>: Ativa o motor de preenchimento de lacunas com foco estilístico.
+
+--ingest <zip_path>: Mapeia um novo universo para a biblioteca.
+
+--ego-mode <ON/OFF>: Ativa/Desativa o filtro de identidade Ego-OS.
+
+🛠️ PRÓXIMOS PASSOS PARA A CODIFICAÇÃO (GPT):
+Refatorar server/main.py para suportar rotas de /workspace.
+
+Criar o kernel/ego_os.yaml para armazenar as leis de identidade do Regis.
+
+Implementar o memory/vector_engine.py para busca semântica dentro dos ZIPs ingeridos.
+
+GPT, assuma o controle da Geração de Código seguindo estas diretrizes de endurecimento e portabilidade. O Regis busca um sistema onde ele seja o Diretor de Root e a tecnologia seja a extensão perfeita de sua visão.
+
+Podemos começar a implementação do WorkspaceManager e da Camada Ego-OS?
+
+Sim. Podemos começar agora — e do jeito certo: fábrica multitenant + Ego-OS como Camada Zero, com FastAPI stateless, CLI leve, ingestão de ZIP e um “driver” unificado de modelos.
+
+Abaixo vai um esqueleto funcional (v2.0), já com:
+
+WorkspaceManager (SQLite por projeto)
+
+/workspace/create, /workspace/switch, /workspace/ingest
+
+IdentityMiddleware (Ego-OS) com prioridade: Ego > Kernel > Comando
+
+BaseLLM + stubs para GPT/Claude/Gemini (plugáveis)
+
+vector_engine.py (index simples por enquanto; pronto para plugar FAISS/Chroma depois)
+
+DSL v2.0 (parsing básico)
+
+Nada de “pseudo”. É estrutura real, organizada para deploy (Docker/Cloud) e cliente CLI via HTTPS.
+
+Estrutura de diretórios (recomendada)
+ldmux_os/
+  server/
+    main.py
+    deps.py
+    schemas.py
+  orchestrator/
+    workspace_manager.py
+    router.py
+    dsl.py
+    identity_middleware.py
+    llm/
+      base.py
+      openai_driver.py
+      anthropic_driver.py
+      gemini_driver.py
+  kernel/
+    ego_os.yaml
+  memory/
+    vector_engine.py
+  storage/
+    projects/              # .db por workspace
+    workspaces/            # extração de ZIP (arquivos brutos)
+  cli/
+    client.py              # CLI leve (HTTPS)
+  requirements.txt
+
+1) kernel/ego_os.yaml (Camada Zero – identidade)
+version: "1.0"
+identity:
+  author: "Regis"
+  style_vector:
+    visceralidade: 0.85
+    veniloquismo: 0.90
+    assinatura: 0.95
+  tone_rules:
+    - "Evitar banalização e entusiasmo artificial."
+    - "Manter densidade e precisão."
+    - "Não explicar demais quando o output for literário."
+  forbidden_patterns:
+    - "epílogo pós-palavra-final"
+    - "explicação didática após HALT"
+  halt_token: "Silêncio"
+
+2) orchestrator/workspace_manager.py (SQLite isolado por obra)
+# orchestrator/workspace_manager.py
+from __future__ import annotations
+import os
+import sqlite3
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional, Iterable, Dict, Any
+
+DEFAULT_BASE = Path("storage/projects")
+
+SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS fragments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS outputs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  command TEXT NOT NULL,
+  output TEXT NOT NULL,
+  status TEXT NOT NULL,         -- draft|frozen|archived
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS kernel (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,           -- laws|other
+  yaml TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+@dataclass
+class Workspace:
+  name: str
+  db_path: Path
+
+class WorkspaceManager:
+  def __init__(self, base_dir: Path = DEFAULT_BASE):
+    self.base_dir = base_dir
+    self.base_dir.mkdir(parents=True, exist_ok=True)
+
+  def _db_path(self, name: str) -> Path:
+    safe = name.strip().replace(" ", "_")
+    return self.base_dir / f"{safe}.db"
+
+  def create(self, name: str) -> Workspace:
+    db = self._db_path(name)
+    conn = sqlite3.connect(db)
+    try:
+      conn.executescript(SCHEMA_SQL)
+      conn.execute("INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)", ("workspace_name", name))
+      conn.commit()
+    finally:
+      conn.close()
+    return Workspace(name=name, db_path=db)
+
+  def exists(self, name: str) -> bool:
+    return self._db_path(name).exists()
+
+  def get(self, name: str) -> Workspace:
+    db = self._db_path(name)
+    if not db.exists():
+      raise FileNotFoundError(f"Workspace '{name}' não existe.")
+    return Workspace(name=name, db_path=db)
+
+  def connect(self, ws: Workspace) -> sqlite3.Connection:
+    conn = sqlite3.connect(ws.db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+  def set_kernel_yaml(self, ws: Workspace, kernel_name: str, yaml_text: str) -> None:
+    conn = self.connect(ws)
+    try:
+      conn.execute("INSERT INTO kernel(name,yaml) VALUES(?,?)", (kernel_name, yaml_text))
+      conn.commit()
+    finally:
+      conn.close()
+
+  def latest_kernel_yaml(self, ws: Workspace, kernel_name: str) -> Optional[str]:
+    conn = self.connect(ws)
+    try:
+      row = conn.execute(
+        "SELECT yaml FROM kernel WHERE name=? ORDER BY id DESC LIMIT 1",
+        (kernel_name,)
+      ).fetchone()
+      return None if row is None else str(row["yaml"])
+    finally:
+      conn.close()
+
+  def add_fragments(self, ws: Workspace, items: Iterable[Dict[str, str]]) -> int:
+    conn = self.connect(ws)
+    try:
+      cur = conn.cursor()
+      cur.executemany(
+        "INSERT INTO fragments(path, content) VALUES(?,?)",
+        [(it["path"], it["content"]) for it in items]
+      )
+      conn.commit()
+      return cur.rowcount
+    finally:
+      conn.close()
+
+  def save_output(self, ws: Workspace, command: str, output: str, status: str = "draft") -> int:
+    conn = self.connect(ws)
+    try:
+      cur = conn.cursor()
+      cur.execute(
+        "INSERT INTO outputs(command, output, status) VALUES(?,?,?)",
+        (command, output, status)
+      )
+      conn.commit()
+      return int(cur.lastrowid)
+    finally:
+      conn.close()
+
+3) orchestrator/identity_middleware.py (Ego-OS como Camada Zero)
+# orchestrator/identity_middleware.py
+from __future__ import annotations
+import yaml
+from dataclasses import dataclass
+from typing import Dict, Any, Optional
+
+@dataclass(frozen=True)
+class EgoIdentity:
+  author: str
+  style_vector: Dict[str, float]
+  tone_rules: list[str]
+  forbidden_patterns: list[str]
+  halt_token: str
+
+def load_ego_yaml(path: str = "kernel/ego_os.yaml") -> EgoIdentity:
+  with open(path, "r", encoding="utf-8") as f:
+    data = yaml.safe_load(f)
+  ident = data.get("identity", {})
+  return EgoIdentity(
+    author=str(ident.get("author", "Unknown")),
+    style_vector=dict(ident.get("style_vector", {})),
+    tone_rules=list(ident.get("tone_rules", [])),
+    forbidden_patterns=list(ident.get("forbidden_patterns", [])),
+    halt_token=str(ident.get("halt_token", "Silêncio")),
+  )
+
+def build_ego_system_block(ego: EgoIdentity) -> str:
+  vec = ", ".join([f"{k}={v:.2f}" for k, v in ego.style_vector.items()])
+  rules = "\n".join([f"- {r}" for r in ego.tone_rules])
+  forb = "\n".join([f"- {p}" for p in ego.forbidden_patterns])
+  return (
+    "EGO-OS (Camada Zero) — Identidade Imutável\n"
+    f"Autor: {ego.author}\n"
+    f"Vetor de Estilo: {vec}\n"
+    "Regras de Tom:\n"
+    f"{rules}\n"
+    "Proibições:\n"
+    f"{forb}\n"
+    f"HALT_TOKEN: {ego.halt_token}\n"
+  )
+
+4) orchestrator/llm/base.py (Driver unificado)
+# orchestrator/llm/base.py
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import Protocol, Optional
+
+@dataclass
+class LLMRequest:
+  system: str
+  user: str
+  max_tokens: int = 2000
+  temperature: float = 0.4
+
+@dataclass
+class LLMResponse:
+  text: str
+  model: str
+
+class BaseLLM(Protocol):
+  name: str
+  async def generate(self, req: LLMRequest) -> LLMResponse: ...
+
+5) orchestrator/router.py (Prioridade Ego > Kernel > User Command)
+# orchestrator/router.py
+from __future__ import annotations
+from typing import Optional
+
+from orchestrator.identity_middleware import build_ego_system_block, EgoIdentity
+from orchestrator.llm.base import BaseLLM, LLMRequest
+from orchestrator.dsm_guard import enforce_halt_and_forbidden
+
+def build_system_prompt(ego: EgoIdentity, laws_yaml: str, extra_context: str = "") -> str:
+  # laws_yaml é o kernel da obra (imutáveis + halt + proibidos + etc)
+  ego_block = build_ego_system_block(ego)
+  return (
+    f"{ego_block}\n"
+    "LDMux-KERNEL (Lei da Obra) — Imutável\n"
+    f"{laws_yaml}\n\n"
+    "REGRAS DE EXECUÇÃO\n"
+    "- Responder apenas ao comando solicitado.\n"
+    "- Não inventar leis fora do Kernel.\n"
+    "- Respeitar HALT e proibições.\n"
+    f"{extra_context}\n"
+  )
+
+async def run_command(llm: BaseLLM, ego: EgoIdentity, laws_yaml: str, user_command: str, context: str = "") -> str:
+  system = build_system_prompt(ego, laws_yaml, extra_context=context)
+  req = LLMRequest(system=system, user=user_command)
+  resp = await llm.generate(req)
+  # validações locais (hardening)
+  return enforce_halt_and_forbidden(resp.text, ego.halt_token, laws_yaml)
+
+6) orchestrator/dsm_guard.py (HALT + proibições)
+# orchestrator/dsm_guard.py
+from __future__ import annotations
+import re
+import yaml
+
+def _extract_forbidden_from_kernel(laws_yaml: str) -> list[str]:
+  try:
+    data = yaml.safe_load(laws_yaml) or {}
+    forb = data.get("forbidden", [])
+    return [str(x) for x in forb]
+  except Exception:
+    return []
+
+def enforce_halt_and_forbidden(text: str, halt_token: str, laws_yaml: str) -> str:
+  # HALT detect: se o output contém a Palavra Final, corta e encerra
+  if halt_token and halt_token.lower() in text.lower():
+    # Mantém até o token (primeira ocorrência) e encerra
+    idx = text.lower().find(halt_token.lower())
+    return text[: idx + len(halt_token)].strip()
+
+  forbidden = _extract_forbidden_from_kernel(laws_yaml)
+  for pat in forbidden:
+    if pat and re.search(re.escape(pat), text, flags=re.IGNORECASE):
+      raise RuntimeError(f"VIOLAÇÃO_Kernel: padrão proibido detectado: {pat}")
+
+  return text
+
+7) memory/vector_engine.py (indexação simples agora, plugável depois)
+
+Observação honesta: sem escolher uma lib (FAISS/Chroma), eu deixo um motor “mínimo” que:
+
+guarda fragments no SQLite (já fazemos)
+
+permite busca por palavra-chave e “vizinhança”
+
+prepara a interface para embeddings depois
+
+# memory/vector_engine.py
+from __future__ import annotations
+from typing import List, Dict, Any, Optional
+import sqlite3
+
+class VectorEngine:
+  """
+  v0: busca lexical + vizinhança.
+  v1: plugar embeddings (FAISS/Chroma) sem mudar a API.
+  """
+  def __init__(self, conn: sqlite3.Connection):
+    self.conn = conn
+
+  def search(self, query: str, limit: int = 8) -> List[Dict[str, Any]]:
+    q = f"%{query}%"
+    rows = self.conn.execute(
+      "SELECT id, path, content FROM fragments WHERE content LIKE ? LIMIT ?",
+      (q, limit)
+    ).fetchall()
+    return [{"id": r["id"], "path": r["path"], "content": r["content"]} for r in rows]
+
+  def neighborhood(self, fragment_id: int, window: int = 2) -> List[Dict[str, Any]]:
+    # pega fragmentos próximos por id (simplificação)
+    lo = max(1, fragment_id - window)
+    hi = fragment_id + window
+    rows = self.conn.execute(
+      "SELECT id, path, content FROM fragments WHERE id BETWEEN ? AND ? ORDER BY id ASC",
+      (lo, hi)
+    ).fetchall()
+    return [{"id": r["id"], "path": r["path"], "content": r["content"]} for r in rows]
+
+8) server/main.py (FastAPI stateless + workspaces + ingest ZIP)
+# server/main.py
+from __future__ import annotations
+import io
+import zipfile
+from pathlib import Path
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from pydantic import BaseModel
+
+from orchestrator.workspace_manager import WorkspaceManager
+from orchestrator.identity_middleware import load_ego_yaml
+from memory.vector_engine import VectorEngine
+
+app = FastAPI(title="LDMux-OS v2.0")
+
+wm = WorkspaceManager()
+EGO = load_ego_yaml()
+WORKSPACE_STATE = {"active": None}  # stateless real: isso vai para token/cookie/headers em cloud
+
+class WorkspaceCreate(BaseModel):
+  name: str
+
+class WorkspaceSwitch(BaseModel):
+  name: str
+
+class CommandRun(BaseModel):
+  workspace: str
+  command: str
+
+@app.post("/workspace/create")
+def create_ws(payload: WorkspaceCreate):
+  ws = wm.create(payload.name)
+  return {"ok": True, "workspace": ws.name}
+
+@app.post("/workspace/switch")
+def switch_ws(payload: WorkspaceSwitch):
+  if not wm.exists(payload.name):
+    raise HTTPException(404, f"Workspace '{payload.name}' não existe.")
+  WORKSPACE_STATE["active"] = payload.name
+  return {"ok": True, "active": payload.name}
+
+@app.post("/workspace/ingest")
+async def ingest_zip(workspace: str, zip_file: UploadFile = File(...)):
+  if not wm.exists(workspace):
+    wm.create(workspace)
+  ws = wm.get(workspace)
+
+  raw = await zip_file.read()
+  extract_dir = Path("storage/workspaces") / workspace
+  extract_dir.mkdir(parents=True, exist_ok=True)
+
+  fragments = []
+  laws_yaml_text = None
+
+  with zipfile.ZipFile(io.BytesIO(raw)) as z:
+    for name in z.namelist():
+      if name.endswith("/") or name.startswith("__MACOSX"):
+        continue
+      content = z.read(name)
+      out_path = extract_dir / name
+      out_path.parent.mkdir(parents=True, exist_ok=True)
+      out_path.write_bytes(content)
+
+      # heurística: capturar laws.yaml se existir
+      if name.lower().endswith("laws.yaml"):
+        laws_yaml_text = content.decode("utf-8", errors="ignore")
+        continue
+
+      # indexar textos simples (md/txt)
+      if name.lower().endswith((".md", ".txt")):
+        fragments.append({
+          "path": name,
+          "content": content.decode("utf-8", errors="ignore")
+        })
+
+  if fragments:
+    wm.add_fragments(ws, fragments)
+
+  if laws_yaml_text:
+    wm.set_kernel_yaml(ws, "laws", laws_yaml_text)
+
+  return {
+    "ok": True,
+    "workspace": workspace,
+    "fragments_indexed": len(fragments),
+    "kernel_detected": bool(laws_yaml_text)
+  }
+
+@app.get("/workspace/search")
+def search(workspace: str, q: str, limit: int = 8):
+  ws = wm.get(workspace)
+  conn = wm.connect(ws)
+  try:
+    ve = VectorEngine(conn)
+    hits = ve.search(q, limit=limit)
+    return {"ok": True, "hits": hits}
+  finally:
+    conn.close()
+
+requirements.txt (mínimo)
+fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.8.2
+pyyaml==6.0.2
+python-multipart==0.0.9
+
+O que isto já resolve (na prática)
+
+✅ Multitenant real: um SQLite por obra
+✅ Ingestão ZIP: extrai e indexa fragmentos; captura laws.yaml se vier junto
+✅ Ego-OS: identidade separada do enredo (Camada Zero)
+✅ Stateless server: pronto para Docker/Cloud (a sessão vira header/token depois)
+✅ BaseLLM: interface única para GPT/Claude/Gemini (drivers entram depois)
+✅ Halt/Proibições: hardening local antes de devolver ao usuário

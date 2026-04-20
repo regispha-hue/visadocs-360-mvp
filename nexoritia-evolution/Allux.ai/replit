@@ -1,0 +1,14 @@
+run = "bash start.sh"
+entrypoint = "daemon.py"
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-23_11"
+
+[deployment]
+run = ["bash", "start.sh"]
+deploymentTarget = "cloudrun"
+
+[env]
+PYTHONUNBUFFERED = "1"
+ALLUX_ENV = "production"

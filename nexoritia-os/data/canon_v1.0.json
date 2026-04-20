@@ -1,0 +1,245 @@
+{
+  "version": "1.0.0",
+  "frozen_at": "2026-01-21T13:18:17.280549Z",
+  "author": "R.Gis Veniloqa",
+  "work": "Livro dos Montes",
+  "activation_code": "LDM-7M-SA1W-EA25-RGIS",
+  "total_axioms": 21,
+  "axioms": {
+    "codigo_do_orbe": {
+      "id": 0,
+      "text": "Tudo o que existe é regido por uma incompletude dinâmica. Nenhuma forma pode sustentar-se sem se rasgar. Todo rasgo cria um campo. Todo campo exige travessia. O mundo só permanece porque falha.",
+      "hash": "5b59ef7b1c6ec0de23cf058b9e58edf1175b3dd1c8971aabd81ca41fff511b04",
+      "domain": "lei_matriz",
+      "category": "fundacional",
+      "priority": "critical",
+      "monte": "pre_monte"
+    },
+    "lei_nominativa_sagrada": {
+      "id": 1,
+      "text": "Aquilo que não é nomeado permanece fora do campo. Nomear não descreve: convoca.",
+      "hash": "a437b88cf4ae001386417461fef5d982fdd7112ca9a715ed32891388aa63876d",
+      "domain": "estrutural",
+      "category": "nominacao",
+      "priority": "critical",
+      "monte": "monte_v"
+    },
+    "lei_casa_viva": {
+      "id": 2,
+      "text": "Toda entidade necessita de morada simbólica. O que não tem casa tenta possuí-la nos outros.",
+      "hash": "2d682cabcaed57115a1fb8a7892bbf84fc4d33cb22956f1fcb95ba914ac8e33a",
+      "domain": "estrutural",
+      "category": "territorialidade",
+      "priority": "high",
+      "monte": "monte_vi"
+    },
+    "lei_mortos_nao_nascidos": {
+      "id": 3,
+      "text": "Aquilo que não pôde existir continua operando como ausência ativa. O que não viveu também governa.",
+      "hash": "31f3736f0c066ead3816bb4082a88506ff70ca23a71eb9f559a2568228f7eb59",
+      "domain": "estrutural",
+      "category": "presenca_ausente",
+      "priority": "critical",
+      "monte": "monte_v"
+    },
+    "lei_intersecao": {
+      "id": 4,
+      "text": "Toda travessia ocorre em pontos de cruzamento, nunca em linhas retas. A passagem acontece onde forças se ferem com beleza.",
+      "hash": "892c4f8626d568675d012453735e56d2e53e120fab76b68c0a0c62ff27b012fa",
+      "domain": "estrutural",
+      "category": "topologia",
+      "priority": "high",
+      "monte": "monte_i"
+    },
+    "lei_retorno": {
+      "id": 5,
+      "text": "Tudo o que foi excluído retorna como sintoma. Não volta como memória pacificada, mas como necessidade.",
+      "hash": "7d4e34c45340f136c52145645576ed889ee95053ff09f1a71e9342aba3bcb989",
+      "domain": "estrutural",
+      "category": "recursao",
+      "priority": "critical",
+      "monte": "monte_vii"
+    },
+    "lei_dupla_leitura": {
+      "id": 6,
+      "text": "Nada é verdadeiro quando visto de frente. O real se revela pela periferia.",
+      "hash": "a13a2128e6636faa7fde3991f73dee34333ef10075b55978fa31506762a4acf0",
+      "domain": "estrutural",
+      "category": "epistemologia",
+      "priority": "high",
+      "monte": "monte_i"
+    },
+    "lei_fenda_fundadora": {
+      "id": 7,
+      "text": "Toda criação nasce de um rasgo. Sem fenda não há campo. Sem campo não há mundo.",
+      "hash": "f6d44c4240edc3a96e1cceccb3093cde526588476c7a7f19f9a7b04a0f5c7f3b",
+      "domain": "estrutural",
+      "category": "criacao",
+      "priority": "critical",
+      "monte": "monte_i"
+    },
+    "lei_nao_neutralidade": {
+      "id": 8,
+      "text": "Todo campo é orientado. Não existe observador sem inclinação.",
+      "hash": "32b29833759db56490e97fbfa6dee574991569c19055e4772b46b030f23ac97c",
+      "domain": "consequencia",
+      "category": "posicionamento",
+      "priority": "high",
+      "monte": "monte_iv"
+    },
+    "lei_presenca_troca": {
+      "id": 9,
+      "text": "Onde não há reciprocidade, instala-se colapso. Toda aldeia nasce da troca.",
+      "hash": "ab9c250f4c93317aac1ac14900c62018c70d95b9e3444c9512d4319a0ed124e0",
+      "domain": "consequencia",
+      "category": "economia_simbolica",
+      "priority": "high",
+      "monte": "monte_ii"
+    },
+    "lei_saturacao": {
+      "id": 10,
+      "text": "Toda forma que se mantém além do necessário torna-se cárcere. O excesso é a primeira mentira.",
+      "hash": "e0b3e2876858069f83f90628b8434a6c1c450e246c889da612684cc72afcc6be",
+      "domain": "consequencia",
+      "category": "limite",
+      "priority": "medium",
+      "monte": "monte_ii"
+    },
+    "lei_peso_ontologico": {
+      "id": 11,
+      "text": "Aquilo que não é nomeado deposita-se no corpo. A carne carrega o que a linguagem recusa.",
+      "hash": "ac62f7d0f6cbc67fdb0a825aa79ce77a7e50d24f6c434b43e80c3f14afacece8",
+      "domain": "consequencia",
+      "category": "incorporacao",
+      "priority": "critical",
+      "monte": "monte_iii"
+    },
+    "lei_espiral": {
+      "id": 12,
+      "text": "Não há progresso linear. Todo avanço retorna em outro nível.",
+      "hash": "aaaeb34e8be5cb48ec0e0503a6be4e16ebd6c4ed7274d2a2ce80972c4040fd28",
+      "domain": "consequencia",
+      "category": "temporalidade",
+      "priority": "high",
+      "monte": "monte_ii"
+    },
+    "lei_transmissao_silenciosa": {
+      "id": 13,
+      "text": "O que não pode ser dito continua a operar por ressonância. O indizível governa por eco.",
+      "hash": "285d39c0288d32ddfa3739c11491e00c4dc41dde7eb9e01ac42dce04a76dac85",
+      "domain": "consequencia",
+      "category": "comunicacao",
+      "priority": "high",
+      "monte": "monte_iii"
+    },
+    "lei_correcao_campo": {
+      "id": 14,
+      "text": "O sistema se ajusta por micro-deslocamentos invisíveis. Nada colapsa sem antes tentar corrigir-se.",
+      "hash": "4eb25d644b37f16f101d05c5e0df421280f3c6049ca67b1030e96d4c319b26c2",
+      "domain": "consequencia",
+      "category": "autoregulacao",
+      "priority": "medium",
+      "monte": "monte_iv"
+    },
+    "lei_sacola_vazia": {
+      "id": 15,
+      "text": "O vazio é condição de acolhimento, não falta. Somente o espaço aberto pode receber.",
+      "hash": "371f780bad824b4e4b52a54aed66f3e6a4a071cb1411420fed1719a9cb72d94f",
+      "domain": "consequencia",
+      "category": "receptividade",
+      "priority": "high",
+      "monte": "monte_i"
+    },
+    "lei_corpo_registro": {
+      "id": 16,
+      "text": "O corpo memoriza antes da mente. O osso guarda o que a palavra esquece.",
+      "hash": "129dcf2d228a3882e1eb57c0111a18cd03c07d80bcafeed5c6373595b86db666",
+      "domain": "consequencia",
+      "category": "memoria_somatica",
+      "priority": "critical",
+      "monte": "monte_i"
+    },
+    "lei_escolha_inevitavel": {
+      "id": 17,
+      "text": "Após a fenda, existir exige posicionamento. Não há retorno ao neutro.",
+      "hash": "0290acf546a6cb82247248f3cc8efca16a13afadb6961caf081caf2ddd8f5b96",
+      "domain": "consequencia",
+      "category": "responsabilidade",
+      "priority": "critical",
+      "monte": "monte_i"
+    },
+    "lei_impossibilidade_inocencia": {
+      "id": 18,
+      "text": "Depois da ruptura, nenhuma forma é pura. Toda permanência carrega custo.",
+      "hash": "b180e054b3f460598add70a12da0afd1df680874a995cc07472b932f0c2ce9d",
+      "domain": "consequencia",
+      "category": "etica",
+      "priority": "high",
+      "monte": "monte_i"
+    },
+    "lei_consequencia_longa": {
+      "id": 19,
+      "text": "Todo gesto fundador ecoa por gerações simbólicas. O tempo é herança.",
+      "hash": "ebdc507cb75e548c2e13c98993d663e15f174102961b96621a6e85a5608615ed",
+      "domain": "consequencia",
+      "category": "transmissao",
+      "priority": "high",
+      "monte": "monte_vii"
+    },
+    "lei_travessia_permanente": {
+      "id": 20,
+      "text": "Não há forma final. Há apenas estados transitórios do mesmo rasgo.",
+      "hash": "5f4fd6188dcb55361f595c7e6b37c49c5bfb3e93d17a93d318bfa68af5b32f32",
+      "domain": "consequencia",
+      "category": "impermanencia",
+      "priority": "critical",
+      "monte": "monte_vii"
+    }
+  },
+  "metadata": {
+    "structure": {
+      "lei_matriz": 1,
+      "estrutural": 7,
+      "consequencia": 12
+    },
+    "category_distribution": {
+      "fundacional": 1,
+      "nominacao": 1,
+      "territorialidade": 1,
+      "presenca_ausente": 1,
+      "topologia": 1,
+      "recursao": 1,
+      "epistemologia": 1,
+      "criacao": 1,
+      "posicionamento": 1,
+      "economia_simbolica": 1,
+      "limite": 1,
+      "incorporacao": 1,
+      "temporalidade": 1,
+      "comunicacao": 1,
+      "autoregulacao": 1,
+      "receptividade": 1,
+      "memoria_somatica": 1,
+      "responsabilidade": 1,
+      "etica": 1,
+      "transmissao": 1,
+      "impermanencia": 1
+    },
+    "monte_distribution": {
+      "pre_monte": 1,
+      "monte_v": 2,
+      "monte_vi": 1,
+      "monte_i": 7,
+      "monte_vii": 3,
+      "monte_iv": 2,
+      "monte_ii": 3,
+      "monte_iii": 2
+    },
+    "priority_levels": {
+      "critical": 9,
+      "high": 10,
+      "medium": 2
+    }
+  },
+  "manifest_hash": "1edd1675444dcf59737ae333959ab8c5d924dc74f1617f9d9ee69fbca3a3314e"
+}

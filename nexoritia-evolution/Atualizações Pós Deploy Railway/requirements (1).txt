@@ -1,0 +1,16 @@
+# Allux.ai v2.0 - Dependencies
+
+# Core API
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Database
+sqlite3  # Built-in Python
+
+# PDF Processing
+PyPDF2==3.0.1
+
+# Optional: Advanced features (comentar se não usar)
+# chromadb==0.4.18  # Para RAG vetorial avançado
+# sentence-transformers==2.2.2  # Para embeddings

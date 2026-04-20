@@ -1,0 +1,134 @@
+════════════════════════════════════════════════════════════════
+  CLAUDE CODE — Sistema LDMux-OS Axiom Kernel v1.0
+════════════════════════════════════════════════════════════════
+
+📂 REPOSITÓRIO GITHUB
+[COLE A URL DO SEU REPOSITÓRIO AQUI]
+Exemplo: https://github.com/regis/allux-ai
+
+════════════════════════════════════════════════════════════════
+
+🎯 PRÓXIMA AÇÃO IMEDIATA
+
+Abra este arquivo e leia:
+👉 START_HERE.md
+
+Link direto:
+[COLE O LINK AQUI]
+Formato: https://github.com/[USUARIO]/[REPO]/blob/main/START_HERE.md
+
+════════════════════════════════════════════════════════════════
+
+📋 CONTEXTO RÁPIDO
+
+✅ Sistema de validação ontológica COMPLETO e TESTADO
+✅ Canon com 21 axiomas congelados (Livro dos Montes)
+✅ API FastAPI com 5 endpoints funcionais
+✅ 8 testes passando (100%)
+✅ Pronto para deploy Railway
+
+════════════════════════════════════════════════════════════════
+
+📖 ROTEIRO DE DEPLOY
+
+Após ler START_HERE.md, siga:
+👉 CLAUDE_CODE_INSTRUCTIONS.md
+
+Este arquivo contém:
+  - AÇÃO 1-4: Deploy completo em ~40 minutos
+  - AÇÃO 5-6: Extensões (derive, rate limiting, métricas)
+  - Troubleshooting para problemas comuns
+
+════════════════════════════════════════════════════════════════
+
+⚡ VALIDAÇÃO RÁPIDA (2 minutos)
+
+Se quiser ver o sistema funcionando imediatamente:
+
+python demo.py
+
+Isso executa 6 demonstrações interativas mostrando:
+  - Estrutura do Canon
+  - Computação de hash SHA256
+  - Fluxos de seal e verify
+
+════════════════════════════════════════════════════════════════
+
+🔧 COMANDOS DE INÍCIO
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Executar testes (8/8 devem passar)
+pytest test_axiom_kernel.py -v
+
+# Iniciar servidor local
+python axiom_kernel.py
+# → http://localhost:8000
+# → http://localhost:8000/docs (Swagger)
+
+════════════════════════════════════════════════════════════════
+
+📊 ESTRUTURA DO PROJETO
+
+DOCUMENTAÇÃO (8 arquivos):
+  - START_HERE.md ← COMECE AQUI
+  - CLAUDE_CODE_INSTRUCTIONS.md ← Roteiro passo-a-passo
+  - SUMARIO_EXECUTIVO.md ← Visão geral
+  - HANDOFF.md ← Contexto técnico completo
+  - ENTREGA.md ← Relatório executivo
+  - CLAUDE_CODE_QUICKSTART.md ← Comandos rápidos
+  - README.md ← Documentação da API
+  - README.txt ← Banner de entrada
+
+CÓDIGO (7 arquivos):
+  - CANON_V1.0.json ← Canon congelado
+  - axiom_kernel.py ← API FastAPI
+  - canon_axioms.py ← Estrutura de dados
+  - freeze.py ← Gerador do Canon
+  - test_axiom_kernel.py ← Testes
+  - demo.py ← Demonstrações
+  - requirements.txt ← Dependências
+
+════════════════════════════════════════════════════════════════
+
+🔑 CREDENCIAIS
+
+Activation Code: LDM-7M-SA1W-EA25-RGIS
+Manifest Hash: 1edd1675444dcf59...a3a3314e
+Versão: 1.0.0
+Kernel: allux_v1.0
+
+════════════════════════════════════════════════════════════════
+
+📝 FORMATO DE RESPOSTA ESPERADO
+
+Após cada AÇÃO, reporte assim:
+
+AÇÃO 1: [COMPLETA/FALHOU]
+- Duração: X minutos
+- Resultado: [descrição breve]
+- Problemas: [se houver]
+- Próximo passo: AÇÃO 2
+
+════════════════════════════════════════════════════════════════
+
+🎯 OBJETIVO FINAL
+
+Sistema LDMux-OS Axiom Kernel v1.0 em produção (Railway)
+  → Endpoints públicos funcionando
+  → CI/CD automatizado
+  → Pronto para integração com Allux.ai
+
+Tempo estimado: ~40 minutos (AÇÃO 1-4)
+
+════════════════════════════════════════════════════════════════
+
+🚀 COMECE AGORA
+
+1. Abra START_HERE.md (link acima)
+2. Escolha: validação rápida ou roteiro completo
+3. Siga CLAUDE_CODE_INSTRUCTIONS.md
+4. Reporte status após cada ação
+
+════════════════════════════════════════════════════════════════

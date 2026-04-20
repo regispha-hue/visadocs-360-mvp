@@ -1,0 +1,15 @@
+from fastapi import FastAPI
+
+app = FastAPI(
+    title="Allux.ai",
+    description="Ontology-first governance daemon",
+    version="1.0.0"
+)
+
+@app.get("/")
+def root():
+    return {"system": "Allux", "status": "online"}
+
+@app.get("/health")
+def health():
+    return {"ok": True}

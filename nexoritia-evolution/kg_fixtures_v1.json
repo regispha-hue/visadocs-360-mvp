@@ -1,0 +1,229 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2026-01-15",
+    "description": "Test fixtures for Allux Knowledge Graph",
+    "namespace": "https://allux.ai/ontology/core#"
+  },
+  
+  "artifacts": [
+    {
+      "uri": "allux:artifact_monte_i_prologo",
+      "type": "allux:Chapter",
+      "title": "Monte I: A Desconciliação dos Sagrados",
+      "version": "1.0.0",
+      "status": "canon",
+      "hash": "a3f5d8b2c1e4f9a71234567890abcdef",
+      "sources": ["allux:source_chat_2025_12_30"],
+      "ontology_refs": ["ldm:desconciliacao", "ldm:sagrados"],
+      "axioms": ["ldm:axiom_nao_reconciliacao"]
+    },
+    {
+      "uri": "allux:artifact_monte_ii_nascimento",
+      "type": "allux:Chapter",
+      "title": "Monte II: O Nascimento do Semi Alado",
+      "version": "1.0.0",
+      "status": "draft",
+      "hash": "b4e6c9d3f2a5e8b79012345678abcdef",
+      "sources": ["allux:source_chat_2026_01_05"],
+      "ontology_refs": ["ldm:semi_alado", "ldm:nascimento"],
+      "axioms": ["ldm:axiom_quinto_setimo"]
+    }
+  ],
+  
+  "sources": [
+    {
+      "uri": "allux:source_chat_2025_12_30",
+      "type": "allux:ChatSource",
+      "platform": "claude",
+      "source_id": "claude_2025-12-30_001",
+      "title": "Desenvolvimento Monte I",
+      "created_at": "2025-12-30T14:23:00Z"
+    },
+    {
+      "uri": "allux:source_chat_2026_01_05",
+      "type": "allux:ChatSource",
+      "platform": "gpt",
+      "source_id": "gpt_2026-01-05_042",
+      "title": "Expansão Monte II",
+      "created_at": "2026-01-05T10:15:00Z"
+    }
+  ],
+  
+  "entities": [
+    {
+      "uri": "ldm:semi_alado",
+      "type": "ldm:Character",
+      "name": "Semi Alado",
+      "description": "Protagonista que atravessa os sete montes",
+      "properties": {
+        "is_protagonist": true,
+        "role": "travessia",
+        "duality": "quinto_e_setimo"
+      }
+    },
+    {
+      "uri": "ldm:masculino",
+      "type": "ldm:Archetype",
+      "name": "Masculino",
+      "description": "Arquétipo masculino primordial"
+    },
+    {
+      "uri": "ldm:feminino",
+      "type": "ldm:Archetype",
+      "name": "Feminino",
+      "description": "Arquétipo feminino primordial"
+    }
+  ],
+  
+  "concepts": [
+    {
+      "uri": "ldm:desconciliacao",
+      "type": "ldm:Concept",
+      "name": "Desconciliação",
+      "definition": "Reconhecimento do que jamais se concilia",
+      "related_to": ["ldm:dualidade", "ldm:incomensuravelidade"]
+    },
+    {
+      "uri": "ldm:sagrados",
+      "type": "ldm:Concept",
+      "name": "Sagrados",
+      "definition": "Dimensões sagradas irreconciliáveis",
+      "related_to": ["ldm:masculino", "ldm:feminino"]
+    }
+  ],
+  
+  "axioms": [
+    {
+      "uri": "ldm:axiom_nao_reconciliacao",
+      "type": "allux:Axiom",
+      "text": "Masculino e Feminino não se fundem — se espelham",
+      "constraint": "masculino must_not fuse_with feminino",
+      "applies_to": ["ldm:masculino", "ldm:feminino"]
+    },
+    {
+      "uri": "ldm:axiom_quinto_setimo",
+      "type": "allux:Axiom",
+      "text": "O Quinto e o Sétimo são o mesmo, mas não se confundem",
+      "constraint": "quinto equals setimo AND quinto distinct_from setimo",
+      "applies_to": ["ldm:semi_alado"]
+    }
+  ],
+  
+  "relations": [
+    {
+      "subject": "ldm:masculino",
+      "predicate": "ldm:mirrors",
+      "object": "ldm:feminino",
+      "type": "symmetric"
+    },
+    {
+      "subject": "ldm:masculino",
+      "predicate": "ldm:unconciliates_with",
+      "object": "ldm:feminino",
+      "type": "symmetric"
+    },
+    {
+      "subject": "ldm:semi_alado",
+      "predicate": "ldm:traverses",
+      "object": "ldm:monte_i",
+      "type": "directional"
+    },
+    {
+      "subject": "ldm:semi_alado",
+      "predicate": "ldm:embodies",
+      "object": "ldm:quinto",
+      "type": "identity"
+    },
+    {
+      "subject": "ldm:semi_alado",
+      "predicate": "ldm:embodies",
+      "object": "ldm:setimo",
+      "type": "identity"
+    }
+  ],
+  
+  "translations": [
+    {
+      "uri": "allux:translation_monte_i_en_lit",
+      "source_artifact": "allux:artifact_monte_i_prologo",
+      "language_profile": "en-LIT",
+      "version": "1.0.0",
+      "hash": "c5f7a0e4d3b6f8a90123456789abcdef",
+      "semantic_equivalence": "pass"
+    }
+  ],
+  
+  "patches": [
+    {
+      "uri": "allux:patch_001_typo_fix",
+      "target_artifact": "allux:artifact_monte_i_prologo",
+      "base_hash": "a3f5d8b2c1e4f9a71234567890abcdef",
+      "operations": [
+        {
+          "op": "replace",
+          "selector": "line:12",
+          "new_text": "carregando o peso de ser o Quinto e o Sétimo,"
+        }
+      ],
+      "proposed_by": "human",
+      "tests": {
+        "conformance": "pass",
+        "ontology": "pass",
+        "editorial": "pass"
+      }
+    }
+  ],
+  
+  "montes": [
+    {
+      "uri": "ldm:monte_i",
+      "name": "Monte I",
+      "title": "A Desconciliação dos Sagrados",
+      "concepts": ["ldm:desconciliacao", "ldm:sagrados"],
+      "traversal_order": 1
+    },
+    {
+      "uri": "ldm:monte_ii",
+      "name": "Monte II",
+      "title": "O Nascimento",
+      "concepts": ["ldm:nascimento", "ldm:identidade"],
+      "traversal_order": 2
+    },
+    {
+      "uri": "ldm:monte_iii",
+      "name": "Monte III",
+      "title": "A Prova",
+      "concepts": ["ldm:prova", "ldm:superacao"],
+      "traversal_order": 3
+    },
+    {
+      "uri": "ldm:monte_iv",
+      "name": "Monte IV",
+      "title": "O Espelho",
+      "concepts": ["ldm:espelho", "ldm:reflexao"],
+      "traversal_order": 4
+    },
+    {
+      "uri": "ldm:monte_v",
+      "name": "Monte V",
+      "title": "O Vácuo",
+      "concepts": ["ldm:vacuo", "ldm:ausencia"],
+      "traversal_order": 5
+    },
+    {
+      "uri": "ldm:monte_vi",
+      "name": "Monte VI",
+      "title": "A Memória",
+      "concepts": ["ldm:memoria", "ldm:permanencia"],
+      "traversal_order": 6
+    },
+    {
+      "uri": "ldm:monte_vii",
+      "name": "Monte VII",
+      "title": "O Retorno",
+      "concepts": ["ldm:retorno", "ldm:completude"],
+      "traversal_order": 7
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+LDMux mudar de nome para Allux, integrar bibliotecas (vários títulos que podem contribuir com material de referência para obras derivadas seguindo o IP), indexação de chats relacionados ao assunto do livro para integrar com a obra em desenvolvimento no chat presente, revisão e diagramação profissional ISBN, e a os que fiz por ultimo sobre livros em série. pdf, expansão narrativa coerente, identificação de ontologias para desenvolvimento de OS, filtro automático de de axiomas e grafos de conhecimento. pdf latex premium. 
+o ldmux não está captando sequencia de atualizações de textos e desenvolvimentos de capítulos. foram feitos atualizações no prologo e no primeiro monte e não estou encontrando essa consolidação.
+providenciar todas essas tarefas.
+verificar quais outras OS podem ser acopladas para inevitabilidade do Allux, como por exemplo linkar com o ExyPage para emissão da landing page do livro quando finalizado. 

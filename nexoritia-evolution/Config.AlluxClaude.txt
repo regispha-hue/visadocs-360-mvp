@@ -1,0 +1,31 @@
+1
+“Gerar Vocabulário Controlado v1”
+gerar
+gerar kg
+Gerar queries KG v1
+Gerar testes KG v1
+Os 3
+Gerar fixtures JSON v1
+recomendado?
+siga
+siga
+sim
+1
+2
+função
+1
+2
+daemon stub
+3
+acoplar
+1
+2
+1
+canon dict
+expandir canon dict
+gerar relations canon
+gerar kg constraints
+Kg export
+Owl ontology 
+Shacl shapes 
+bundle pack v1

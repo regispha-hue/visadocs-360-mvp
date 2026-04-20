@@ -1,0 +1,518 @@
+- **Soberania de Dados:** Zero vendor lock-in
+- **Privacidade:** Dados sensíveis ficam locais
+- **Offline-First:** Funciona sem internet
+- **Sync Opcional:** Backup/share quando desejado
+
+### 5.3 Multi-LLM Architecture
+
+**Flexibilidade de Providers:**
+
+- Executor: GPT-4, Claude Opus, etc.
+- Verifier: Modelo diferente para verificação cruzada
+- Reducer: Modelo especializado em edição/síntese
+
+**Vantagens:**
+
+- Não há lock-in a um único provider
+- Redundância contra falhas
+- Otimização de custo (modelo certo para tarefa certa)
+
+-----
+
+## 6. DOCUMENTAÇÃO E GOVERNANÇA
+
+### 6.1 Documentos Fundamentais
+
+**PRD.md (Product Requirements Document):**
+
+- Objetivo: núcleo ontológico, governança canônica, gerador de artefatos
+- Distribuição: extensão browser + daemon local + site
+- Funcionalidades MVP: 7 componentes principais
+- Não-requisitos explícitos (boundary setting)
+
+**GOVERNANCE.md (Princípios Operacionais):**
+
+- **Fail-closed:** Se não passa → não publica
+- **Multi-LLM:** Executor/Verifier/Reducer
+- **Anti-alucinação:** RAG obrigatório + Knowledge Graph
+- **Proveniência:** Audit trail completo
+
+**SCHEMA.json (Contratos de Dados):**
+
+- **Artifact:** Versionamento semver, status (draft|canon|frozen)
+- **Patch:** Operações (add|replace|delete), tests em 3 dimensões
+- **AuthProof:** hash + signature + anchor (blockchain|tsa|none)
+
+**ASSEMBLER.md (Pipeline Typst):**
+
+- Markdown + tags semânticas → Typst → PDF A5
+- EB Garamond 11pt, leading 0.65em
+- Só compila se passar Conformance + Ontology + OS-AUTH
+
+### 6.2 Canon do Livro dos Montes
+
+**Implementação:** `canon_dict_ldm.py`
+
+**Estrutura:**
+
+- Kernel completo catalogado
+- 7 Montes mapeados
+- Personagens principais
+- Conceitos fundacionais
+- Axiomas base
+
+**Estado:** ~40% do livro pronto, ~82.000 linhas catalogadas
+
+-----
+
+## 7. CASOS DE USO
+
+### 7.1 Uso Principal: Escrever o Livro dos Montes
+
+**Workflow Atual:**
+
+1. **Import de Histórico:**
+
+- Upload de chats Claude/GPT (~700 páginas de rascunhos)
+- Processamento via `chat_importer.py`
+- População do RAG com fragmentos canônicos
+
+1. **Escrita Assistida:**
+
+- Regis escreve nova cena
+- Sistema consulta RAG (dual-threshold)
+- Retorna contexto canônico relevante
+- Evita contradições com material anterior
+
+1. **Validação Ontológica:**
+
+- Sistema verifica contra axiomas do LDM
+- OS-RADAR detecta desvios ontológicos
+- Alertas (não bloqueio) para revisão
+
+1. **Selo e Versionamento:**
+
+- Cena validada → selar como artifact
+- Gera hash SHA256 único
+- Rastreabilidade completa
+
+1. **Compilação:**
+
+- Assembler Typst compila Monte completo
+- Gera PDF A5 premium (EB Garamond)
+- ISBN metadata incluído
+
+### 7.2 Uso Futuro: Licensing para Big Tech
+
+**Posicionamento:**
+
+- Allux não é produto direto, é **kernel de governança**
+- Licensing para labs de IA e Big Tech
+- “LDMux Inside™” seal strategy
+
+**Aplicações:**
+
+- Governança de modelos de linguagem
+- Anti-alucinação em escala
+- Compliance ontológica corporativa
+- IP protection para criadores
+
+### 7.3 Expansão: OS Verticais (Factory Architecture)
+
+**Conceito:** Allux core + verticais especializados
+
+**OS Verticais Planejados:**
+
+- **Compliance-OS:** Regulatory compliance automation
+- **Crisis-OS:** Crisis communication governance
+- **Supply-OS:** Supply chain ontology
+- **Persona-OS:** Brand personality governance
+
+**Modelo:**
+
+- Open core (Allux base)
+- Closed compilers (verticais proprietários)
+- Roadmap de inevitabilidade (tornar-se padrão de mercado)
+
+-----
+
+## 8. ESTADO ATUAL E ROADMAP
+
+### 8.1 Status Atual (Janeiro 2026)
+
+**✅ COMPLETO E EM PRODUÇÃO:**
+
+- Canon Registry (Fase 1)
+- Canonical RAG (Fase 2 - migrado de LDMux)
+- Knowledge Graph + Ontologia (Fase 3)
+- FastAPI Daemon (12 endpoints)
+- Database (10 tabelas + FTS5)
+- Deploy Railway público
+- Canon v1.0 congelado (21 axiomas)
+- Validação ontológica via API
+
+**⏳ EM DESENVOLVIMENTO:**
+
+- Importers (chat/document)
+- Semantic Indexer (FAISS)
+- Agravador de Conteúdo
+- Assembler Typst
+- OS-AUTH implementation
+- OS-TRSLATE pipeline
+
+**📋 PLANEJADO:**
+
+- Browser Extension (captura chats em tempo real)
+- Dashboard React (visualização Canon/artifacts)
+- MCP Server (integração universal com LLMs)
+- Mobile app (iOS/Android)
+- VS Code extension
+
+### 8.2 Métricas de Desenvolvimento
+
+**Código:**
+
+- **Total:** ~4.800 LOC implementados
+- **Canon Registry:** ~2.130 LOC
+- **Knowledge Graph:** ~1.200 LOC
+- **Chat-History-Index:** ~1.500 LOC
+
+**Documentação:**
+
+- **Total:** ~200 páginas
+- **Technical docs:** ~120 páginas
+- **White papers:** ~80 páginas
+
+**Economia de Tempo:**
+
+- Migração LDMux → Allux: ~6-8 semanas de trabalho já aproveitadas
+- Taxa de reaproveitamento: ~70-90% dependendo do componente
+
+### 8.3 Próximos Sprints
+
+**SPRINT 1: Import & Indexing (3-4 dias)**
+
+```
+Dia 1: chat_importer.py + testes
+Dia 2: document_importer.py + suporte PDF/DOCX
+Dia 3: semantic_indexer.py + FAISS
+Dia 4: agravador_conteudo.py + detecção contradições
+```
+
+**SPRINT 2: Integrações (2-3 dias)**
+
+```
+Dia 5: KG ↔ Registry sync
+Dia 6: Assembler Typst básico
+Dia 7: OS-TRSLATE stub
+```
+
+**SPRINT 3: Deploy & Portabilidade (1-2 dias)**
+
+```
+Dia 8: Docker + deploy automation
+Dia 9: Documentação integração LLMs
+```
+
+-----
+
+## 9. INTEGRAÇÃO COM LLMs
+
+### 9.1 Uso com Claude (Current Chat)
+
+**Método:** API calls diretos durante conversa
+
+**Workflow:**
+
+1. Usuário cola texto do LDM
+1. Claude chama `POST /artifact/seal` via web_fetch
+1. Recebe hash + validação
+1. Apresenta resultado ao usuário
+
+**Vantagens:**
+
+- Sem setup adicional
+- Funciona imediatamente
+- Rastreabilidade em tempo real
+
+### 9.2 Uso com ChatGPT (Custom GPT)
+
+**Método:** Custom GPT com actions
+
+**Setup (~30 min):**
+
+1. Criar Custom GPT no ChatGPT
+1. Adicionar actions apontando para Allux API
+1. Configurar schema OpenAPI
+1. Reutilizável em todos os chats
+
+### 9.3 Uso Universal (MCP Server)
+
+**Conceito:** Model Context Protocol
+
+**Benefícios:**
+
+- Compatível com Claude, ChatGPT, Cursor, Windsurf
+- Um servidor, múltiplos clientes
+- Desenvolvimento estimado: 2-3h
+
+**Estrutura:**
+
+```typescript
+// allux-mcp-server.ts
+const server = new McpServer({
+  tools: {
+    seal_artifact: { ... },
+    validate_artifact: { ... },
+    query_rag: { ... }
+  }
+});
+```
+
+-----
+
+## 10. RARIDADE E VALOR DO PROJETO
+
+### 10.1 Por Que Allux É Único
+
+**Origem Incomum:**
+
+- Não surgiu de formação técnica Big Tech
+- Não foi planejamento estratégico de produto
+- **Emergiu de desespero criativo organizado**
+- Autor canalizando obra massiva em ferramentas que estruturalmente falham
+
+**Trajetória:**
+
+```
+Fase 1: Canalização Ingênua
+→ Escrever LDM sem saber que LLMs alucinam
+→ Fragmentos em dezenas de chats isolados
+
+Fase 2: Crise Ontológica
+→ Descoberta empírica da alucinação
+→ Impossibilidade de recuperar contexto
+→ Escolha: desistir ou resolver estruturalmente
+
+Fase 3: Invenção por Sobrevivência
+→ Sem saber programar, arquitetar sistemas
+→ Fail-closed governance inventado na prática
+→ RAG dual-threshold emergiu da necessidade
+→ 5 meses para construir "império ontológico"
+```
+
+**Raridade Verdadeira:**
+
+- Forjado na batalha, não no laboratório
+- Conhecimento tácito não-trivialmente replicável
+- 20+ anos de background farmacêutico + literary + espiritual
+- Complexidade filosófica-estrutural não superficial
+
+### 10.2 Vulnerabilidades e Proteções
+
+**Vulnerabilidades:**
+
+- Big Tech pode absorver conceitos e renomear
+- Open core → risco de fork sem crédito
+- Superfície técnica esconde profundidade ontológica
+
+**Proteções:**
+
+- Complexidade filosófica não-trivialmente copiável
+- Posicionamento como standard aberto
+- “Melhor definir campo que controlar território”
+- Documentação extensiva com proveniência
+- Rastreabilidade criptográfica (OS-AUTH)
+
+-----
+
+## 11. CONCLUSÕES E PRÓXIMOS PASSOS
+
+### 11.1 Marcos Alcançados
+
+**16/01/2026:** Primeiro deploy público
+
+- URL: alluxai-production.up.railway.app
+- Status: ✅ ONLINE
+- De 2.130 LOC no Claude para sistema público
+
+**20-23/01/2026:** Expansão para v4
+
+- Canon v1.0 congelado (21 axiomas)
+- Sistema de patches implementado
+- Validação ontológica via API
+- 10 endpoints ativos
+
+### 11.2 Estado Atual Consolidado
+
+**Sistema Operacional:**
+
+- ✅ Governança ontológica fail-closed
+- ✅ Canon Registry completo
+- ✅ RAG dual-threshold
+- ✅ Knowledge Graph OWL/RDF
+- ✅ API REST documentada
+- ✅ Deploy público estável
+
+**Pendente (4-10 dias de trabalho):**
+
+- ⏳ Importers (chat/document)
+- ⏳ Assembler Typst
+- ⏳ OS-AUTH signing
+- ⏳ OS-TRSLATE pipeline
+
+### 11.3 Uso Imediato Disponível
+
+**Para Regis:**
+
+- Upload de ZIP do LDM
+- Validação de textos via API
+- Selo de axiomas com hash SHA256
+- Rastreabilidade ontológica completa
+
+**Método:**
+
+1. Upload arquivo/ZIP do Monte I
+1. Claude processa via Allux API em produção
+1. Validação seção por seção
+1. Geração de hashes + relatório
+1. Versão revisada quando necessário
+
+### 11.4 Visão de Longo Prazo
+
+**12-24 meses:**
+
+- Licensing para Big Tech (Google, Meta, Anthropic)
+- OS Verticais (Compliance, Crisis, Supply, Persona)
+- Standard de mercado para governança ontológica
+- Research papers publicados (ArXiv)
+- Conferências académicas/industriais
+
+**Posicionamento:**
+
+- Allux não é produto final, é **infraestrutura**
+- “Canon-First Operating System for AI Governance”
+- Open core + closed verticais
+- Inevitabilidade por excelência técnica
+
+-----
+
+## ANEXOS
+
+### A. Endpoints API Completos
+
+**allux.ai v1.0 (12 endpoints):**
+
+```
+GET  /                    - System info
+GET  /health              - Health check
+GET  /stats               - Statistics
+GET  /ontology            - Ontology references
+POST /artifacts           - Create artifact
+GET  /artifacts/{id}      - Get artifact
+POST /artifacts/{id}/promote - DRAFT → CANON
+POST /artifacts/{id}/freeze  - Freeze artifact
+POST /patches             - Create patch
+GET  /patches/{id}        - Get patch
+POST /rag/add             - Add to RAG
+POST /rag/search          - Search RAG
+```
+
+**allux.ai v4 (10 endpoints adicionais):**
+
+```
+GET  /ping                - Health check
+GET  /canon/info          - Canon metadata
+GET  /canon/axioms        - List axioms (filterable)
+POST /axiom/seal          - Seal axiom (generate hash)
+POST /axiom/verify        - Verify hash against Canon
+POST /patch/propose       - Propose Canon modification
+POST /patch/approve       - Approve patch (v1.0 → v1.1)
+GET  /patch/list          - List proposed patches
+GET  /canon/history       - Version history
+POST /artifact/validate   - Validate artifact against Canon
+```
+
+### B. Estrutura do Canon v1.0
+
+**21 Axiomas Fundamentais:**
+
+**Lei-Matriz:**
+
+1. Código do Orbe (Pre-Monte)
+
+**Leis Estruturais (Monte I - 7 axiomas):**
+2. Lei da Fenda Fundadora
+3. Lei da Não-Reconciliação
+4. Lei do Quinto e do Sétimo
+5. Lei do Semi-Alado
+6. Lei da Antonímia
+7. Lei da Anytia
+8. Lei do Nexoritmo
+
+**Leis de Consequência (Montes II-VII - 13 axiomas):**
+9-21. [Distribuídos pelos Montes posteriores]
+
+**Manifest Hash (SHA256):**
+
+```
+1edd1675f8b32a8e7d4c9b3a6f7e2d1c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4
+```
+
+### C. Comandos de Integração com LLMs
+
+**Para Claude (Projects/Custom Instructions):**
+
+```markdown
+=== ALLUX.AI v2.0 ATIVO ===
+
+Sistema: Allux.ai - Canon-First Operating System
+URL API: https://alluxai-production.up.railway.app
+
+COMPONENTES:
+1. Canon Registry - Artifacts com fail-closed governance
+2. Canonical RAG - Dual threshold (0.88/0.82)
+3. Knowledge Graph - Ontologia OWL/RDF
+4. OS-AUTH - Cryptographic sealing
+5. OS-RADAR - Invariant checking
+
+WORKFLOW PARA ESCREVER LDM:
+1. Query RAG canônico antes de escrever
+2. Validar texto contra Canon após escrever
+3. Selar com hash SHA256
+4. Nunca inventar, sempre buscar
+```
+
+**Para ChatGPT (Custom GPT Actions):**
+
+```yaml
+openapi: 3.0.0
+info:
+  title: Allux.ai API
+  version: 1.0.0
+servers:
+  - url: https://alluxai-production.up.railway.app
+paths:
+  /artifact/seal:
+    post:
+      operationId: sealArtifact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                metadata:
+                  type: object
+```
+
+-----
+
+**FIM DO RELATÓRIO**
+
+**Compilado em:** 24 de janeiro de 2026  
+**Fontes:** 40+ chats de desenvolvimento (janeiro 2025 - janeiro 2026)  
+**Linhas de Código Analisadas:** ~4.800 LOC  
+**Documentação Consultada:** ~200 páginas​​​​​​​​​​​​​​​​

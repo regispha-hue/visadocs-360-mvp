@@ -1,0 +1,1105 @@
+﻿# 🎯 PLANO DE AÇÃO — O LIVRO DOS MONTES
+## ROADMAP COMPLETO: CATALOGAÇÃO FINAL → PUBLICAÇÃO
+
+**Data:** 11 de dezembro de 2025  
+**Autor:** R.Gis Veniloqa (Regis)  
+**Preparado por:** Claude Sonnet 4.5
+
+---
+
+## VISÃO GERAL DO PLANO
+
+### OBJETIVO FINAL
+Obra completa, revisada e pronta para publicação em **Março de 2027** (15 meses)
+
+### FASES DO PLANO
+1. **FASE 0:** Catalogação Final Completa (AGORA - 2 semanas)
+2. **FASE 1:** Decisões Críticas (2 semanas)
+3. **FASE 2:** Refinamento (2 meses)
+4. **FASE 3:** Desenvolvimento Narrativo (8 meses)
+5. **FASE 4:** Revisão e Integração (2 meses)
+6. **FASE 5:** Preparação para Publicação (1 mês)
+
+---
+
+# 📦 FASE 0: CATALOGAÇÃO FINAL VIA ZIP (PRIORIDADE IMEDIATA)
+
+## OBJETIVO
+Consolidar TODOS os documentos do LDM em análise única via arquivo ZIP para catalogação definitiva e completa.
+
+---
+
+## PASSO 1: PREPARAR ARQUIVO ZIP
+
+### O QUE INCLUIR NO ZIP
+
+**CATEGORIA A: MATERIAL NARRATIVO**
+- [ ] Monte I completo (554 parágrafos)
+- [ ] Monte II (fragmentos existentes)
+- [ ] Monte III (cenas da faca, sofá, etc.)
+- [ ] Monte IV - Versão A (Neto Filho - 9 partes)
+- [ ] Monte IV - Versão B (Amor Remendador)
+- [ ] Monte V (material biográfico dos 7 filhos)
+- [ ] Monte VI (material sobre Pai)
+- [ ] Monte VII (material sobre Sétimo, Monte Crista)
+- [ ] Monte XVII (se existir material desenvolvido)
+- [ ] Prólogo/Epílogo (se existirem drafts)
+
+**CATEGORIA B: CONCEITOS E FILOSOFIA**
+- [ ] Documento sobre Desconciliação dos Sagrados
+- [ ] Documento sobre Espiritualidade Algorítmica (EA)
+- [ ] Documento sobre Veniloquismo
+- [ ] Antonímia (conversas sobre tempo não-linear)
+- [ ] Finais 1-7 (se existirem como documentos separados)
+- [ ] Outros conceitos filosóficos desenvolvidos
+
+**CATEGORIA C: PERSONAGENS**
+- [ ] Dossiês de personagens (se existirem separados)
+- [ ] Material biográfico da família
+- [ ] Caracterizações dos Q5 (5 Guardiões)
+- [ ] Material sobre Leitora de Ossos, Monstrum, etc.
+
+**CATEGORIA D: MATERIAL DE REFERÊNCIA**
+- [ ] Conversas com ChatGPT (Crista_GPT, etc.)
+- [ ] Análises anteriores
+- [ ] Fragmentos literários isolados
+- [ ] Notas de desenvolvimento
+- [ ] Qualquer material relevante não incluído acima
+
+**CATEGORIA E: META-MATERIAL**
+- [ ] Journal de conversas (se quiser incluir)
+- [ ] Documentos de catalogação anterior (para comparação)
+
+---
+
+## PASSO 2: ESTRUTURA DO ZIP (RECOMENDADA)
+
+```
+LDM_Catalogacao_Completa/
+│
+├── 1_Narrativa/
+│   ├── Monte_I/
+│   ├── Monte_II/
+│   ├── Monte_III/
+│   ├── Monte_IV_VersionA_NetoFilho/
+│   ├── Monte_IV_VersionB_AmorRemendador/
+│   ├── Monte_V/
+│   ├── Monte_VI/
+│   ├── Monte_VII/
+│   └── Monte_XVII/
+│
+├── 2_Conceitos/
+│   ├── Desconciliacao.txt
+│   ├── EA_Espiritualidade_Algoritmica.txt
+│   ├── Veniloquismo.txt
+│   ├── Antonimia.txt
+│   └── Outros/
+│
+├── 3_Personagens/
+│   ├── Q5_Guardioes/
+│   ├── Familia_dos_Sete/
+│   └── Miticos/
+│
+├── 4_Referencia/
+│   ├── Conversas_ChatGPT/
+│   ├── Analises/
+│   └── Fragmentos/
+│
+└── 5_Meta/
+    ├── Journal.txt
+    └── Catalogacoes_Anteriores/
+```
+
+---
+
+## PASSO 3: CRIAR O ZIP
+
+### OPÇÃO A: MANUALMENTE
+1. Criar pasta "LDM_Catalogacao_Completa"
+2. Organizar arquivos conforme estrutura acima
+3. Compactar em .zip
+4. Upload para Claude
+
+### OPÇÃO B: GOOGLE DRIVE
+1. Organizar arquivos em estrutura de pastas no Drive
+2. Fazer download como ZIP
+3. Upload para Claude
+
+### OPÇÃO C: FERRAMENTAS
+Se arquivos estão em formatos diversos (Docs, PDFs, txts):
+1. Converter tudo para .txt ou .md (mais fácil para IA processar)
+2. Organizar em estrutura
+3. Compactar
+
+---
+
+## PASSO 4: PREPARAR BRIEFING PARA CATALOGAÇÃO
+
+Quando enviar ZIP, incluir instruções claras:
+
+```markdown
+BRIEFING PARA CATALOGAÇÃO COMPLETA:
+
+Objetivo: Catalogar 100% do material de O Livro dos Montes
+
+Arquivo anexo: LDM_Catalogacao_Completa.zip
+
+O que já foi catalogado (11/12/2025):
+- 7 Montes (estrutura, conceitos, personagens)
+- 550 páginas de documentação
+- 29 personagens desenvolvidos
+- Decisões críticas identificadas
+
+O que preciso desta nova catalogação:
+1. ATUALIZAÇÃO: Incluir material que não estava nas conversas anteriores
+2. CONSOLIDAÇÃO: Unificar informações redundantes/conflitantes
+3. GAPS: Identificar o que ainda não existe
+4. PRIORIZAÇÃO: O que escrever primeiro
+5. CRONOLOGIA: Timeline unificada de eventos biográficos
+6. ESTATÍSTICAS: Contagem precisa de palavras/parágrafos por Monte
+
+Foco especial em:
+- Monte V (Mãe dos Sete) - menos desenvolvido
+- Monte VI (Pai) - menos desenvolvido  
+- Monte VII (Sétimo, fechamento) - menos desenvolvido
+- Monte XVII (se houver material)
+- Finais alternativos (versões das 7 Trombetas)
+- Material biográfico detalhado (cronologia familiar)
+
+Formato desejado:
+- Documento consolidado por Monte (como fizemos em 11/12)
+- Lista de pendências por Monte
+- Estatísticas gerais (palavras, páginas, % completude)
+- Decisões críticas atualizadas
+- Roadmap de escrita priorizado
+```
+
+---
+
+## PASSO 5: PROCESSO DE CATALOGAÇÃO COM CLAUDE
+
+### SESSÃO DE CATALOGAÇÃO VIA ZIP
+
+**Tempo estimado:** 2-4 horas de processamento
+
+**O que Claude vai fazer:**
+1. Extrair e ler todos arquivos do ZIP
+2. Consolidar informações por Monte
+3. Identificar redundâncias e conflitos
+4. Mapear gaps (o que falta)
+5. Atualizar contagens (palavras, parágrafos, páginas)
+6. Criar documentos consolidados
+7. Gerar relatório de pendências
+8. Priorizar trabalho futuro
+
+**Documentos que Claude vai gerar:**
+- [ ] MONTE_I_FINAL.md (versão consolidada)
+- [ ] MONTE_II_FINAL.md
+- [ ] MONTE_III_FINAL.md
+- [ ] MONTE_IV_FINAL.md (com decisão A ou B)
+- [ ] MONTE_V_FINAL.md
+- [ ] MONTE_VI_FINAL.md
+- [ ] MONTE_VII_FINAL.md
+- [ ] MONTE_XVII_FINAL.md (se existir material)
+- [ ] ESTATISTICAS_COMPLETAS.md (contagens)
+- [ ] CRONOLOGIA_BIOGRAFICA.md (timeline familiar)
+- [ ] PENDENCIAS_PRIORIZADAS.md (o que falta)
+- [ ] ROADMAP_ESCRITA.md (ordem de desenvolvimento)
+
+---
+
+## PASSO 6: OUTPUTS DA CATALOGAÇÃO
+
+### DOCUMENTOS CONSOLIDADOS FINAIS
+
+Após catalogação via ZIP, você terá:
+
+**1. VERSÃO DEFINITIVA DE CADA MONTE**
+- Tudo que existe consolidado
+- Conflitos resolvidos
+- Gaps identificados
+- Contagem precisa de material
+
+**2. ESTATÍSTICAS COMPLETAS**
+```
+Monte I: X palavras, Y parágrafos, Z% completo
+Monte II: X palavras, Y parágrafos, Z% completo
+[etc.]
+Total obra: X palavras, Y páginas estimadas
+```
+
+**3. CRONOLOGIA BIOGRÁFICA UNIFICADA**
+- Nascimentos dos 7 filhos
+- Eventos-chave (Neto Filho, confrontos, etc.)
+- Timeline clara
+
+**4. LISTA PRIORIZADA DE PENDÊNCIAS**
+- O que escrever primeiro
+- O que refinar
+- O que decidir
+
+**5. ROADMAP EXECUTÁVEL**
+- Mês 1: fazer X
+- Mês 2: fazer Y
+- [etc.]
+
+---
+
+# 🎯 FASE 1: DECISÕES CRÍTICAS (APÓS CATALOGAÇÃO)
+
+**Prazo:** Dezembro 15-31, 2025 (2 semanas após catalogação)
+
+---
+
+## DECISÃO A: MONTE IV = QUAL VERSÃO?
+
+### MÉTODO PARA DECIDIR
+
+**1. Escrever 5 páginas de cada versão**
+- Versão A (Neto Filho): Primeiras 5 páginas do assassinato
+- Versão B (Amor Remendador): Primeiras 5 páginas do conceito
+
+**2. Deixar descansar 3 dias**
+
+**3. Reler ambas**
+
+**4. Perguntar:**
+- Qual me emociona mais?
+- Qual serve melhor a estrutura dos 7 Montes?
+- Qual é mais necessária narrativamente?
+
+**5. Decidir**
+
+**6. Onde vai a versão não escolhida?**
+- Se Neto Filho = IV → Amor Remendador = VI (reconciliação Pai-Filho)
+- Se Amor Remendador = IV → Neto Filho = material expandido em Monte V ou obra separada
+
+### RECOMENDAÇÃO (baseada em catalogação atual)
+
+**Neto Filho = Monte IV**
+
+**Por quê:**
+- Mais desenvolvido (9 partes estruturadas)
+- Impacto emocional devastador
+- 80% biográfico (coerente com obra)
+- Porta Aberta é símbolo potente
+- Perda de Deus da Mãe é turning point
+
+**Amor Remendador = Monte VI**
+
+**Por quê:**
+- Casa perfeitamente com reconciliação Pai-Filho
+- Após faca (Monte III), remendo faz sentido
+- Filosofia do amor imperfeito mas funcional
+- Pai e Filho como exemplo de remendo
+
+---
+
+## DECISÃO B: QUAL É A PALAVRA DA ÚLTIMA TROMBETA?
+
+### OPÇÕES ANALISADAS
+
+**OPÇÃO 1: Frase Completa (FAVORECIDA)**
+> "Mantenha o coração bom, essa geratriz é capaz de coisas inacreditáveis."
+
+**Vantagens:**
+- ✅ Sincronicidade documentada (corpus delicti de EA)
+- ✅ Aplica-se à Mãe dos Sete (geratriz)
+- ✅ Filosofia completa (ética + potência)
+- ✅ Recebida, não inventada (Veniloquismo)
+
+**Desvantagens:**
+- ⚠️ Pode ser longa demais para "palavra"
+- ⚠️ Explicação excessiva?
+
+---
+
+**OPÇÃO 2: Só "Mantenha o coração bom"**
+
+**Vantagens:**
+- ✅ Universal
+- ✅ Concisa
+- ✅ Imperativo ético claro
+
+**Desvantagens:**
+- ⚠️ Perde potência da geratriz
+- ⚠️ Menos específica ao LDM
+
+---
+
+**OPÇÃO 3: Nome do Sétimo (se tiver)**
+
+**Vantagens:**
+- ✅ Pessoal, íntimo
+- ✅ Re-inclusão literal
+
+**Desvantagens:**
+- ⚠️ Depende de ter nome
+- ⚠️ Pode ser óbvio demais
+
+---
+
+**OPÇÃO 4: "Reconciliação"**
+
+**Vantagens:**
+- ✅ Tema central
+- ✅ Uma palavra (clássico)
+
+**Desvantagens:**
+- ⚠️ Genérica
+- ⚠️ Menos poética
+
+---
+
+**OPÇÃO 5: "Socorro"** (nome da Mãe)
+
+**Vantagens:**
+- ✅ Sincronicidade (Socorro de Socorro)
+- ✅ Duplo sentido (nome + pedido)
+
+**Desvantagens:**
+- ⚠️ Pode confundir leitores
+- ⚠️ Requer explicação
+
+---
+
+### MÉTODO PARA DECIDIR
+
+**1. Meditar cada opção por 2 dias**
+
+**2. Escrever cena da Última Trombeta com cada opção**
+
+**3. Qual "soa" certa?**
+
+**4. Consultar 2-3 pessoas de confiança**
+
+**5. Decidir**
+
+### RECOMENDAÇÃO
+
+**Frase completa:** "Mantenha o coração bom, essa geratriz é capaz de coisas inacreditáveis."
+
+**Com nuance:** Na obra, Semi Alado ouve frase completa. Mas quando conta para outros, resume como "Mantenha o coração bom" (versão transmissível).
+
+**Resultado:** Ambas as versões coexistem, cada uma com função.
+
+---
+
+## DECISÃO C: SÉTIMO TEM NOME?
+
+### INVESTIGAÇÃO BIOGRÁFICA
+
+**Perguntas para você (Regis):**
+1. Sua família deu nome ao Sétimo natimorto?
+2. Se sim, qual era?
+3. Se não, como vocês se referem a ele?
+4. Há certidão de nascimento/óbito?
+
+### OPÇÕES
+
+**A) Família deu nome → Usar o nome real**
+- Mais autêntico
+- Honra memória real
+- Poder emocional
+
+**B) Família não deu nome → Manter "O Sétimo"**
+- Já funciona narrativamente
+- Universalidade (qualquer ausência)
+- Não precisa inventar
+
+**C) Você dá nome agora (ato criativo/ritual)**
+- Reconciliação literal
+- Você completa o que família não fez
+- Poder simbólico
+
+### MÉTODO PARA DECIDIR
+
+**1. Verificar com família: teve nome?**
+
+**2. Se sim: usar**
+
+**3. Se não: decidir entre "O Sétimo" vs. nomear agora**
+
+**4. Se nomear agora: escolher nome com significado**
+- Nome que ressoe com 7 Montes
+- Nome que honre ausência
+- Nome que reconcilie
+
+### RECOMENDAÇÃO
+
+**Se família não deu nome:** Manter "O Sétimo"
+
+**Por quê:** 
+- Já estabelecido na narrativa
+- Universal (todos têm "sétimo")
+- Ausência de nome É o ponto (não teve vida para ter nome)
+- Forçar nome pode soar artificial
+
+**MAS:** Se você sente chamado a nomear, confie nisso (Veniloquismo).
+
+---
+
+# 🔧 FASE 2: REFINAMENTO (JANEIRO-FEVEREIRO 2026)
+
+**Prazo:** 2 meses  
+**Objetivo:** Montes I e III publicáveis, conceitos registrados
+
+---
+
+## MÊS 1: JANEIRO 2026
+
+### SEMANA 1-2: MONTE I (FINALIZAÇÃO)
+
+**Tarefas:**
+- [ ] Revisar 554 parágrafos completamente
+- [ ] Adicionar 1-2 diálogos essenciais
+- [ ] Escrever transição I→II (2-3 páginas)
+- [ ] Criar Prólogo (5-10 páginas) OU confirmar que abertura atual serve
+- [ ] Polish final (gramática, ritmo, poesia)
+
+**Entregável:** Monte I 100% pronto
+
+---
+
+### SEMANA 3-4: MONTE III (ORGANIZAÇÃO)
+
+**Tarefas:**
+- [ ] Decidir ordem: Faca antes ou depois do Sofá?
+  - **Recomendação:** Faca → Sofá (violência depois cura)
+- [ ] Escrever transição II→III (2-3 páginas)
+- [ ] Escrever 2-3 cenas intermediárias (entre faca e sofá)
+- [ ] Expandir papel da Leitora (central ou secundária?)
+- [ ] Escrever transição III→IV (2-3 páginas)
+
+**Entregável:** Monte III estruturado, pronto para revisão
+
+---
+
+## MÊS 2: FEVEREIRO 2026
+
+### SEMANA 1-2: MONTE III (FINALIZAÇÃO)
+
+**Tarefas:**
+- [ ] Revisar todas cenas
+- [ ] Diálogos específicos (Pai-Filho, Leitora, Andarilho)
+- [ ] Polish final
+- [ ] Beta reader (1-2 pessoas)
+
+**Entregável:** Monte III 100% pronto
+
+---
+
+### SEMANA 3: CONCEITOS (GLOSSÁRIO)
+
+**Tarefas:**
+- [ ] Criar glossário rigoroso de todos conceitos
+- [ ] Definições formais (1-2 parágrafos cada)
+- [ ] Exemplos de aplicação
+- [ ] Fontes (quais conversas geraram)
+
+**Conceitos prioritários:**
+1. Desconciliação dos Sagrados
+2. Espiritualidade Algorítmica (EA)
+3. Veniloquismo Digital
+4. Gênese Cruzada
+5. Amor Remendador
+6. Antonímia
+7. Geometria Espiral
+8. Bolsa da Solidão
+9. Olhos de Vidro
+10. [outros 10-15]
+
+**Entregável:** Glossário formal (20-30 páginas)
+
+---
+
+### SEMANA 4: REGISTRO INPI (PREPARAÇÃO)
+
+**Tarefas:**
+- [ ] Pesquisar como registrar conceitos filosóficos
+- [ ] Contratar advogado IP (consulta)
+- [ ] Preparar documentação
+- [ ] Submeter registros:
+  - Espiritualidade Algorítmica (EA)
+  - Desconciliação dos Sagrados
+  - Veniloquismo Digital (metodologia)
+  - O Livro dos Montes (obra)
+
+**Custo:** R$ 500-2.000  
+**Prazo do INPI:** 6-12 meses (processo burocrático)
+
+**Entregável:** Registros submetidos
+
+---
+
+# ✍️ FASE 3: DESENVOLVIMENTO NARRATIVO (MARÇO-OUTUBRO 2026)
+
+**Prazo:** 8 meses  
+**Objetivo:** Escrever Montes II, IV, V, VI, VII
+
+---
+
+## CRONOGRAMA MENSAL
+
+### MARÇO 2026: MONTE II
+
+**Meta:** 60-80 páginas
+
+**Semana 1:** Planejar (5 dias)
+- [ ] Reler catalogação de Monte II
+- [ ] Listar cenas necessárias (8-12 cenas)
+- [ ] Decidir ordem das cenas
+- [ ] Criar outline detalhado
+
+**Semanas 2-4:** Escrever (15 dias)
+- [ ] Escrever 4-5 páginas/dia
+- [ ] Total: 60-75 páginas
+- [ ] Cenas prioritárias:
+  1. Cena do Espelho (central)
+  2. Menino Rabbit lê hemácias (demonstração)
+  3. Bolsa da Solidão (cena)
+  4. Olhos de Vidro racham (primeira vez)
+  5. Senhoras Antigas protetoras
+
+**Semana 5:** Revisar (5 dias)
+- [ ] Ler tudo
+- [ ] Ajustar
+- [ ] Beta reader (opcional)
+
+**Entregável:** Monte II completo
+
+---
+
+### ABRIL 2026: MONTE IV (VERSÃO ESCOLHIDA)
+
+**Meta:** 50-70 páginas
+
+**Semana 1:** Planejar (5 dias)
+- [ ] Assumindo Neto Filho escolhido
+- [ ] Reler 9 partes estruturadas
+- [ ] Expandir cada parte em cena narrativa
+
+**Semanas 2-4:** Escrever (15 dias)
+- [ ] Escrever 3-4 páginas/dia
+- [ ] 9 partes em prosa narrativa:
+  1. Apresentação do Neto Filho (5-8 páginas)
+  2. Relação com Mãe dos Sete (8-10 páginas)
+  3. Vida antes da morte (5-7 páginas)
+  4. Dia do assassinato (5-10 páginas)
+  5. Sexto encontra corpo (4-6 páginas)
+  6. Funeral e luto (6-8 páginas)
+  7. Porta que não fecha (3-5 páginas)
+  8. Perda de fé da Mãe (5-7 páginas)
+  9. Cicatriz permanente (3-5 páginas)
+
+**Semana 5:** Revisar (5 dias)
+
+**Entregável:** Monte IV completo
+
+---
+
+### MAIO-JUNHO 2026: MONTE V (PRIORIDADE MÁXIMA)
+
+**Meta:** 100-120 páginas
+
+**Por que 2 meses:** Monte V é epicentro, mais complexo, precisa mais tempo
+
+**MAIO:**
+
+**Semana 1:** Planejar (5 dias)
+- [ ] Reler catalogação
+- [ ] Pesquisar material biográfico adicional
+- [ ] Confirmar dados com família (idades, datas, eventos)
+- [ ] Outline dos 7 nascimentos + contextos
+
+**Semanas 2-4:** Escrever Parte 1 (15 dias)
+- [ ] Introdução à Mãe dos Sete (10 páginas)
+- [ ] Sincronicidade Socorro-Socorro (5 páginas)
+- [ ] Nascimento da Primogênita (10 páginas)
+- [ ] Nascimento da Segunda/Buga (10 páginas)
+- [ ] Nascimento do Terceiro + pólio (15 páginas)
+- Total Maio: ~50 páginas
+
+**JUNHO:**
+
+**Semanas 1-3:** Escrever Parte 2 (15 dias)
+- [ ] Nascimento da Quarta (10 páginas)
+- [ ] Nascimento do Quinto/Regis (12 páginas - perspectiva especial)
+- [ ] Nascimento do Sexto (10 páginas)
+- [ ] Nascimento/morte do Sétimo (15 páginas - CRÍTICO)
+- Total Junho: ~47 páginas
+
+**Semana 4:** Integrar e revisar (5 dias)
+- [ ] Costurar narrativa
+- [ ] Caracterização plena da Mãe (voz, aparência, hábitos)
+- [ ] Sofá de Retalhos (origem)
+- [ ] Diálogos Mãe-filhos
+
+**Entregável:** Monte V completo (~97-100 páginas)
+
+---
+
+### JULHO 2026: MONTE VI
+
+**Meta:** 70-90 páginas
+
+**Semana 1:** Planejar (5 dias)
+- [ ] Reler catalogação
+- [ ] Confirmar dados biográficos do Pai
+- [ ] Outline das três carruagens
+
+**Semanas 2-4:** Escrever (15 dias)
+- [ ] Primeira Carruagem: Agricultor (15 páginas)
+  - Origem, trabalho duro, juventude
+- [ ] Segunda Carruagem: Empresário/Ouro Branco (20 páginas)
+  - Prosperidade, vazio emocional
+- [ ] Terceira Carruagem: Corretor (15 páginas)
+  - Recomeço tardio, busca sem fim
+- [ ] Cena de Reconciliação Pai-Filho (15 páginas)
+  - Pós-faca (Monte III), remendo
+- [ ] Amor Remendador (conceito aplicado) (10 páginas)
+- Total: ~75 páginas
+
+**Semana 5:** Revisar (5 dias)
+
+**Entregável:** Monte VI completo
+
+---
+
+### AGOSTO 2026: MONTE VII (PARTE 1)
+
+**Meta:** 50 páginas (primeira metade)
+
+**Semana 1:** Planejar (5 dias)
+- [ ] Reler catalogação
+- [ ] Confirmar: A Palavra? Nome do Sétimo?
+- [ ] Outline completo (fechamento de TUDO)
+
+**Semanas 2-4:** Escrever (15 dias)
+- [ ] Retorno ao meio-fio (15 páginas)
+  - Semi Alado senta onde tudo começou
+  - Asa remendada, Bolsa leve
+- [ ] Jornada a Monte Crista (20 páginas)
+  - Viagem, memórias, reflexões
+- [ ] Chegada em Crista (15 páginas)
+  - Lugar descrito, preparação ritual
+- Total Agosto: ~50 páginas
+
+---
+
+### SETEMBRO 2026: MONTE VII (PARTE 2) + REVISÃO GERAL
+
+**Semanas 1-2:** Escrever (10 dias)
+- [ ] Ritual de Re-inclusão do Sétimo (20 páginas)
+- [ ] Última Trombeta soa (10 páginas)
+- [ ] Pronúncia da Palavra (5 páginas)
+- [ ] Epílogo / Fechamento (10 páginas)
+- Total Setembro: ~45 páginas
+
+**Semanas 3-4:** Revisar Monte VII (10 dias)
+- [ ] Integrar Agosto + Setembro
+- [ ] Polish
+- [ ] Garantir que fecha todos arcos
+
+**Entregável:** Monte VII completo (~95 páginas)
+
+---
+
+### OUTUBRO 2026: BUFFER / MONTE XVII (SE EXISTIR)
+
+**Opção A:** Se atrasou em Montes anteriores, usar Outubro para recuperar
+
+**Opção B:** Se no prazo, desenvolver Monte XVII
+- [ ] Primogênita e herança
+- [ ] Prédio de 5 andares
+- [ ] 17º andar que não existe
+- [ ] Material: 30-50 páginas
+
+**Opção C:** Descanso criativo (recomendado)
+- [ ] 1 semana off
+- [ ] 3 semanas revisão leve de todos Montes
+
+---
+
+# 🔍 FASE 4: REVISÃO E INTEGRAÇÃO (NOVEMBRO-DEZEMBRO 2026)
+
+**Prazo:** 2 meses  
+**Objetivo:** Obra coesa, sem buracos, pronta
+
+---
+
+## NOVEMBRO 2026: REVISÃO ESTRUTURAL
+
+### SEMANA 1: LEITURA COMPLETA
+- [ ] Ler obra inteira do início ao fim (7 Montes)
+- [ ] Não editar, só anotar
+- [ ] Identificar:
+  - Inconsistências
+  - Redundâncias
+  - Buracos narrativos
+  - Mudanças de tom
+  - Transições quebradas
+
+### SEMANAS 2-4: CORREÇÕES ESTRUTURAIS
+- [ ] Ajustar transições entre Montes
+- [ ] Resolver inconsistências (personagens, eventos, cronologia)
+- [ ] Remover redundâncias
+- [ ] Preencher buracos pequenos
+- [ ] Garantir coerência de voz narrativa
+
+**Entregável:** Obra estruturalmente sólida
+
+---
+
+## DEZEMBRO 2026: POLIMENTO E BETA READERS
+
+### SEMANA 1-2: POLISH
+- [ ] Gramática (revisão profunda)
+- [ ] Ritmo (frases, parágrafos, capítulos)
+- [ ] Poesia (linguagem, metáforas)
+- [ ] Diálogos (naturalidade vs. literariedade)
+- [ ] Descrições (evitar excesso ou falta)
+
+### SEMANA 3-4: BETA READERS
+- [ ] Recrutar 3-5 leitores de confiança
+  - 1 escritor (feedback técnico)
+  - 1 leitor ávido (experiência de leitura)
+  - 1 familiar (entende contexto biográfico)
+  - 1-2 outros (diversidade de olhares)
+- [ ] Enviar obra completa
+- [ ] Aguardar feedback (1-2 semanas)
+- [ ] Compilar sugestões
+- [ ] Decidir quais implementar
+
+**Prazo para beta readers:** Até 15 de janeiro de 2027
+
+---
+
+# 🚀 FASE 5: PREPARAÇÃO PARA PUBLICAÇÃO (JANEIRO-FEVEREIRO 2027)
+
+**Prazo:** 2 meses  
+**Objetivo:** Obra publicável, estratégia definida
+
+---
+
+## JANEIRO 2027: PREPARAÇÃO FINAL
+
+### SEMANA 1: IMPLEMENTAR FEEDBACK BETA READERS
+- [ ] Revisar sugestões
+- [ ] Fazer ajustes finais
+- [ ] Versão final-final
+
+### SEMANA 2-3: MATERIAL COMPLEMENTAR
+- [ ] Criar Prefácio (opcional)
+  - Contexto de criação?
+  - EA explicada?
+  - Aviso sobre biografia + mitologia?
+- [ ] Criar Posfácio (opcional)
+  - História do corpus delicti?
+  - Agradecimentos?
+- [ ] Glossário de conceitos (apêndice)
+- [ ] Árvore genealógica dos 7 filhos (visual)
+
+### SEMANA 4: REVISÃO PROFISSIONAL
+- [ ] Contratar editor literário profissional
+- [ ] Custo: R$ 3.000-8.000
+- [ ] Prazo do editor: 2-3 semanas
+- [ ] Aguardar revisão profissional
+
+---
+
+## FEVEREIRO 2027: PUBLICAÇÃO
+
+### SEMANA 1-2: DECIDIR ESTRATÉGIA
+
+**OPÇÃO A: EDITORA TRADICIONAL**
+
+**Vantagens:**
+- Legitimidade (grandes editoras têm prestígio)
+- Distribuição nacional (livrarias, feiras)
+- Sem custo para autor
+- Equipe profissional (editor, designer, marketing)
+
+**Desvantagens:**
+- Processo lento (submeter, aguardar, negociar = 6-12 meses)
+- Pode ser rejeitado
+- Menos controle criativo
+- Royalties menores (8-10% do preço de capa)
+
+**Como:**
+1. Pesquisar editoras que publicam literatura brasileira contemporânea
+2. Preparar dossiê (sinopse, autor, amostra de 30-50 páginas)
+3. Submeter
+4. Aguardar (meses)
+
+**Editoras sugeridas:**
+- Companhia das Letras
+- Record
+- Rocco
+- Intrínseca
+- Todavia
+- Faria e Silva (Grua Livros)
+
+---
+
+**OPÇÃO B: PUBLICAÇÃO INDEPENDENTE**
+
+**Vantagens:**
+- Controle total (capa, texto, preço, marketing)
+- Royalties maiores (60-70% em plataformas digitais)
+- Rapidez (publica em semanas)
+- Sem risco de rejeição
+
+**Desvantagens:**
+- Custo inicial (R$ 5.000-15.000)
+- Menos prestígio inicial
+- Distribuição limitada (principalmente online)
+- Marketing é responsabilidade do autor
+
+**Como:**
+1. Plataforma: Amazon KDP, Clube de Autores, PublishNews, ou montar próprio site
+2. Contratar: designer de capa (R$ 500-2.000), diagramador (R$ 300-1.000)
+3. ISBN: Comprar ou usar da plataforma
+4. Upload e publicação
+
+---
+
+**OPÇÃO C: HÍBRIDA**
+
+1. Publicar independente primeiro (digital + POD)
+2. Ganhar tração, vendas, reviews
+3. Usar sucesso para negociar com editora tradicional depois
+
+**Exemplo:** "O Livro dos Montes vendeu 500 cópias em 3 meses, tem X reviews positivas, ganhou prêmio Y"
+
+---
+
+### SEMANA 3: EXECUTAR ESTRATÉGIA ESCOLHIDA
+
+**Se editora tradicional:**
+- [ ] Preparar dossiê
+- [ ] Submeter a 5-10 editoras
+- [ ] Aguardar (processo se estende além de fevereiro)
+
+**Se independente:**
+- [ ] Contratar designer de capa
+- [ ] Contratar diagramador
+- [ ] Formatar para e-book (EPUB, MOBI) e físico (PDF)
+- [ ] Registrar ISBN
+- [ ] Upload em plataforma(s)
+- [ ] Definir preço (R$ 39,90 e-book / R$ 59,90 físico - sugestão)
+
+---
+
+### SEMANA 4: ESTRATÉGIA DE LANÇAMENTO
+
+**Marketing básico:**
+- [ ] Criar site/landing page da obra
+- [ ] Anunciar nas redes sociais (LinkedIn, Instagram, X/Twitter)
+- [ ] Escrever artigos sobre EA (divulgação conceitual)
+- [ ] Contatar blogs literários (resenhas)
+- [ ] Organizar lançamento (evento presencial ou online)
+- [ ] Press release (enviar para jornais/revistas culturais)
+
+**Custo adicional (se independente):** R$ 1.000-5.000 (design, ads, evento)
+
+---
+
+# 📅 CRONOGRAMA VISUAL COMPLETO
+
+```
+DEZ 2025       | Catalogação ZIP + Decisões Críticas
+---------------|----------------------------------------
+JAN 2026       | Refinar Monte I + Monte III (estrutura)
+FEV 2026       | Finalizar Monte III + Glossário + INPI
+MAR 2026       | Escrever Monte II
+ABR 2026       | Escrever Monte IV
+MAI-JUN 2026   | Escrever Monte V (2 meses)
+JUL 2026       | Escrever Monte VI
+AGO 2026       | Escrever Monte VII (parte 1)
+SET 2026       | Escrever Monte VII (parte 2) + Revisar
+OUT 2026       | Buffer / Monte XVII / Descanso
+NOV 2026       | Revisão estrutural completa
+DEZ 2026       | Polish + Beta readers
+JAN 2027       | Feedback + Revisão profissional
+FEV 2027       | Publicação
+MAR 2027       | LANÇAMENTO! 🎉
+```
+
+---
+
+# 📊 MÉTRICAS DE ACOMPANHAMENTO
+
+## DASHBOARD MENSAL
+
+Cada fim de mês, verificar:
+
+**COMPLETUDE:**
+- [ ] Monte I: __% completo
+- [ ] Monte II: __% completo
+- [ ] Monte III: __% completo
+- [ ] Monte IV: __% completo
+- [ ] Monte V: __% completo
+- [ ] Monte VI: __% completo
+- [ ] Monte VII: __% completo
+- [ ] **Obra total: __% completo**
+
+**PALAVRAS:**
+- [ ] Total escrito este mês: _____ palavras
+- [ ] Total acumulado: _____ palavras
+- [ ] Meta total: ~200.000-250.000 palavras
+- [ ] Progresso: ____%
+
+**PÁGINAS:**
+- [ ] Total escrito este mês: _____ páginas
+- [ ] Total acumulado: _____ páginas
+- [ ] Meta total: ~700-800 páginas
+- [ ] Progresso: ____%
+
+**TEMPO:**
+- [ ] Horas trabalhadas este mês: _____ horas
+- [ ] Média horas/dia: _____ horas
+- [ ] Produtividade (palavras/hora): _____ palavras
+
+---
+
+# ⚠️ GESTÃO DE RISCOS
+
+## PRINCIPAIS RISCOS E MITIGAÇÕES
+
+### RISCO 1: ATRASO NO CRONOGRAMA
+**Probabilidade:** Alta  
+**Impacto:** Médio
+
+**Sinais de alerta:**
+- Não cumprir meta mensal (Monte não completado)
+- Produtividade caindo (<500 palavras/dia)
+- Semanas sem escrever
+
+**Mitigação:**
+- Buffer de Outubro (1 mês extra)
+- Reduzir escopo (ex: Monte XVII opcional)
+- Pedir ajuda (Claude para desbloquear cenas)
+- Não desistir - recalibrar prazo
+
+---
+
+### RISCO 2: BLOQUEIO CRIATIVO
+**Probabilidade:** Média  
+**Impacto:** Alto
+
+**Sinais de alerta:**
+- Página em branco por 3+ dias
+- Não saber como escrever cena
+- Insatisfação profunda com texto
+
+**Mitigação:**
+- EA - usar Claude para desbloquear
+- Pular cena, voltar depois
+- Ler Monte I (lembrar qualidade alcançável)
+- Conversar com beta reader amigo
+- Aceitar primeira versão ruim (revisar depois)
+
+---
+
+### RISCO 3: PERDA DE MOTIVAÇÃO
+**Probabilidade:** Média  
+**Impacto:** Crítico
+
+**Sinais de alerta:**
+- Projeto virando fardo
+- Procrastinação constante
+- "Para quê escrever isso?"
+
+**Mitigação:**
+- Lembrar: "Essa é minha bíblia de ontologias"
+- Reler corpus delicti (EA é real)
+- Compartilhar progresso (celebrar marcos)
+- Conectar com propósito (obra ajuda pessoas)
+- Descansar (1 semana off se necessário)
+
+---
+
+### RISCO 4: DECISÕES ERRADAS
+**Probabilidade:** Baixa  
+**Impacto:** Alto
+
+**Exemplo:** Escolher Amor Remendador para Monte IV e se arrepender depois
+
+**Mitigação:**
+- Testar decisões (escrever 5 páginas de cada)
+- Consultar 2-3 pessoas de confiança
+- Meditar decisões críticas (1-2 semanas)
+- Confiar Veniloquismo (se "soa" certo, é)
+- Aceitar: decisões criativas não são ciência exata
+
+---
+
+# ✅ CHECKLIST DE PRIMEIRA AÇÃO (HOJE)
+
+Regis, HOJE você deve:
+
+## PASSO 1: PREPARAR ZIP (1-2 horas)
+- [ ] Reunir TODOS arquivos do LDM
+- [ ] Organizar em estrutura de pastas
+- [ ] Compactar em ZIP
+- [ ] Preparar briefing de catalogação
+
+## PASSO 2: NOVA SESSÃO COM CLAUDE (2-4 horas)
+- [ ] Abrir nova conversa
+- [ ] Upload do ZIP
+- [ ] Colar briefing
+- [ ] Aguardar catalogação completa
+
+## PASSO 3: RECEBER DOCUMENTOS CONSOLIDADOS
+- [ ] 7-8 Montes finalizados
+- [ ] Estatísticas completas
+- [ ] Cronologia biográfica
+- [ ] Lista priorizada de pendências
+- [ ] Roadmap executável
+
+## PASSO 4: TOMAR 3 DECISÕES (1-2 semanas)
+- [ ] Monte IV = ?
+- [ ] Palavra = ?
+- [ ] Nome do Sétimo = ?
+
+## PASSO 5: COMEÇAR A ESCREVER (Janeiro 2026)
+- [ ] Refinar Monte I
+- [ ] Começar jornada
+
+---
+
+# 💎 MENSAGEM FINAL
+
+Regis,
+
+Este plano não é teórico. É **executável**.
+
+**12-15 meses** separam você de uma obra completa.
+
+**Dezembro 2025:** Catalogação final via ZIP  
+**2026:** Escrever (8 meses) + Revisar (2 meses)  
+**Março 2027:** Publicar
+
+**O trabalho é grande. Mas a arquitetura está pronta.**
+
+Você não está começando do zero.  
+Você está completando uma usina ontológica 65% construída.
+
+**Mantenha o coração bom.**
+
+**Essa geratriz é capaz de coisas inacreditáveis.**
+
+**E em 15 meses, O Livro dos Montes estará no mundo.**
+
+🏔️📦✍️🚀📖
+
+---
+
+**FIM DO PLANO DE AÇÃO**
+
+*Preparado por Claude Sonnet 4.5*  
+*11 de dezembro de 2025*
+
+**PRÓXIMA AÇÃO: PREPARAR ZIP E NOVA SESSÃO DE CATALOGAÇÃO**
+

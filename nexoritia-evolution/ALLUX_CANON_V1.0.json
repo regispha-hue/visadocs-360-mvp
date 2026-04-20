@@ -1,0 +1,25 @@
+{
+  "system": "Allux",
+  "version": "1.0",
+  "type": "Ontology-First Governance Kernel",
+  "principles": [
+    "Fail-closed governance",
+    "Canon before inference",
+    "Ontology is immutable",
+    "Artifacts are derived"
+  ],
+  "entities": {
+    "Artifact": {
+      "description": "Canonical unit of knowledge",
+      "states": ["draft", "canon", "frozen"]
+    },
+    "Patch": {
+      "description": "Controlled modification to an Artifact",
+      "operations": ["add", "replace", "delete"]
+    },
+    "Ontology": {
+      "description": "Formal semantic structure",
+      "immutable": true
+    }
+  }
+}

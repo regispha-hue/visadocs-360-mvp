@@ -1,0 +1,89 @@
+O Vale do Silício não fala de outra coisa. E isso nem virou assunto no Brasil ainda.
+Imagina se a Siri funcionasse de verdade.
+Lembrasse do que você diz. Fizesse tarefas reais. Te mandasse mensagem quando algo importante acontecesse.
+Isso existe agora. Se chama ClawdBot.
+A diferença pro ChatGPT:
+→ ChatGPT vive num site. ClawdBot vive no seu Telegram.
+→ ChatGPT esquece tudo quando você fecha. ClawdBot lembra de cada conversa.
+→ ChatGPT espera você abrir. ClawdBot te manda mensagem primeiro.
+→ ChatGPT responde perguntas. ClawdBot executa tarefas no seu computador.
+Leia isso de novo.
+O que ele faz que Siri e Alexa não fazem:
+→ Briefing às 7h: seus emails, sua agenda, suas tarefas
+→ Alertas proativos: "aquela ação caiu 5%"
+→ Automações sob demanda: você pede, ele cria
+→ Memória real: lembra o que você disse há duas semanas
+Siri tem memória de peixinho dourado.
+ClawdBot tem cérebro.
+O custo real:
+→ Servidor: $5/mês (Hetzner) 
+→ IA: $20-100/mês (Claude / API) 
+→ Total: $25-150/mês
+Compara com "consultores de IA" cobrando R$50 mil pra configurar assistente e automação básicos.
+COMO INSTALAR EM 30 MINUTOS
+Você pode rodar no seu Mac.
+Ou aderir à febre e comprar um Mac Mini só pra ele.
+Mas tem uma alternativa mais simples e mais barata: VPS.
+Por que usar um VPS?
+→ Roda 24/7 sem depender do seu computador 
+→ Pode te mandar mensagens proativamente 
+→ Custa ~$5/mês na Hetzner
+O que você precisa?
+→ Conta na Hetzner (ou outro VPS com Ubuntu) 
+→ API key da Anthropic (~$20-50/mês uso moderado) 
+→ Telegram (recomendado) ou WhatsApp
+Passo 1: Criar servidor na Hetzner
+→ Cria conta em hetzner.com/cloud 
+→ Novo servidor Ubuntu 24.04 
+→ Plano CX22 ($4/mês, 4GB RAM) pra chat básico 
+→ Plano CX32 ($7/mês, 8GB RAM) se quiser browser automation
+Passo 2: Conectar via SSH
+bash
+ssh root@<seu-ip>
+Criar usuário dedicado:
+bash
+adduser clawdbot
+usermod -aG sudo clawdbot
+su - clawdbot
+Passo 3: Instalar Node.js
+bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+nvm install 22
+corepack enable pnpm
+Passo 4: Instalar ClawdBot
+Opção simples (recomendada):
+bash
+curl -fsSL https://clawd.bot/install.sh | bash
+Ou from source:
+bash
+git clone https://github.com/clawdbot/clawdbot.git
+cd clawdbot
+pnpm install
+pnpm build
+pnpm ui:build
+Passo 5: Rodar o wizard
+bash
+clawdbot onboard --install-daemon
+O wizard vai te guiar:
+→ Gateway: seleciona "local" 
+→ Runtime: escolhe "Node" 
+→ Auth: API key da Anthropic (Claude Opus 4.5 recomendado) 
+→ Provider: Telegram (mais fácil que WhatsApp)
+Pro Telegram: cria um bot em @BotFather, manda /newbot e pega o token.
+Passo 6: Aprovar seu usuário
+Manda uma mensagem pro bot no Telegram.
+Depois aprova com:
+bash
+clawdbot pairing list telegram
+clawdbot pairing approve telegram <código>
+Pronto. Seu assistente está rodando 24/7.
+Documentação: docs.clawd.bot 
+Tutorial detalhado: velvetshark.com/clawdbot-the-self-hosted-ai-that-siri-should-have-been 
+Repositório: github.com/clawdbot/clawdbot
+Ainda é projeto pra quem gosta de fuçar. Não é plug-and-play.
+Mas a direção é clara:
+Assistentes que rodam no seu servidor, se adaptam a você, e fazem o que você pede — não o que um dev decidiu que você precisa.
+Siri e Alexa nunca vão chegar nisso.
+Isso é o futuro do trabalho. E já começou.
+Vai ficar de fora?

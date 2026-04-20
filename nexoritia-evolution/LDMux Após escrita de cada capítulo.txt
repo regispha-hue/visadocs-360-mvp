@@ -1,0 +1,2 @@
+LDMux: Após escrita de cada capítulo ou monte, emite o PDF ou Word tanto para ser baixado quanto para ficar dentro da biblioteca da pasta do livro correspondente no diretório do LDMux.
+
