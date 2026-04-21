@@ -422,3 +422,485 @@ model RespostaQuiz {
   @@index([tentativaId])
   @@index([questaoId])
 }
+
+// ISO 9001:2015 - Gestão da Qualidade e Riscos
+enum StatusRisco {
+  IDENTIFICADO
+  MITIGADO
+  MONITORADO
+  CRITICO
+  ACEITO
+}
+
+enum TipoRisco {
+  OPERACIONAL
+  REGULATORIO
+  QUALIDADE
+  SEGURANCA
+  FINANCEIRO
+}
+
+enum SeveridadeRisco {
+  BAIXO
+  MEDIO
+  ALTO
+  CRITICO
+}
+
+enum StatusNaoConformidade {
+  ABERTA
+  EM_ANALISE
+  CORRECAO_PENDENTE
+  CORRIGIDA
+  VERIFICADA
+  FECHADA
+}
+
+enum StatusAuditoria {
+  PLANEJADA
+  EM_ANDAMENTO
+  CONCLUIDA
+  CANCELADA
+}
+
+model Risco {
+  id               String         @id @default(uuid())
+  tenantId         String
+  descricao        String
+  setor            String
+  categoria        String?
+  probabilidade    Int            // 1 a 5
+  impacto          Int            // 1 a 5
+  nivelRisco       Int            // Cálculo automático: Prob x Impacto
+  tipo             TipoRisco
+  severidade       SeveridadeRisco
+  status           StatusRisco    @default(IDENTIFICADO)
+  
+  // Vinculação com POPs existentes
+  popId            String?
+  pop              Pop?           @relation(fields: [popId], references: [id], onDelete: SetNull)
+  
+  // Plano de ação
+  planoAcao        String?
+  responsavelPlano String?
+  prazoPlano       DateTime?
+  dataMitigacao    DateTime?
+  
+  // Análise de impacto
+  impactoFinanceiro Float?
+  impactoReputacional Float?
+  impactoLegal     Float?
+  
+  // Histórico
+  criadoPor        String?
+  criadoEm         DateTime       @default(now())
+  atualizadoPor    String?
+  atualizadoEm     DateTime       @updatedAt
+  
+  // Relacionamentos
+  naoConformidades NaoConformidade[]
+  auditorias       AuditoriaRisco[]
+  
+  @@index([tenantId])
+  @@index([setor])
+  @@index([tipo])
+  @@index([status])
+  @@index([nivelRisco])
+  @@index([popId])
+}
+
+model NaoConformidade {
+  id               String               @id @default(uuid())
+  tenantId         String
+  codigo           String               @unique
+  titulo           String
+  descricao        String
+  setor            String?
+  
+  // Classificação
+  tipo             String               // "Desvio de POP", "Não conformidade", "Oportunidade"
+  severidade       SeveridadeRisco
+  status           StatusNaoConformidade @default(ABERTA)
+  
+  // Origem
+  origem           String               // "Auditoria", "Fiscalização", "Denúncia", "Rotina"
+  dataOcorrencia   DateTime
+  dataIdentificacao DateTime             @default(now())
+  
+  // Responsáveis
+  reportadoPor     String
+  responsavelAnalise String?
+  responsavelCorrecao String?
+  
+  // Análise
+  causaRaiz        String?
+  analiseCausa     Json?                 // Análise detalhada
+  impacto          String?
+  
+  // Ações corretivas
+  acoesCorretivas  String[]
+  prazoCorrecao    DateTime?
+  dataConclusao    DateTime?
+  
+  // Verificação
+  verificacao      String?
+  dataVerificacao  DateTime?
+  eficacia         Boolean?
+  
+  // Relacionamentos
+  riscoId          String?
+  risco            Risco?               @relation(fields: [riscoId], references: [id], onDelete: SetNull)
+  popId            String?
+  pop              Pop?                 @relation(fields: [popId], references: [id], onDelete: SetNull)
+  treinamentos     Treinamento[]
+  
+  // Anexos
+  anexos           Json?                 // URLs de documentos
+  
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  
+  @@index([tenantId])
+  @@index([codigo])
+  @@index([status])
+  @@index([severidade])
+  @@index([dataOcorrencia])
+  @@index([riscoId])
+  @@index([popId])
+}
+
+model AuditoriaRisco {
+  id               String         @id @default(uuid())
+  tenantId         String
+  titulo           String
+  descricao        String?
+  tipo             String         // "Interna", "Externa", "Fiscalização"
+  status           StatusAuditoria @default(PLANEJADA)
+  
+  // Período
+  dataInicio       DateTime
+  dataFim          DateTime?
+  
+  // Equipe
+  auditorLider     String
+  auditores        String[]       // Nomes dos auditores
+  
+  // Escopo
+  setores          String[]       // Setores auditados
+  pops             String[]       // POPs verificados
+  criterios        Json?          // Critérios de auditoria
+  
+  // Resultados
+  resultado        String?        // "Conforme", "Não conforme", "Parcialmente conforme"
+  pontuacao        Float?         // Score geral
+  naoConformidades String[]       // Códigos das NCs encontradas
+  
+  // Relatório
+  relatorioUrl     String?
+  relatorioNome    String?
+  dataEntrega      DateTime?
+  
+  // Ações
+  planoAcao       String?
+  prazoAcao       DateTime?
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  // Relacionamentos
+  riscoId          String?
+  risco            Risco?         @relation(fields: [riscoId], references: [id], onDelete: SetNull)
+  
+  @@index([tenantId])
+  @@index([status])
+  @@index([dataInicio])
+  @@index([tipo])
+  @@index([riscoId])
+}
+
+// Inteligência Regulatória Ativa
+enum StatusNorma {
+  ATIVA
+  REVOGADA
+  ATUALIZADA
+  EM_REVISAO
+}
+
+enum TipoAtualizacao {
+  NOVA_NORMA
+  ALTERACAO
+  REVOGACAO
+  ORIENTACAO
+}
+
+model NormaRegulatoria {
+  id               String         @id @default(uuid())
+  numero           String         // "RDC 67/2007"
+  titulo           String
+  tipo             String         // "RDC", "Portaria", "Resolução"
+  orgao            String         // "ANVISA", "Ministério da Saúde"
+  status           StatusNorma    @default(ATIVA)
+  
+  // Conteúdo
+  ementa           String?
+  conteudo         String?
+  urlOficial       String?
+  
+  // Datas
+  dataPublicacao   DateTime
+  dataVigencia     DateTime?
+  dataRevogacao    DateTime?
+  
+  // Categorias
+  categorias       String[]       // ["Manipulação", "Qualidade", "Segurança"]
+  aplicabilidade   String[]       // ["Farmácias", "Distribuidoras", "Laboratórios"]
+  
+  // Impacto nos POPs
+  popsImpactados   String[]       // Códigos dos POPs afetados
+  requisitos       Json?          // Requisitos específicos
+  
+  // Análise de impacto
+  nivelImpacto     Int            // 1 a 5
+  complexidade    Int            // 1 a 5
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  // Relacionamentos
+  atualizacoes     AtualizacaoNorma[]
+  alertas          AlertaNorma[]
+  
+  @@index([numero])
+  @@index([tipo])
+  @@index([status])
+  @@index([dataPublicacao])
+}
+
+model AtualizacaoNorma {
+  id               String         @id @default(uuid())
+  normaId          String
+  norma            NormaRegulatoria @relation(fields: [normaId], references: [id], onDelete: Cascade)
+  
+  tipo             TipoAtualizacao
+  descricao        String
+  detalhes         Json?          // Detalhes da mudança
+  
+  // Datas
+  dataDeteccao     DateTime       @default(now())
+  dataPublicacao   DateTime?
+  dataVigencia     DateTime?
+  
+  // Análise de impacto
+  impactoPOPs      String[]       // POPs afetados
+  acoesNecessarias String[]       // Ações recomendadas
+  
+  // Status
+  status           String         // "Detectada", "Analisando", "Comunicada", "Implementada"
+  
+  // Responsável
+  detectadoPor     String?        // "Sistema IA", "Equipe", "Usuário"
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  @@index([normaId])
+  @@index([tipo])
+  @@index([dataDetecao])
+  @@index([status])
+}
+
+model AlertaNorma {
+  id               String         @id @default(uuid())
+  normaId          String
+  norma            NormaRegulatoria @relation(fields: [normaId], references: [id], onDelete: Cascade)
+  atualizacaoId    String?
+  
+  tenantId         String
+  tenant           Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Conteúdo do alerta
+  titulo           String
+  mensagem         String
+  tipo             String         // "CRÍTICO", "ALERTA", "INFORMATIVO"
+  prioridade       Int            // 1 a 5
+  
+  // Análise de impacto
+  popsAfetados     String[]       // Códigos dos POPs afetados
+  setoresAfetados  String[]       // Setores impactados
+  impactoOperacional String?
+  
+  // Ações recomendadas
+  acoesRecomendadas String[]
+  prazoAcao        DateTime?
+  
+  // Status
+  status           String         // "NOVO", "LIDO", "EM_ANALISE", "RESOLVIDO"
+  dataLeitura      DateTime?
+  dataResolucao    DateTime?
+  
+  // Responsáveis
+  responsavel      String?
+  notificadoPor    String?
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  @@index([tenantId])
+  @@index([normaId])
+  @@index([status])
+  @@index([prioridade])
+  @@index([createdAt])
+}
+
+// Prova de Competência Prática
+enum StatusVerificacaoPratica {
+  PENDENTE
+  AGENDADO
+  EM_ANDAMENTO
+  APROVADO
+  REPROVADO
+  CANCELADO
+}
+
+model VerificacaoPratica {
+  id               String               @id @default(uuid())
+  tenantId         String
+  tenant           Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Vinculação
+  treinamentoId    String
+  treinamento      Treinamento         @relation(fields: [treinamentoId], references: [id], onDelete: Cascade)
+  colaboradorId    String
+  colaborador      Colaborador         @relation(fields: [colaboradorId], references: [id], onDelete: Cascade)
+  popId            String
+  pop              Pop                 @relation(fields: [popId], references: [id], onDelete: Cascade)
+  
+  // Agendamento
+  dataAgendamento  DateTime
+  duracaoEstimada  Int?                 // minutos
+  
+  // Verificação
+  status           StatusVerificacaoPratica @default(PENDENTE)
+  supervisor       String               // Nome do supervisor
+  resultado        String?              // "APROVADO", "REPROVADO", "PARCIAL"
+  nota             Float?               // 0 a 10
+  
+  // Checklist de verificação
+  checklist        Json?                // Itens verificados
+  observacoes      String?
+  pontosCriticos   String?              // Pontos que precisaram atenção
+  
+  // Evidências
+  fotosUrl         String[]             // URLs das fotos/vídeos
+  assinaturaSupervisor String?          // Assinatura digital
+  
+  // Datas
+  dataInicio       DateTime?
+  dataConclusao    DateTime?
+  
+  // Retreinamento
+  precisaRetreinamento Boolean         @default(false)
+  dataRetreinamento DateTime?
+  
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  
+  @@index([tenantId])
+  @@index([treinamentoId])
+  @@index([colaboradorId])
+  @@index([popId])
+  @@index([status])
+  @@index([dataAgendamento])
+}
+
+// Botão de Pânico - Modo Fiscalização
+enum StatusAuditoriaFiscalizacao {
+  ATIVO
+  INATIVO
+  EXPIRADO
+}
+
+model AuditoriaFiscalizacao {
+  id               String               @id @default(uuid())
+  tenantId         String
+  tenant           Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Configuração
+  qrCode           String               // QR Code para acesso
+  codigoAcesso     String               // Código de acesso alternativo
+  status           StatusAuditoriaFiscalizacao @default(ATIVO)
+  
+  // Período de validade
+  dataGeracao      DateTime             @default(now())
+  dataExpiracao    DateTime
+  
+  // Responsáveis autorizados
+  responsaveis      String[]             // Nomes/Cargos autorizados
+  
+  // Conteúdo da auditoria
+  masterListPOPs   Json                 // POPs ativos e versões
+  certificados     Json                 // Certificados de treinamento válidos
+  cronogramaValidades Json             // Validades de documentos
+  
+  // Logs de acesso
+  acessos          Json?                // Histórico de acessos
+  
+  // Configurações de segurança
+  ipRestritos      String[]             // IPs permitidos (opcional)
+  horarioFuncionamento Json?            // Horários permitidos
+  
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  
+  @@index([tenantId])
+  @@index([qrCode])
+  @@index([status])
+  @@index([dataExpiracao])
+}
+
+// Relacionamentos adicionais nos modelos existentes
+model Pop {
+  // ... campos existentes ...
+  
+  // Novos relacionamentos para ISO e Riscos
+  naoConformidades NaoConformidade[]
+  verificacoesPraticas VerificacaoPratica[]
+  
+  // Campos adicionais para conformidade
+  isoCompliance    Json?                // Dados de conformidade ISO
+  riskAssessment   Json?                // Avaliação de riscos associada
+  lastAuditDate    DateTime?            // Última auditoria
+  nextAuditDue     DateTime?            // Próxima auditoria prevista
+}
+
+model Treinamento {
+  // ... campos existentes ...
+  
+  // Novos relacionamentos
+  naoConformidades NaoConformidade[]
+  verificacoesPraticas VerificacaoPratica[]
+  
+  // Campos adicionais
+  praticaObrigatoria Boolean            @default(false)
+  dataProximaVerificacao DateTime?
+  supervisorId     String?              // ID do supervisor responsável
+}
+
+model Tenant {
+  // ... campos existentes ...
+  
+  // Novos relacionamentos
+  riscos            Risco[]
+  naoConformidades  NaoConformidade[]
+  auditorias        AuditoriaRisco[]
+  normas            NormaRegulatoria[]
+  atualizacoes      AtualizacaoNorma[]
+  alertas           AlertaNorma[]
+  verificacoes      VerificacaoPratica[]
+  auditoriasFiscalizacao AuditoriaFiscalizacao[]
+  
+  // Campos adicionais para ISO
+  isoStatus         String?              // "Em implementação", "Certificado", "Não aplicável"
+  isoCertificado    Json?                // Dados do certificado ISO
+  isoAuditoria      Json?                // Próxima auditoria ISO
+}
