@@ -1,7 +1,6 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/visadocs_saas/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -92,6 +91,12 @@ model Tenant {
   fornecedores       Fornecedor[]
   documentos         Documento[]
   quizzes            Quiz[]
+
+  alertas AlertaNorma[]
+
+  verificacoesPraticas VerificacaoPratica[]
+
+  auditoriasFiscalizacao AuditoriaFiscalizacao[]
 }
 
 model User {
@@ -141,6 +146,12 @@ model Pop {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 
+  riscos Risco[]
+
+  naoConformidades NaoConformidade[]
+
+  verificacoesPraticas VerificacaoPratica[]
+
   @@unique([tenantId, codigo])
   @@index([tenantId])
   @@index([setor])
@@ -163,6 +174,8 @@ model Colaborador {
   tentativasQuiz TentativaQuiz[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+
+  verificacoesPraticas VerificacaoPratica[]
 
   @@unique([tenantId, cpfHash])
   @@index([tenantId])
@@ -188,6 +201,10 @@ model Treinamento {
   tentativasQuiz  TentativaQuiz[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+
+  naoConformidades NaoConformidade[]
+
+  verificacoesPraticas VerificacaoPratica[]
 
   @@index([tenantId])
   @@index([popId])
@@ -705,7 +722,7 @@ model AtualizacaoNorma {
   
   @@index([normaId])
   @@index([tipo])
-  @@index([dataDetecao])
+  @@index([dataDeteccao])
   @@index([status])
 }
 
@@ -856,51 +873,4 @@ model AuditoriaFiscalizacao {
   @@index([qrCode])
   @@index([status])
   @@index([dataExpiracao])
-}
-
-// Relacionamentos adicionais nos modelos existentes
-model Pop {
-  // ... campos existentes ...
-  
-  // Novos relacionamentos para ISO e Riscos
-  naoConformidades NaoConformidade[]
-  verificacoesPraticas VerificacaoPratica[]
-  
-  // Campos adicionais para conformidade
-  isoCompliance    Json?                // Dados de conformidade ISO
-  riskAssessment   Json?                // Avaliação de riscos associada
-  lastAuditDate    DateTime?            // Última auditoria
-  nextAuditDue     DateTime?            // Próxima auditoria prevista
-}
-
-model Treinamento {
-  // ... campos existentes ...
-  
-  // Novos relacionamentos
-  naoConformidades NaoConformidade[]
-  verificacoesPraticas VerificacaoPratica[]
-  
-  // Campos adicionais
-  praticaObrigatoria Boolean            @default(false)
-  dataProximaVerificacao DateTime?
-  supervisorId     String?              // ID do supervisor responsável
-}
-
-model Tenant {
-  // ... campos existentes ...
-  
-  // Novos relacionamentos
-  riscos            Risco[]
-  naoConformidades  NaoConformidade[]
-  auditorias        AuditoriaRisco[]
-  normas            NormaRegulatoria[]
-  atualizacoes      AtualizacaoNorma[]
-  alertas           AlertaNorma[]
-  verificacoes      VerificacaoPratica[]
-  auditoriasFiscalizacao AuditoriaFiscalizacao[]
-  
-  // Campos adicionais para ISO
-  isoStatus         String?              // "Em implementação", "Certificado", "Não aplicável"
-  isoCertificado    Json?                // Dados do certificado ISO
-  isoAuditoria      Json?                // Próxima auditoria ISO
 }
