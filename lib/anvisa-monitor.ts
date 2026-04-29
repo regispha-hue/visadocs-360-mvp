@@ -32,7 +32,7 @@ interface AtualizacaoDetectada {
 class ANVISAMonitor {
   private static instance: ANVISAMonitor;
   private isRunning = false;
-  private intervalo: NodeJS.Timeout | null = null;
+  private intervalo: any | null = null;
 
   private constructor() {}
 
@@ -80,7 +80,7 @@ class ANVISAMonitor {
   /**
    * Executa ciclo completo de monitoramento
    */
-  private async execututarMonitoramento(): Promise<void> {
+  private async executarMonitoramento(): Promise<void> {
     try {
       console.log("Executando ciclo de monitoramento ANVISA...");
       
