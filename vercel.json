@@ -1,6 +1,15 @@
 {
-  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "buildCommand": "prisma generate && next build",
   "outputDirectory": ".next",
   "cleanUrls": true,
   "trailingSlash": false
+}
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "NEXTAUTH_URL": "@nextauth_url",
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_key",
+    "OPENROUTER_API_KEY": "@openrouter_api_key"
+  }
 }
