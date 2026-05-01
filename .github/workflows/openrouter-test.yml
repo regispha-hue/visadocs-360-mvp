@@ -1,34 +1,132 @@
 name: Testar OpenRouter Connection
 
-on: 
+on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   workflow_dispatch:
 
 jobs:
   test-openrouter:
     runs-on: ubuntu-latest
+    timeout-minutes: 2  # ✅ Evita jobs travados
+
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v4  # ✅ v4 (v3 usa Node 16/20 deprecated)
+
       - name: Configurar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # ✅ v4
         with:
           node-version: '18'
-      
+
       - name: Testar conexão com OpenRouter API
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          echo "Testando conexão com OpenRouter..."
-          curl -X POST https://openrouter.ai/api/v1/chat/completions \
+          set -euo pipefail  # ✅ Fail-fast em qualquer erro
+
+          echo "🔄 Testando conexão com OpenRouter..."
+          echo ""
+
+          # ✅ Verificar se a key existe
+          if [ -z "$OPENROUTER_API_KEY" ]; then
+            echo "❌ OPENROUTER_API_KEY não está configurada nos secrets!"
+            exit 1
+          fi
+
+          echo "✅ OPENROUTER_API_KEY encontrada (${#OPENROUTER_API_KEY} chars)"
+          echo ""
+
+          # ✅ Salvar resposta para validação
+          RESPONSE=$(curl -sf -X POST https://openrouter.ai/api/v1/chat/completions \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "HTTP-Referer: https://github.com/regispha-hue/visadocs-360-mvp" \
+            -H "X-Title: VISADOCS CI/CD Test" \
+            -d '{
+              "model": "deepseek/deepseek-chat-v3-0324",
+              "messages": [{"role": "user", "content": "Responda APENAS: OK"}],
+              "max_tokens": 5,
+              "temperature": 0
+            }' 2>&1) || {
+              echo "❌ Falha na conexão com OpenRouter!"
+              echo "Resposta: $RESPONSE"
+              exit 1
+            }
+
+          echo "📡 Resposta recebida:"
+          echo "$RESPONSE" | head -c 500
+          echo ""
+          echo ""
+
+          # ✅ Validar que a resposta contém conteúdo válido
+          if echo "$RESPONSE" | grep -q '"choices"'; then
+            echo "✅ OpenRouter respondeu com sucesso!"
+          elif echo "$RESPONSE" | grep -q '"error"'; then
+            echo "❌ OpenRouter retornou erro:"
+            echo "$RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$RESPONSE"
+            exit 1
+          else
+            echo "⚠️ Resposta inesperada:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          # ✅ Extrair e mostrar modelo usado
+          MODEL_USED=$(echo "$RESPONSE" | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          print(data.get('model', 'unknown'))
+          " 2>/dev/null || echo "unknown")
+
+          echo ""
+          echo "📊 Resumo:"
+          echo "  Modelo: $MODEL_USED"
+          echo "  Status: ✅ Conexão verificada"
+          echo "  Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      # ✅ NOVO: Testar também o modelo secundário (Qwen)
+      - name: Testar modelo secundário (Qwen)
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          echo "🔄 Testando Qwen 72B..."
+
+          HTTP_CODE=$(curl -so /dev/null -w "%{http_code}" -X POST \
+            https://openrouter.ai/api/v1/chat/completions \
             -H "Authorization: Bearer $OPENROUTER_API_KEY" \
             -H "Content-Type: application/json" \
             -H "HTTP-Referer: https://github.com/regispha-hue/visadocs-360-mvp" \
             -d '{
-              "model": "openai/gpt-3.5-turbo",
-              "messages": [{"role": "user", "content": "Responda com: Conexão OpenRouter OK!"}]
-            }' \
-            -w "\nStatus: %{http_code}\n"
+              "model": "qwen/qwen-2.5-72b-instruct",
+              "messages": [{"role": "user", "content": "OK"}],
+              "max_tokens": 3,
+              "temperature": 0
+            }')
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Qwen 72B: HTTP $HTTP_CODE — OK"
+          else
+            echo "⚠️ Qwen 72B: HTTP $HTTP_CODE — verificar"
+            # Não falha o build, apenas avisa
+          fi
+
+      # ✅ NOVO: Verificar saldo/créditos
+      - name: Verificar créditos OpenRouter
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          echo "💳 Verificando créditos..."
+
+          CREDITS=$(curl -sf https://openrouter.ai/api/v1/auth/key \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" 2>&1) || {
+              echo "⚠️ Não foi possível verificar créditos (endpoint pode não existir)"
+              exit 0
+            }
+
+          echo "$CREDITS" | python3 -m json.tool 2>/dev/null || echo "$CREDITS"
