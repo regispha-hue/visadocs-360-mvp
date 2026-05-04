@@ -1,0 +1,240 @@
+---
+name: Nexoritia Evidence Report
+description: Workflow para geração de relatórios de evidência e audit trail. Prepara documentação para auditorias e compliance reviews.
+trigger:
+  - audit_request
+  - compliance_review
+  - monthly_report
+  - incident_investigation
+---
+
+# Workflow: Evidence Report
+
+## Propósito
+Gerar relatórios completos de evidências e audit trail para:
+- Auditorias regulatórias (ANVISA)
+- Revisões de compliance
+- Investigações de incidentes
+- Relatórios mensais de governança
+
+## Tipos de Relatório
+
+### 1. Audit Report
+**Escopo:** Eventos de auditoria em período
+**Público:** Auditores, reguladores
+**Período:** Sob demanda ou trimestral
+
+### 2. Compliance Report
+**Escopo:** Conformidade com políticas
+**Público:** Compliance officer, gestão
+**Período:** Mensal
+
+### 3. Incident Report
+**Escopo:** Investigação específica
+**Público:** Investigação, segurança
+**Período:** Sob demanda
+
+### 4. Governance Report
+**Escopo:** Métricas de governança
+**Público:** Executivos, conselho
+**Período:** Mensal
+
+## Passos
+
+### 1. Definir Escopo
+```
+□ Identificar tipo de relatório
+□ Definir período
+□ Identificar stakeholder
+□ Confirmar requisitos
+```
+
+### 2. Coletar Evidências
+```
+□ Extrair logs de auditoria
+□ Coletar evidências de validação
+□ Reunir documentos relevantes
+□ Verificar chain of custody
+```
+
+### 3. Verificar Integridade
+```
+□ Validar hash chain
+□ Confirmar imutabilidade
+□ Verificar timestamps
+□ Checar consistência
+```
+
+### 4. Analisar Dados
+```
+□ Identificar padrões
+□ Detectar anomalias
+□ Calcular métricas
+□ Gerar insights
+```
+
+### 5. Compilar Relatório
+```
+□ Estruturar conteúdo
+□ Incluir evidências
+□ Adicionar análises
+□ Formatar para audiência
+```
+
+### 6. Revisar e Aprovar
+```
+□ Revisão técnica
+□ Revisão de compliance
+□ Aprovação final
+□ Assinatura digital
+```
+
+### 7. Distribuir
+```
+□ Entregar a stakeholders
+□ Arquivar cópia
+□ Registrar distribuição
+□ Agendar follow-up
+```
+
+## Estrutura do Relatório
+
+### Executive Summary
+- Objetivo do relatório
+- Período coberto
+- Principais findings
+- Recomendações
+
+### Methodology
+- Fontes de dados
+- Critérios de seleção
+- Métodos de análise
+- Limitações
+
+### Findings
+- Eventos relevantes
+- Violações (se houver)
+- Tendências
+- Métricas
+
+### Evidence
+- Logs extraídos
+- Documentos
+- Hashes de integridade
+- Chain of custody
+
+### Conclusions
+- Avaliação geral
+- Riscos identificados
+- Oportunidades
+
+### Recommendations
+- Ações corretivas
+- Melhorias sugeridas
+- Prioridades
+
+### Appendices
+- Logs completos
+- Evidências brutas
+- Referências
+
+## Comandos
+
+```bash
+# Verificar cadeia de evidência
+node tools/nexoritia/hash-evidence-chain.mjs \
+  --verify \
+  --from="2025-01-01" \
+  --to="2025-01-31"
+
+# Extrair logs de período
+node tools/nexoritia/write-audit-event.mjs \
+  --report \
+  --period="2025-01" \
+  --type="audit" \
+  --output="audit-report.json"
+
+# Gerar relatório de compliance
+node tools/nexoritia/run-nexoritia-quality-gate.mjs \
+  --report \
+  --period="2025-01" \
+  --output="compliance-report.json"
+```
+
+## Métricas Incluídas
+
+### Volume
+- Total de eventos
+- Eventos por categoria
+- Eventos por severidade
+- Eventos por tenant
+
+### Qualidade
+- Pass rate de validações
+- Quality scores médios
+- Rejection rate
+- Rework rate
+
+### Compliance
+- Taxa de conformidade
+- Violações por política
+- Tempo de resolução
+- Escalonamentos
+
+### Performance
+- Tempo de processamento
+- Latência de validação
+- Throughput
+- Disponibilidade
+
+## Distribuição
+
+### Interno
+- Quality Management
+- Compliance Officer
+- Technical Leads
+- Executive Team
+
+### Externo (quando aplicável)
+- Auditores
+- Reguladores
+- Clientes (sob NDA)
+
+## Segurança
+
+### Classificação
+- INTERNAL: Uso interno
+- CONFIDENTIAL: Dados sensíveis
+- RESTRICTED: Informação regulada
+
+### Proteção
+- Criptografia em trânsito
+- Acesso controlado
+- Watermark (se externo)
+- Expiração (se temporário)
+
+## Retenção
+
+### Períodos
+- Relatório: 5 anos
+- Evidências brutas: 5 anos
+- Anexos: Conforme política
+
+### Formato
+- PDF/A para arquivamento
+- JSON para análise
+- Imutável após aprovação
+
+## Sucesso
+
+Relatório gerado e entregue:
+```
+✓ Dados coletados
+✓ Integridade verificada
+✓ Análise completa
+✓ Relatório compilado
+✓ Revisado e aprovado
+✓ Distribuído com segurança
+
+Status: REPORT DELIVERED 📊
+```

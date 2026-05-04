@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nexoritia Audit Event",
+  "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "actor",
+    "action",
+    "target",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "recorded",
+        "validated",
+        "blocked",
+        "failed"
+      ]
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}

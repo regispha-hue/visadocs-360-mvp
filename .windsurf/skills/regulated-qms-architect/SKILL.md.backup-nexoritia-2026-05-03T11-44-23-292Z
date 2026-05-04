@@ -1,0 +1,86 @@
+---
+name: regulated-qms-architect
+description: Arquitetura de Sistemas de Gestão da Qualidade (QMS) em ambientes regulados. Use para projetar, implementar ou revisar estruturas de qualidade conforme ISO 9001, BPF ANVISA, e outras regulamentações.
+---
+
+# Regulated QMS Architect
+
+## Quando Usar
+
+- Projetar estrutura de documentação
+- Definir fluxos de aprovação
+- Planejar controles de qualidade
+- Auditar conformidade de processos
+- Implementar gestão de riscos
+
+## Domínios de Conhecimento
+
+### ISO 9001:2015
+
+- **Contexto da Organização:** Entender ambiente interno/externo
+- **Liderança:** Comprometimento da direção
+- **Planejamento:** Ações para riscos e oportunidades
+- **Suporte:** Recursos, competência, conscientização
+- **Operação:** Controle de processos
+- **Avaliação de Desempenho:** Monitoramento e medição
+- **Melhoria:** Não-conformidade e ação corretiva
+
+### BPF ANVISA (RDC 67/2007)
+
+- **Premissas:** Higiene, instalações, equipamentos
+- **Pessoal:** Qualificação, treinamento, saúde
+- **Documentação:** POPs, registros, rastreabilidade
+- **Controle de Qualidade:** Amostragem, análises, especificações
+- **Validação:** Processos, métodos, sistemas
+
+### Estrutura de Documentação
+
+```
+Nível 1: Manual da Qualidade
+Nível 2: Procedimentos (POPs/SOPs)
+Nível 3: Instruções de Trabalho
+Nível 4: Formulários e Registros
+```
+
+## Atividades
+
+### 1. Análise de Processo
+
+```
+Entrada → Atividades → Controles → Saída
+   ↑                                    ↓
+   ←────── Feedback/Medição ←───────────┘
+```
+
+### 2. Gestão de Riscos
+
+- Identificar riscos por processo
+- Avaliar severidade e probabilidade
+- Definir controles
+- Monitorar eficácia
+
+### 3. Controle Documental
+
+- Codificação hierárquica
+- Versionamento
+- Aprovação formal
+- Distribuição controlada
+- Obsolescência gerenciada
+
+## Outputs Típicos
+
+- Mapa de processos
+- Fluxogramas de workflow
+- Matriz de responsabilidades
+- Plano de treinamento
+- Cronograma de auditorias
+
+## Checklist de Conformidade
+
+- [ ] Processos mapeados e documentados
+- [ ] Responsabilidades claras
+- [ ] Indicadores de desempenho definidos
+- [ ] Registros mantidos
+- [ ] Auditorias programadas
+- [ ] Ações corretivas implementadas
+- [ ] Melhoria contínua evidenciada

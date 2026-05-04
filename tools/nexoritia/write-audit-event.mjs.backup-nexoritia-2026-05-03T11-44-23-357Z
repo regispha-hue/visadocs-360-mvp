@@ -1,0 +1,318 @@
+#!/usr/bin/env node
+/**
+ * write-audit-event.mjs
+ * Registra eventos de auditoria no sistema Nexoritia
+ * Uso: node write-audit-event.mjs --type=<tipo> --actor=<ator> [opções]
+ */
+
+import { writeFileSync, appendFileSync, existsSync, mkdirSync } from 'fs';
+import { resolve, dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..', '..');
+
+/**
+ * Gera hash SHA-256
+ */
+function sha256(data) {
+  return createHash('sha256').update(data).digest('hex');
+}
+
+/**
+ * Carrega último hash da cadeia
+ */
+function getPreviousHash(logDir) {
+  const timestamp = new Date();
+  const yearMonth = `${timestamp.getFullYear()}-${String(timestamp.getMonth() + 1).padStart(2, '0')}`;
+  const day = String(timestamp.getDate()).padStart(2, '0');
+  const logFile = join(logDir, yearMonth, `${day}-events.jsonl`);
+  
+  if (!existsSync(logFile)) {
+    return '0'.repeat(64); // Genesis hash
+  }
+  
+  try {
+    const content = readFileSync(logFile, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    
+    if (lines.length === 0) {
+      return '0'.repeat(64);
+    }
+    
+    const lastEvent = JSON.parse(lines[lines.length - 1]);
+    return lastEvent.hash_chain?.current || '0'.repeat(64);
+  } catch (e) {
+    return '0'.repeat(64);
+  }
+}
+
+/**
+ * Cria evento de auditoria
+ */
+function createAuditEvent(params) {
+  const timestamp = new Date().toISOString();
+  const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Evento base
+  const event = {
+    id,
+    timestamp,
+    actor: {
+      type: params.actor?.split(':')[0] || 'AGENT',
+      id: params.actor || 'agent:unknown',
+      tenant_id: params.tenant || 'system'
+    },
+    action: {
+      type: params.type || 'UNKNOWN',
+      category: params.category || 'SYSTEM'
+    },
+    resource: {
+      type: params.resourceType || 'UNKNOWN',
+      id: params.resource || 'unknown'
+    },
+    result: {
+      status: params.result || 'SUCCESS',
+      details: params.details ? JSON.parse(params.details) : {}
+    },
+    context: {
+      request_id: params.requestId || id,
+      workflow_id: params.workflow || null
+    }
+  };
+  
+  // Adicionar IP e user agent se disponíveis
+  if (process.env.NEXORITIA_LOG_IP) {
+    event.context.ip = process.env.NEXORITIA_LOG_IP;
+  }
+  
+  return event;
+}
+
+/**
+ * Calcula hash chain
+ */
+function calculateHashChain(event, previousHash) {
+  const eventData = JSON.stringify(event);
+  const currentHash = sha256(eventData + previousHash);
+  
+  return {
+    current: currentHash,
+    previous: previousHash
+  };
+}
+
+/**
+ * Escreve evento no log
+ */
+function writeEvent(event, hashChain) {
+  const timestamp = new Date();
+  const yearMonth = `${timestamp.getFullYear()}-${String(timestamp.getMonth() + 1).padStart(2, '0')}`;
+  const day = String(timestamp.getDate()).padStart(2, '0');
+  
+  const logDir = join(PROJECT_ROOT, '.nexoritia', 'logs', 'audit-events');
+  const monthDir = join(logDir, yearMonth);
+  const logFile = join(monthDir, `${day}-events.jsonl`);
+  
+  // Criar diretórios se necessário
+  if (!existsSync(logDir)) {
+    mkdirSync(logDir, { recursive: true });
+  }
+  if (!existsSync(monthDir)) {
+    mkdirSync(monthDir, { recursive: true });
+  }
+  
+  // Adicionar hash chain ao evento
+  const eventWithHash = {
+    ...event,
+    hash_chain: hashChain
+  };
+  
+  // Escrever no arquivo (append)
+  const line = JSON.stringify(eventWithHash) + '\n';
+  appendFileSync(logFile, line);
+  
+  return {
+    file: logFile,
+    line: eventWithHash
+  };
+}
+
+/**
+ * Gera relatório de período
+ */
+function generateReport(period) {
+  const [year, month] = period.split('-');
+  const reportDir = join(PROJECT_ROOT, '.nexoritia', 'logs', 'audit-events', period);
+  
+  if (!existsSync(reportDir)) {
+    return {
+      success: false,
+      error: `Nenhum log encontrado para período ${period}`,
+      summary: null
+    };
+  }
+  
+  // Contar eventos
+  let totalEvents = 0;
+  const byType = {};
+  const byResult = {};
+  
+  try {
+    const files = readdirSync(reportDir).filter(f => f.endsWith('.jsonl'));
+    
+    for (const file of files) {
+      const content = readFileSync(join(reportDir, file), 'utf-8');
+      const lines = content.trim().split('\n').filter(Boolean);
+      
+      for (const line of lines) {
+        try {
+          const event = JSON.parse(line);
+          totalEvents++;
+          
+          const type = event.action?.type || 'UNKNOWN';
+          byType[type] = (byType[type] || 0) + 1;
+          
+          const result = event.result?.status || 'UNKNOWN';
+          byResult[result] = (byResult[result] || 0) + 1;
+        } catch (e) {
+          // Ignorar linhas inválidas
+        }
+      }
+    }
+  } catch (e) {
+    // Diretório pode estar vazio
+  }
+  
+  const report = {
+    period,
+    generated_at: new Date().toISOString(),
+    summary: {
+      total_events: totalEvents,
+      by_type: byType,
+      by_result: byResult
+    }
+  };
+  
+  return {
+    success: true,
+    report
+  };
+}
+
+/**
+ * CLI
+ */
+function main() {
+  const args = process.argv.slice(2);
+  const params = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const key = args[i].slice(2);
+      const value = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+      params[key] = value;
+      if (value !== true) i++;
+    }
+  }
+  
+  // Modo: relatório
+  if (params.report && params.period) {
+    const result = generateReport(params.period);
+    
+    if (result.success) {
+      console.log('\n=== Relatório de Auditoria ===\n');
+      console.log(`Período: ${result.report.period}`);
+      console.log(`Gerado: ${result.report.generated_at}`);
+      console.log(`\nTotal de eventos: ${result.report.summary.total_events}\n`);
+      
+      if (Object.keys(result.report.summary.by_type).length > 0) {
+        console.log('Por tipo:');
+        for (const [type, count] of Object.entries(result.report.summary.by_type)) {
+          console.log(`  ${type}: ${count}`);
+        }
+      }
+      
+      if (Object.keys(result.report.summary.by_result).length > 0) {
+        console.log('\nPor resultado:');
+        for (const [result, count] of Object.entries(result.report.summary.by_result)) {
+          console.log(`  ${result}: ${count}`);
+        }
+      }
+      
+      console.log();
+      
+      // Salvar relatório se solicitado
+      if (params.output) {
+        const outputPath = resolve(params.output);
+        writeFileSync(outputPath, JSON.stringify(result.report, null, 2));
+        console.log(`Relatório salvo em: ${outputPath}\n`);
+      }
+      
+      process.exit(0);
+    } else {
+      console.error(`\n❌ ${result.error}\n`);
+      process.exit(1);
+    }
+  }
+  
+  // Modo: escrever evento
+  if (params.type && params.actor) {
+    const event = createAuditEvent(params);
+    const logDir = join(PROJECT_ROOT, '.nexoritia', 'logs', 'audit-events');
+    const previousHash = getPreviousHash(logDir);
+    const hashChain = calculateHashChain(event, previousHash);
+    const result = writeEvent(event, hashChain);
+    
+    console.log('\n=== Evento de Auditoria Registrado ===\n');
+    console.log(`ID: ${event.id}`);
+    console.log(`Tipo: ${event.action.type}`);
+    console.log(`Ator: ${event.actor.id}`);
+    console.log(`Recurso: ${event.resource.id}`);
+    console.log(`Resultado: ${event.result.status}`);
+    console.log(`Hash: ${hashChain.current.substring(0, 16)}...`);
+    console.log(`Arquivo: ${result.file}`);
+    console.log(`Timestamp: ${event.timestamp}\n`);
+    
+    // Output JSON se solicitado
+    if (params.json) {
+      console.log(JSON.stringify(event, null, 2));
+    }
+    
+    process.exit(0);
+  }
+  
+  // Ajuda
+  console.log(`
+Uso: node write-audit-event.mjs [opções]
+
+Opções:
+  --type=<tipo>            Tipo do evento (ex: DOCUMENT_CREATION)
+  --actor=<ator>           Identificador do ator (ex: agent:cascade)
+  --resource=<id>          ID do recurso afetado
+  --resourceType=<tipo>    Tipo do recurso
+  --result=<status>        SUCCESS, FAILURE, BLOCKED
+  --details=<json>         Detalhes adicionais em JSON
+  --tenant=<id>            ID do tenant
+  --category=<cat>         Categoria (SOP, TRAINING, SYSTEM)
+  --workflow=<id>          ID do workflow
+  
+  --report                 Modo relatório
+  --period=YYYY-MM         Período do relatório
+  --output=<arquivo>       Salvar relatório em arquivo
+  
+  --json                   Output em JSON
+
+Exemplos:
+  node write-audit-event.mjs --type=FILE_MODIFICATION --actor=agent:cascade --resource=doc-123
+  node write-audit-event.mjs --report --period=2025-01 --output=report.json
+`);
+  
+  process.exit(0);
+}
+
+// Import necessário para relatório
+import { readdirSync, readFileSync } from 'fs';
+
+main();

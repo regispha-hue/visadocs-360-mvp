@@ -1,0 +1,156 @@
+---
+name: regulated-output-safety
+order: 10
+---
+
+# Regra 10: Regulated Output Safety
+
+## Propósito
+Garantir que todo output gerado (documento, código, dado) seja seguro, conforme e adequado para ambiente regulado.
+
+## Escopo
+Aplica-se a:
+- Documentos SOP/POP
+- Certificados
+- Código de produção
+- Configurações
+- Exportações de dados
+
+## Validações Obrigatórias
+
+### 1. Schema Validation (BLOQUEANTE)
+
+```
+ANTES de entregar:
+→ Validar contra schema JSON
+→ Zero erros permitidos
+```
+
+```bash
+node tools/nexoritia/validate-contracts.mjs \
+  --type=sop \
+  --file=output.json
+```
+
+### 2. Tenant Isolation (BLOQUEANTE)
+
+```
+ANTES de processar:
+→ Confirmar dados do tenant correto
+→ Nenhum vazamento cruzado
+```
+
+### 3. Sensitive Data Scan (BLOQUEANTE)
+
+```
+VERIFICAR ausência de:
+→ Senhas ou secrets
+→ Chaves de API
+→ Dados pessoais não necessários
+→ PHI (Protected Health Information)
+```
+
+### 4. Policy Compliance (BLOQUEANTE)
+
+```
+CONFERIR conformidade com:
+→ .nexoritia/policies/document-control.policy.yaml
+→ .nexoritia/policies/ai-generation.policy.yaml
+→ .nexoritia/policies/regulated-output.policy.yaml
+```
+
+## Classificação de Output
+
+### DOCUMENT (SOP/POP/Certificado)
+- **Critérios:** Schema, aprovação, versionamento
+- **Workflow:** sop-generation ou training-certification
+- **Aprovação:** 3 papéis (elaborar, revisar, aprovar)
+
+### CODE (Produção)
+- **Critérios:** Testes, segurança, documentação
+- **Workflow:** release-validation
+- **Aprovação:** Code review + QA
+
+### DATA (Exportações)
+- **Critérios:** Anonimização, LGPD, rastreabilidade
+- **Validação:** DPO review se contiver PII
+
+### CONFIG (Variáveis/Flags)
+- **Critérios:** Nunca expor secrets
+- **Validação:** Security scan
+
+## Quality Gates
+
+### Mínimos para Aprovação
+
+| Tipo | Score Mínimo | Bloqueante |
+|------|--------------|------------|
+| Document | 80% | Schema errors |
+| Code | 70% | Security issues |
+| Data | 90% | Privacy violations |
+| Config | 100% | Secret exposure |
+
+### Checks Automáticos
+
+- [ ] Schema válido
+- [ ] Sem dados sensíveis
+- [ ] Tenant isolado
+- [ ] Políticas respeitadas
+- [ ] Evidência gerada
+
+## Sanitização
+
+### Entrada
+- Sanitizar inputs de usuário
+- Validar tipos e formatos
+- Rejeitar padrões perigosos
+
+### Saída
+- Escapar caracteres especiais
+- Codificar corretamente
+- Validar estrutura
+
+## Erros e Exceções
+
+### Schema Validation Failed
+**Ação:** Bloquear, retornar erros específicos, solicitar correção
+
+### Sensitive Data Detected
+**Ação:** Bloquear imediatamente, alertar segurança, preservar evidência
+
+### Policy Violation
+**Ação:** Bloquear, identificar política violada, documentar
+
+### Quality Below Threshold
+**Ação:** Bloquear se for documento regulado, permitir com warning para não-regulado
+
+## Evidência
+
+Cada validação gera:
+```json
+{
+  "event": "OUTPUT_VALIDATION",
+  "output_type": "DOCUMENT",
+  "validation_results": {
+    "schema": "PASSED|FAILED",
+    "safety": "PASSED|FAILED",
+    "policy": "PASSED|FAILED",
+    "quality": "SCORE"
+  },
+  "timestamp": "ISO8601"
+}
+```
+
+## Emergências
+
+### Hotfix Necessário
+1. Documentar necessidade de emergência
+2. Aprovação mínima (1 pessoa)
+3. Implementação imediata
+4. Revisão pós-facto (24h)
+
+### Rollback
+- Trigger: Critical error, regulatory noncompliance
+- Tempo máximo de decisão: 5 minutos
+- Método: Automated
+- Notificação: Immediate

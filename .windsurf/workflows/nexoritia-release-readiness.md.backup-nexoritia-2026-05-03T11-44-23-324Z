@@ -1,0 +1,259 @@
+---
+name: Nexoritia Release Readiness
+description: Workflow para validação de readiness para deploy em produção. Garante que todas as verificações de qualidade e conformidade foram concluídas.
+trigger:
+  - pre_deploy
+  - release_candidate
+  - production_push
+---
+
+# Workflow: Release Readiness
+
+## Propósito
+Validar que o sistema está pronto para deploy em produção, garantindo:
+1. Qualidade técnica
+2. Conformidade regulatória
+3. Evidências completas
+4. Rollback plan
+
+## Trigger
+- Pull request para main/master
+- Tag de release criada
+- Deploy manual solicitado
+
+## Checklist de Readiness
+
+### 1. Código
+- [ ] Testes automatizados passando
+- [ ] Cobertura mínima: 70%
+- [ ] Sem erros de lint
+- [ ] Sem vulnerabilidades críticas
+- [ ] Code review aprovado
+
+### 2. Documentação
+- [ ] CHANGELOG atualizado
+- [ ] Documentação técnica atualizada
+- [ ] README revisado
+- [ ] Comentários de código atualizados
+
+### 3. Conformidade
+- [ ] Schemas validados
+- [ ] Políticas conferidas
+- [ ] Audit trail completo
+- [ ] Nenhum bloqueio ativo
+
+### 4. Infraestrutura
+- [ ] Migrations testadas
+- [ ] Variáveis de ambiente configuradas
+- [ ] Rollback script pronto
+- [ ] Monitoramento configurado
+
+### 5. Testes
+- [ ] Unit tests passando
+- [ ] Integration tests passando
+- [ ] E2E tests passando (se aplicável)
+- [ ] Performance tests aceitáveis
+
+## Passos
+
+### 1. Pre-Flight
+```
+□ Verificar branch correta
+□ Confirmar versão
+□ Validar checklist completo
+□ Inicializar audit
+```
+
+### 2. Automated Tests
+```
+□ Executar test suite
+□ Verificar cobertura
+□ Checar flakiness
+□ Reportar falhas
+```
+
+### 3. Schema Validation
+```
+□ Validar contratos JSON
+□ Verificar schemas Prisma
+□ Confirmar migrations
+```
+
+### 4. Policy Compliance
+```
+□ Checar políticas ativas
+□ Verificar compliance
+□ Identificar violations
+```
+
+### 5. Security Scan
+```
+□ SAST scan
+□ Dependency check
+□ Secret scan
+□ Vulnerability assessment
+```
+
+### 6. Quality Gate
+```
+□ Calcular métricas
+□ Verificar thresholds
+□ Aprovar ou rejeitar
+```
+
+### 7. Evidence Collection
+```
+□ Coletar logs
+□ Gerar reports
+□ Atualizar chain
+□ Arquivar evidências
+```
+
+### 8. Go/No-Go Decision
+```
+□ Consolidar resultados
+□ Decisão final
+□ Notificar stakeholders
+□ Documentar decisão
+```
+
+## Comandos
+
+```bash
+# Quality gate completo
+node tools/nexoritia/run-nexoritia-quality-gate.mjs \
+  --type=release \
+  --branch=main
+
+# Validar contratos
+node tools/nexoritia/validate-contracts.mjs
+
+# Verificar evidências
+node tools/nexoritia/hash-evidence-chain.mjs \
+  --verify \
+  --from="last_release"
+
+# Gerar relatório
+node tools/nexoritia/write-audit-event.mjs \
+  --type="RELEASE_VALIDATION" \
+  --actor="agent:cascade" \
+  --result="SUCCESS" \
+  --details='{"version": "1.2.0", "checks": "all_passed"}'
+```
+
+## Quality Gates
+
+### Gate 1: Technical Quality
+```
+Tests: PASS
+Coverage: > 70%
+Lint: 0 errors
+Security: 0 critical
+```
+
+### Gate 2: Compliance
+```
+Schemas: VALID
+Policies: COMPLIANT
+Audit: COMPLETE
+Blockers: NONE
+```
+
+### Gate 3: Readiness
+```
+Docs: UPDATED
+Infra: READY
+Rollback: TESTED
+Team: APPROVED
+```
+
+### Final Gate: Go/No-Go
+```
+GO: All gates passed
+CONDITIONAL: Minor issues with mitigation
+NO-GO: Any blocking issue
+```
+
+## Resultados
+
+### GO
+```
+✓ Technical quality: PASSED
+✓ Compliance: PASSED
+✓ Readiness: PASSED
+✓ Evidence: COMPLETE
+
+Status: APPROVED FOR DEPLOY
+```
+
+### CONDITIONAL GO
+```
+✓ Technical quality: PASSED
+⚠ Compliance: WARNING (minor)
+✓ Readiness: PASSED
+✓ Evidence: COMPLETE
+
+Status: APPROVED WITH CONDITIONS
+Actions: Mitigate warnings post-deploy
+```
+
+### NO-GO
+```
+❌ Technical quality: FAILED
+❌ Compliance: FAILED
+⚠ Readiness: WARNING
+
+Status: REJECTED
+Actions: Fix issues and re-validate
+```
+
+## Rollback Plan
+
+### Critérios para Rollback
+- Critical error in production
+- Security incident
+- Regulatory noncompliance
+- Performance degradation
+
+### Rollback Procedure
+```
+1. Decision: < 5 minutes
+2. Execution: Automated
+3. Verification: Health checks
+4. Communication: Immediate
+5. Investigation: Post-rollback
+```
+
+## Pós-Deploy
+
+### Monitoramento (24h)
+- Error rates
+- Performance metrics
+- User feedback
+- System health
+
+### Validação
+- Smoke tests
+- Critical flows
+- Data integrity
+- Security checks
+
+### Documentação
+- Deploy log
+- Issues found
+- Resolutions
+- Lessons learned
+
+## Sucesso
+
+Release validado e pronto:
+```
+✓ Código testado e aprovado
+✓ Documentação atualizada
+✓ Conformidade verificada
+✓ Evidências completas
+✓ Rollback plan pronto
+✓ Team aprovou
+
+Status: CLEARED FOR TAKEOFF 🚀
+```

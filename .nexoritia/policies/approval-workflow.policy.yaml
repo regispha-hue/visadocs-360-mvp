@@ -1,0 +1,11 @@
+name: approval-workflow
+version: 0.1.0
+states:
+  - draft
+  - review
+  - approved
+  - retired
+rules:
+  - id: approval-requires-review
+    severity: high
+    statement: A document cannot move from draft to approved without review.

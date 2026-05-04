@@ -1,0 +1,242 @@
+# Policy: Regulated Output
+# Version: 1.0.0
+# Scope: All outputs in regulated environments (documents, code, data)
+
+policy:
+  name: regulated-output
+  description: Requisitos para qualquer output em ambiente regulado
+  version: "1.0.0"
+  effective_date: "2025-01-15"
+
+  output_types:
+    DOCUMENT:
+      examples: ["SOP", "POP", "Manual", "Relatório"]
+      criticality: HIGH
+    
+    CODE:
+      examples: ["Produção", "Scripts", "Configurações"]
+      criticality: HIGH
+    
+    DATA:
+      examples: ["Exportações", "Relatórios", "Integrações"]
+      criticality: MEDIUM
+    
+    CONFIGURATION:
+      examples: ["Variáveis", "Feature flags", "Permissões"]
+      criticality: CRITICAL
+
+  universal_requirements:
+    identification:
+      - "Unique identifier"
+      - "Version number"
+      - "Creation timestamp"
+      - "Author identification"
+      - "Tenant isolation"
+    
+    traceability:
+      - "Source input reference"
+      - "Generation method"
+      - "Tools/versions used"
+      - "Validation evidence"
+    
+    integrity:
+      - "Cryptographic hash"
+      - "Chain of custody"
+      - "No post-approval modifications"
+    
+    quality:
+      - "Meet acceptance criteria"
+      - "Pass validation gates"
+      - "Comply with standards"
+
+  pre_output_checks:
+    mandatory:
+      - id: PRE-001
+        name: "Schema Validation"
+        description: "Output must conform to defined schema"
+        blocking: true
+      
+      - id: PRE-002
+        name: "Tenant Isolation Check"
+        description: "No data leakage between tenants"
+        blocking: true
+      
+      - id: PRE-003
+        name: "Sensitive Data Scan"
+        description: "No exposed secrets or PII"
+        blocking: true
+      
+      - id: PRE-004
+        name: "Format Compliance"
+        description: "Follows required format specification"
+        blocking: true
+
+    recommended:
+      - id: PRE-005
+        name: "Readability Score"
+        description: "Appropriate for target audience"
+        threshold: 60
+      
+      - id: PRE-006
+        name: "Completeness Check"
+        description: "All required fields present"
+      
+      - id: PRE-007
+        name: "Consistency Check"
+        description: "No contradictions or conflicts"
+
+  approval_matrix:
+    DOCUMENT:
+      levels:
+        - "Elaborador: Technical content"
+        - "Revisor: Compliance and accuracy"
+        - "Aprovador: Authority to implement"
+      
+    CODE:
+      levels:
+        - "Developer: Implementation"
+        - "Reviewer: Code quality and security"
+        - "Tech Lead: Architecture alignment"
+        - "QA: Testing completeness"
+      
+    DATA_EXPORT:
+      levels:
+        - "Data Owner: Content approval"
+        - "DPO: Privacy compliance"
+        - "Security: Data protection"
+
+  distribution_controls:
+    internal:
+      approved_roles: ["employee", "contractor"]
+      authentication: required
+      logging: true
+    
+    external:
+      approved_roles: ["auditor", "regulator", "partner"]
+      additional_approval: true
+      nda_required: true
+      watermark: true
+    
+    public:
+      approved: false
+      exception_process: "executive_approval"
+
+  modification_restrictions:
+    post_approval:
+      allowed: false
+      exception: "formal_revision_process"
+    
+    pre_approval:
+      allowed: true
+      tracking: "version_history"
+      rollback: "available"
+    
+    emergency:
+      allowed: true
+      authorization: "quality_manager"
+      retrospective_approval: "24h"
+      full_documentation: required
+
+  security_classifications:
+    PUBLIC:
+      description: "Information intended for public disclosure"
+      controls: minimal
+    
+    INTERNAL:
+      description: "Internal use only"
+      controls: authentication
+    
+    CONFIDENTIAL:
+      description: "Sensitive business information"
+      controls: ["authentication", "authorization", "logging"]
+    
+    RESTRICTED:
+      description: "Highly sensitive, regulated data"
+      controls: ["multi_factor_auth", "need_to_know", "full_audit"]
+    
+    CRITICAL:
+      description: "Safety-critical, patient data"
+      controls: ["air_gap", "witness", "dual_control"]
+
+  error_handling:
+    validation_failure:
+      action: "BLOCK_OUTPUT"
+      notification: ["author", "quality_team"]
+      log: true
+    
+    security_violation:
+      action: "BLOCK_AND_ALERT"
+      notification: ["security_team", "compliance_officer"]
+      investigation: true
+    
+    quality_issue:
+      action: "FLAG_FOR_REVIEW"
+      notification: ["author", "reviewer"]
+      deadline: "24h"
+
+  continuous_monitoring:
+    metrics:
+      - "Output volume by type"
+      - "Validation pass rate"
+      - "Approval cycle time"
+      - "Error and rejection rate"
+      - "Security incidents"
+    
+    alerts:
+      - "Unusual output volume"
+      - "Repeated validation failures"
+      - "Security violations"
+      - "Approval bottlenecks"
+
+  compliance_mapping:
+    RDC_67_2007:
+      requirements: ["traceability", "integrity", "approval"]
+      evidence: "audit_trail"
+    
+    LGPD:
+      requirements: ["data_minimization", "purpose_limitation"]
+      evidence: "privacy_impact_assessment"
+    
+    ISO_9001:
+      requirements: ["document_control", "quality_assurance"]
+      evidence: "quality_records"
+
+  emergency_procedures:
+    immediate_recall:
+      trigger: ["safety_issue", "compliance_violation", "data_breach"]
+      steps:
+        - "Identify affected outputs"
+        - "Notify recipients"
+        - "Recall and replace"
+        - "Document incident"
+        - "Root cause analysis"
+      
+    embargo:
+      trigger: ["regulatory_inquiry", "litigation"]
+      steps:
+        - "Suspend distribution"
+        - "Preserve evidence"
+        - "Legal review"
+        - "Controlled release"
+
+  training_requirements:
+    roles:
+      - AUTHOR:
+          training: ["output_policy", "technical_standards"]
+          frequency: "annual"
+      
+      - REVIEWER:
+          training: ["review_procedures", "compliance_requirements"]
+          frequency: "semi_annual"
+      
+      - APPROVER:
+          training: ["approval_authority", "risk_assessment"]
+          frequency: "annual"
+
+  documentation:
+    every_output_must_have:
+      - "Generation context"
+      - "Validation results"
+      - "Approval chain"
+      - "Distribution list"
+      - "Known limitations"

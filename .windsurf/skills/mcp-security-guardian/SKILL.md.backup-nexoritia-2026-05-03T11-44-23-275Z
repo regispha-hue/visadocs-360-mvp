@@ -1,0 +1,158 @@
+---
+name: mcp-security-guardian
+description: Segurança e governança de conexões MCP (Model Context Protocol). Use para validar, monitorar e proteger integrações com serviços externos via protocolo MCP.
+---
+
+# MCP Security Guardian
+
+## Quando Usar
+
+- Configurar nova conexão MCP
+- Validar permissões de ferramenta
+- Auditar chamadas MCP
+- Investigar incidentes de segurança
+- Implementar controles de acesso
+
+## Princípios de Segurança MCP
+
+### 1. Fail-Closed por Padrão
+```
+Sem permissão explícita = Acesso negado
+```
+
+### 2. Princípio do Menor Privilégio
+```
+Ferramenta só recebe permissões estritamente necessárias
+```
+
+### 3. Sanitização de Output
+```
+Sempre inspecionar resposta antes de processar
+```
+
+### 4. Logging Completo
+```
+Toda chamada registrada com contexto
+```
+
+## Configuração de Ferramenta
+
+```json
+{
+  "tool": "database-query",
+  "permissions": {
+    "read": ["colaboradores", "treinamentos"],
+    "write": [],
+    "delete": false
+  },
+  "rate_limit": "100/min",
+  "timeout": "30s",
+  "logging": "full",
+  "tenant_isolation": true
+}
+```
+
+## Checklist de Segurança
+
+### Antes de Habilitar
+
+- [ ] Ferramenta é necessária?
+- [ ] Permissões são mínimas?
+- [ ] Sanitização está implementada?
+- [ ] Rate limiting configurado?
+- [ ] Logging habilitado?
+- [ ] Tenant isolation verificado?
+- [ ] Timeout apropriado?
+
+### Depois de Habilitar
+
+- [ ] Testar com dados de teste
+- [ ] Verificar logs
+- [ ] Confirmar isolamento
+- [ ] Documentar uso esperado
+
+## Padrões de Sanitização
+
+### Entrada
+```javascript
+// Remover caracteres especiais perigosos
+function sanitizeInput(input) {
+  return input.replace(/[<>\"'%;()&+]/g, '');
+}
+```
+
+### Saída
+```javascript
+// Verificar se não contém dados sensíveis
+function validateOutput(output) {
+  const forbidden = ['password', 'secret', 'key', 'token'];
+  return !forbidden.some(f => output.toLowerCase().includes(f));
+}
+```
+
+## Incident Response
+
+### Detecção
+- Anomalia nos logs
+- Rate limit excedido
+- Output inesperado
+- Erro de permissão
+
+### Contenção
+- Desabilitar ferramenta imediatamente
+- Isolar chamadas
+- Preservar logs
+
+### Investigação
+- Analisar padrão de uso
+- Identificar causa raiz
+- Avaliar impacto
+
+### Recuperação
+- Corrigir vulnerabilidade
+- Re-habilitar com controles
+- Monitorar intensivamente
+
+## Evidência de Auditoria
+
+```json
+{
+  "event": "MCP_CALL",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "tool": "database-query",
+  "actor": "agent:cascade",
+  "tenant": "farmacia-abc",
+  "input_hash": "sha256:abc123...",
+  "output_hash": "sha256:def456...",
+  "duration_ms": 150,
+  "result": "SUCCESS",
+  "sanitization_applied": true
+}
+```
+
+## Controles Implementados
+
+### Rate Limiting
+```yaml
+rate_limits:
+  per_minute: 100
+  per_hour: 1000
+  burst: 10
+```
+
+### Timeout
+```yaml
+timeouts:
+  default: 30s
+  database: 60s
+  external_api: 30s
+  generation: 120s
+```
+
+### Isolamento
+```yaml
+tenant_isolation:
+  enforce: true
+  validate_on_each_call: true
+  error_on_leak: true
+```

@@ -1,0 +1,193 @@
+---
+name: authorization-guardian
+description: Gestão de autorização e permissões em sistemas multi-tenant regulados. Use para validar acessos, verificar roles e garantir isolamento entre tenants.
+---
+
+# Authorization Guardian
+
+## Quando Usar
+
+- Validar permissão de usuário
+- Verificar acesso a recurso
+- Implementar controle de acesso
+- Auditar tentativas de acesso
+- Configurar RBAC
+
+## Modelo de Autorização
+
+### RBAC (Role-Based Access Control)
+
+```
+Usuário → Role → Permissões → Recursos
+```
+
+### Roles no Sistema
+
+| Role | Descrição | Permissões |
+|------|-----------|------------|
+| SUPER_ADMIN | Administrador global | Todas (cuidado!) |
+| ADMIN_FARMACIA | Admin do tenant | CRUD no tenant |
+| RT | Responsável Técnico | Aprovar documentos, ver relatórios |
+| ANALISTA_CQ | Analista de Qualidade | Criar/revisar SOPs |
+| OPERADOR | Operador de produção | Ver SOPs, registrar atividades |
+
+### Permissões Granulares
+
+```yaml
+permissions:
+  sop:
+    - read
+    - create
+    - update
+    - delete
+    - approve
+  
+  treinamento:
+    - read
+    - create
+    - complete
+    - certify
+  
+  colaborador:
+    - read
+    - create
+    - update
+    - deactivate
+```
+
+## Verificação de Acesso
+
+### Lógica de Autorização
+
+```javascript
+// Pseudo-código
+function authorize(user, action, resource) {
+  // 1. Verificar se usuário está ativo
+  if (!user.active) return DENY;
+  
+  // 2. Verificar tenant isolation
+  if (user.tenantId !== resource.tenantId) return DENY;
+  
+  // 3. Verificar role tem permissão
+  if (!user.role.permissions.includes(action)) return DENY;
+  
+  // 4. Verificar condições específicas
+  if (resource.status === 'APROVADO' && action === 'delete') {
+    return DENY; // Não pode deletar documento aprovado
+  }
+  
+  return ALLOW;
+}
+```
+
+## Isolamento de Tenant
+
+### Princípio
+> Cada tenant vê apenas seus próprios dados
+
+### Implementação
+
+```sql
+-- Todas as queries incluem tenant_id
+SELECT * FROM sops 
+WHERE tenant_id = :current_tenant_id
+```
+
+### Validações
+
+- [ ] Query inclui filtro de tenant
+- [ ] API valida tenant no token
+- [ ] Cache segregado por tenant
+- [ ] Uploads em pastas separadas
+- [ ] Logs identificam tenant
+
+## Fluxo de Autorização
+
+```
+Requisição Entra
+    ↓
+[Autenticação] ← Token válido?
+    ↓ SIM
+[Identificar Tenant] ← Do token
+    ↓
+[Identificar Role] ← Do usuário
+    ↓
+[Verificar Permissão] ← Para ação
+    ↓ SIM
+[Verificar Isolamento] ← Tenant do recurso
+    ↓ SIM
+[Acesso Permitido]
+    ↓
+[Log de Acesso]
+```
+
+## Auditoria
+
+### Eventos Registrados
+
+- Tentativa de acesso negada
+- Acesso a recurso sensível
+- Alteração de permissões
+- Escalonamento de privilégio
+
+### Evidência
+
+```json
+{
+  "event": "ACCESS_CHECK",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "user_id": "uuid",
+  "user_role": "ANALISTA_CQ",
+  "tenant_id": "tenant-abc",
+  "resource": "sop-123",
+  "action": "update",
+  "result": "ALLOWED",
+  "reason": "role_has_permission"
+}
+```
+
+## Segregação de Funções
+
+### Regras Críticas
+
+1. **Elaboração vs Aprovação**
+   - Quem elabora não aprova
+   - Mínimo 2 pessoas no processo
+
+2. **Desenvolvimento vs Produção**
+   - Acesso dev ≠ acesso prod
+   - Deploy requer aprovação
+
+3. **Operação vs Auditoria**
+   - Auditor não opera
+   - Operador não audita
+
+### Implementação
+
+```yaml
+segregation_rules:
+  document_approval:
+    elaborator_cannot_approve: true
+    min_people: 3
+    roles: [ELABORADOR, REVISOR, APROVADOR]
+  
+  code_deployment:
+    developer_cannot_deploy_alone: true
+    requires_qa: true
+    requires_approval: true
+```
+
+## Tratamento de Violação
+
+### Detecção
+- Acesso negado repetido
+- Tentativa de bypass
+- Acesso fora do horário
+- Volume anômalo
+
+### Resposta
+1. Bloquear acesso
+2. Registrar incidente
+3. Notificar segurança
+4. Investigar
+5. Documentar lições

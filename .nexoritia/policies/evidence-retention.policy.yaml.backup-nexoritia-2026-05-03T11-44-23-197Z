@@ -1,0 +1,186 @@
+# Policy: Evidence Retention
+# Version: 1.0.0
+# Scope: Retention and archival of audit evidence
+
+policy:
+  name: evidence-retention
+  description: Política de retenção de evidências para auditorias
+  version: "1.0.0"
+  effective_date: "2025-01-15"
+  regulatory_basis:
+    - "RDC 222/2018"
+    - "LGPD - Lei 13.709/2018"
+    - "ISO 9001:2015 - Controle de Documentos"
+
+  retention_periods:
+    audit_trail:
+      duration: "permanent"
+      description: "Logs de auditoria imutáveis"
+      format: "hash_chain"
+      backup: "geographic_redundancy"
+    
+    active_documents:
+      duration: "current_version_only"
+      description: "Somente versão vigente"
+      archive_on_supersede: true
+    
+    obsolete_documents:
+      duration: "5_years"
+      description: "Após obsolescência"
+      trigger: "document_status_change"
+    
+    training_records:
+      duration: "5_years_after_employee_departure"
+      description: "Registros de treinamento"
+      minimum: "3_years"
+    
+    certificates:
+      duration: "permanent"
+      description: "Certificados de qualificação"
+      blockchain_anchor: true
+    
+    validation_reports:
+      duration: "10_years"
+      description: "Relatórios de validação"
+      archive: true
+    
+    system_logs:
+      duration: "2_years"
+      description: "Logs operacionais"
+      rotation: "monthly"
+    
+    user_access_logs:
+      duration: "1_year"
+      description: "Logs de acesso"
+      lgpd_anonymization: "after_retention"
+    
+    backup_logs:
+      duration: "3_months"
+      description: "Logs de backup"
+      media_rotation: true
+
+  storage_requirements:
+    immutability:
+      active_records: "append_only"
+      archived_records: "read_only"
+      hash_verification: "monthly"
+    
+    accessibility:
+      active: "immediate"
+      archived: "24_hours"
+      audit_request: "4_hours"
+    
+    security:
+      encryption: "at_rest_and_in_transit"
+      access_control: "role_based"
+      audit_access: "logged"
+    
+    integrity:
+      checksums: "sha256"
+      verification: "daily"
+      alert_on_mismatch: true
+
+  archival_process:
+    trigger:
+      - "End of retention period"
+      - "Document obsolescence"
+      - "System migration"
+      - "Explicit request"
+    
+    steps:
+      - "Verify retention period elapsed"
+      - "Create archive package"
+      - "Generate integrity manifest"
+      - "Transfer to archive storage"
+      - "Verify transfer integrity"
+      - "Update retention registry"
+      - "Notify stakeholders"
+    
+    format:
+      container: "encrypted_tar"
+      manifest: "json"
+      index: "searchable"
+
+  destruction_process:
+    allowed_for:
+      - "Expired retention period"
+      - "LGPD deletion request"
+      - "Explicit authorization"
+    
+    prohibited_for:
+      - "Active audit subjects"
+      - "Legal hold"
+      - "Pending litigation"
+    
+    method:
+      electronic: "cryptographic_erasure"
+      physical: "secure_destruction"
+      certificate: true
+    
+    documentation:
+      destruction_log: true
+      authorization: required
+      witness: "for_classified_data"
+
+  legal_hold:
+    trigger:
+      - "Litigation notice"
+      - "Regulatory investigation"
+      - "Audit in progress"
+    
+    action:
+      - "Suspend destruction"
+      - "Preserve all relevant records"
+      - "Notify stakeholders"
+      - "Document scope"
+    
+    release:
+      - "Written authorization"
+      - "Case closure"
+      - "Statute of limitations"
+
+  lgpd_compliance:
+    data_subject_rights:
+      access: "within_15_days"
+      correction: "immediate"
+      deletion: "subject_to_retention"
+      portability: "upon_request"
+    
+    anonymization:
+      when: "after_retention_or_on_request"
+      method: "irreversible"
+      exceptions: ["legal_hold", "audit_trail"]
+
+  quality_assurance:
+    periodic_reviews:
+      frequency: "annual"
+      scope: "retention_compliance"
+      report: to_quality_council
+    
+    spot_checks:
+      frequency: "quarterly"
+      sample_size: "5%"
+      focus: "integrity_and_accessibility"
+
+  disaster_recovery:
+    backup:
+      frequency: "daily"
+      retention: "30_days"
+      offsite: true
+    
+    restore_testing:
+      frequency: "semi_annual"
+      scope: "critical_records"
+      rto: "4_hours"
+      rpo: "24_hours"
+
+  metrics:
+    track:
+      - "Storage utilization"
+      - "Archive retrieval time"
+      - "Integrity check results"
+      - "Compliance rate"
+    
+    report:
+      frequency: "quarterly"
+      audience: "quality_management"

@@ -1,0 +1,12 @@
+name: ai-generation
+version: 0.1.0
+rules:
+  - id: no-final-regulated-output-without-review
+    severity: critical
+    statement: AI-generated regulated content must not be marked final without human review.
+  - id: source-risk-disclosure
+    severity: high
+    statement: Outputs must disclose uncertainty or validation gaps.
+  - id: no-fake-validation
+    severity: critical
+    statement: Never claim validation occurred unless evidence exists.

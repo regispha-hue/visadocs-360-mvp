@@ -1,0 +1,141 @@
+---
+name: ai-output-validator
+description: Validação de outputs gerados por inteligência artificial em ambientes regulados. Use para verificar qualidade, conformidade e segurança de conteúdo gerado por IA antes de aprovação.
+---
+
+# AI Output Validator
+
+## Quando Usar
+
+- Validar documento gerado por IA
+- Verificar conformidade de código
+- Avaliar qualidade de resposta
+- Checar segurança de output
+- Preparar para aprovação humana
+
+## Dimensões de Validação
+
+### 1. Schema Compliance
+```
+Output → Validar contra Schema → ✓ ou ✗
+```
+
+### 2. Policy Compliance
+```
+Output → Checar Políticas → ✓ ou ✗
+```
+
+### 3. Quality Metrics
+- Completude (todos os campos?)
+- Clareza (fácil entender?)
+- Precisão (tecnicamente correto?)
+- Consistência (sem contradições?)
+
+### 4. Safety Checks
+- Sem dados sensíveis expostos
+- Sem instruções perigosas
+- Sem informações médicas não verificadas
+- Sem vazamento de contexto
+
+## Quality Gates
+
+### Documentos (SOPs/POPs)
+
+| Check | Threshold | Bloqueante |
+|-------|-----------|------------|
+| Schema | 0 erros | Sim |
+| Completude | 100% | Sim |
+| Clareza | Score > 60 | Não |
+| Referências | Presentes | Sim |
+| Riscos | Identificados | Sim |
+
+### Código
+
+| Check | Threshold | Bloqueante |
+|-------|-----------|------------|
+| Sintaxe | 0 erros | Sim |
+| Testes | > 70% | Não |
+| Segurança | 0 críticas | Sim |
+| Documentação | Presente | Não |
+
+## Processo de Validação
+
+```
+┌─────────────────────────────────────┐
+│  Output Gerado pela IA              │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│  1. Schema Validation               │
+│     → Validar estrutura             │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│  2. Policy Check                    │
+│     → Verificar políticas           │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│  3. Quality Assessment              │
+│     → Calcular métricas             │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│  4. Safety Scan                     │
+│     → Verificar segurança           │
+└─────────────────────────────────────┘
+              ↓
+        ┌─────────┐
+        │ PASSOU? │
+        └────┬────┘
+      Sim /    \ Não
+        /      \
+    [APROVAR]  [REJEITAR]
+    com notas  com feedback
+```
+
+## Ferramentas
+
+```bash
+# Inspecionar output
+node tools/nexoritia/inspect-regulated-output.mjs \
+  --file=documento.json \
+  --schema=sop.schema.json \
+  --policies=all
+
+# Quality gate completo
+node tools/nexoritia/run-nexoritia-quality-gate.mjs \
+  --type=document \
+  --input=sop-gerado.yaml
+```
+
+## Evidência
+
+Cada validação deve gerar:
+- Timestamp
+- Resultado (pass/fail)
+- Métricas calculadas
+- Violations encontradas
+- Hash do output validado
+
+## Tratamento de Falhas
+
+### Schema Error
+- Bloquear output
+- Retornar erros específicos
+- Solicitar regeneração
+
+### Policy Violation
+- Bloquear output
+- Identificar política violada
+- Escalonar se necessário
+
+### Quality Warning
+- Permitir com flag
+- Notificar revisor
+- Documentar risco
+
+### Safety Issue
+- Bloquear imediatamente
+- Alertar segurança
+- Investigar causa

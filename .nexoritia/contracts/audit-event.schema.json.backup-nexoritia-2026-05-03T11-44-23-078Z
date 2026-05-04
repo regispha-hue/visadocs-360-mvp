@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nexoritia:audit-event:v1",
+  "title": "Audit Event Schema",
+  "description": "Schema para eventos de auditoria trilha",
+  "type": "object",
+  "required": ["id", "timestamp", "actor", "action", "resource", "result"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC"
+    },
+    "actor": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["USER", "AGENT", "SYSTEM", "WEBHOOK", "INTEGRATION"]
+        },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "ip_address": { 
+          "type": "string",
+          "pattern": "^(?:[0-9]{1,3}\\.{3}[0-9]{1,3}$|^$"
+        },
+        "user_agent": { "type": "string" }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["type", "category"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "CREATE",
+            "READ",
+            "UPDATE",
+            "DELETE",
+            "APPROVE",
+            "REJECT",
+            "VALIDATE",
+            "GENERATE",
+            "EXPORT",
+            "IMPORT",
+            "LOGIN",
+            "LOGOUT",
+            "SYNC",
+            "BACKUP",
+            "RESTORE"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "enum": ["SOP", "TRAINING", "CERTIFICATE", "USER", "SYSTEM", "INTEGRATION", "SECURITY"]
+        },
+        "description": { "type": "string" },
+        "workflow_id": { "type": "string" }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["SOP", "TRAINING", "CERTIFICATE", "USER", "TENANT", "FILE", "API", "CONFIG"]
+        },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "tenant_id": { "type": "string" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "location": { "type": "string" },
+        "workflow_step": { "type": "string" },
+        "request_id": { "type": "string" },
+        "session_id": { "type": "string" },
+        "correlation_id": { "type": "string" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["SUCCESS", "FAILURE", "BLOCKED", "WARNING", "PENDING"]
+        },
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "details": { "type": "object" },
+        "duration_ms": { "type": "integer" }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "properties": {
+        "policy_applied": { "type": "string" },
+        "rule_triggered": { "type": "string" },
+        "validation_passed": { "type": "boolean" },
+        "evidence_hash": { "type": "string" },
+        "gdpr_relevant": { "type": "boolean", "default": false },
+        "lgpd_relevant": { "type": "boolean", "default": true }
+      }
+    },
+    "hash_chain": {
+      "type": "object",
+      "properties": {
+        "current": { 
+          "type": "string", 
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 deste evento"
+        },
+        "previous": { 
+          "type": "string", 
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 do evento anterior"
+        },
+        "merkle_root": { 
+          "type": "string", 
+          "pattern": "^[a-f0-9]{64}$" 
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"]
+        },
+        "retention_years": { "type": "integer", "default": 5 },
+        "deletion_date": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

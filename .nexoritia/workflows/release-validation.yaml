@@ -1,0 +1,8 @@
+name: release-validation
+version: 0.1.0
+steps:
+  - inspect-changes
+  - run-quality-gate
+  - validate-regulated-impact
+  - record-release-evidence
+  - approve-release

@@ -1,0 +1,9 @@
+name: capa-nonconformity
+version: 0.1.0
+steps:
+  - record-nonconformity
+  - classify-risk
+  - define-corrective-action
+  - define-preventive-action
+  - verify-effectiveness
+  - close-or-reopen

@@ -1,0 +1,12 @@
+name: document-control
+version: 0.1.0
+rules:
+  - id: doc-version-required
+    severity: high
+    statement: Every regulated document must have an explicit version.
+  - id: doc-status-required
+    severity: high
+    statement: Every regulated document must have a lifecycle status.
+  - id: reviewer-required-before-approval
+    severity: high
+    statement: Approved documents must identify a reviewer or approver.

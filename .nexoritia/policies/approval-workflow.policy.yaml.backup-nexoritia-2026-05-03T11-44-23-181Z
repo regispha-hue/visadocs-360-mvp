@@ -1,0 +1,176 @@
+# Policy: Approval Workflow
+# Version: 1.0.0
+# Scope: Document and process approval in regulated environments
+
+policy:
+  name: approval-workflow
+  description: Fluxo de aprovação para documentos e processos em BPF
+  version: "1.0.0"
+  effective_date: "2025-01-15"
+
+  roles:
+    ELABORADOR:
+      description: "Cria ou revisa substancialmente o documento"
+      requirements:
+        - "Conhecimento técnico do processo"
+        - "Treinamento em BPF"
+      cannot_approve: true
+    
+    REVISOR:
+      description: "Verifica precisão técnica e conformidade"
+      requirements:
+        - "Expertise no domínio"
+        - "Independência do elaborador"
+      cannot_approve_own_elaboration: true
+    
+    APROVADOR:
+      description: "Autoriza implementação do documento"
+      requirements:
+        - "Autoridade na área"
+        - "Visão sistêmica"
+      must_be_distinct_from_elaborador: true
+
+  workflow_stages:
+    DRAFT:
+      status: "Em elaboração"
+      next: ["REVIEW"]
+      actions:
+        - "Editar conteúdo"
+        - "Salvar versões"
+        - "Solicitar revisão"
+      approvers_required: 0
+    
+    REVIEW:
+      status: "Em revisão técnica"
+      next: ["REVIEW_REJECT", "APPROVAL"]
+      actions:
+        - "Aprovar para aprovação"
+        - "Rejeitar para correção"
+        - "Solicitar esclarecimentos"
+      approvers_required: 1
+      timeout: "5_days"
+    
+    REVIEW_REJECT:
+      status: "Retornado para correção"
+      next: ["DRAFT"]
+      actions:
+        - "Corrigir conforme feedback"
+        - "Resubmeter"
+      approvers_required: 0
+    
+    APPROVAL:
+      status: "Aguardando aprovação final"
+      next: ["APPROVAL_REJECT", "APPROVED"]
+      actions:
+        - "Aprovar documento"
+        - "Rejeitar com justificativa"
+        - "Solicitar revisão adicional"
+      approvers_required: 1
+      timeout: "3_days"
+    
+    APPROVAL_REJECT:
+      status: "Rejeitado na aprovação"
+      next: ["DRAFT"]
+      actions:
+        - "Reelaborar"
+        - "Reconsiderar"
+      approvers_required: 0
+    
+    APPROVED:
+      status: "Aprovado e vigente"
+      next: ["REVISION", "OBSOLESCENCE"]
+      actions:
+        - "Implementar"
+        - "Treinar"
+        - "Distribuir"
+      approvers_required: 0
+      effective_immediately: true
+    
+    REVISION:
+      status: "Em revisão periódica"
+      next: ["DRAFT", "APPROVED"]
+      actions:
+        - "Confirmar vigência"
+        - "Solicitar revisão"
+      approvers_required: 1
+      triggered_by: "time_or_event"
+    
+    OBSOLESCENCE:
+      status: "Obsoleto"
+      next: []
+      actions:
+        - "Arquivar"
+        - "Notificar"
+      approvers_required: 0
+      retention_period: "5_years"
+
+  signature_requirements:
+    format: "digital"
+    authentication: "two_factor"
+    non_repudiation: true
+    timestamp: "trusted_authority"
+    
+    elements:
+      - signer_id
+      - signer_name
+      - signer_role
+      - decision
+      - timestamp
+      - document_hash
+      - signature_hash
+
+  emergency_procedures:
+    emergency_change:
+      definition: "Mudança necessária para segurança ou conformidade imediata"
+      authorization: "quality_manager_or_above"
+      process:
+        - "Documentar necessidade"
+        - "Aprovação verbal/documentada"
+        - "Implementação imediata"
+        - "Revisão pós-implementação (48h)"
+      requirements:
+        - "Justificativa de emergência"
+        - "Risco de não implementar"
+        - "Aprovação retrospectiva"
+
+  delegation:
+    allowed: true
+    conditions:
+      - "Durante ausência programada"
+      - "Para revisões técnicas"
+    
+    prohibited:
+      - "Aprovação final de documentos críticos"
+      - "Mais que 2 níveis de delegação"
+    
+    record_keeping: "full_delegation_chain"
+
+  rejection_handling:
+    on_rejection:
+      - "Documentar razão"
+      - "Notificar elaborador"
+      - "Estabelecer prazo para correção"
+      - "Escalar se necessário"
+    
+    escalation:
+      trigger: "3_rejections_same_document"
+      to: "quality_council"
+      action: "mediate_and_decide"
+
+  metrics:
+    track:
+      - "Average approval time"
+      - "Rejection rate"
+      - "Rework rate"
+      - "Escalation frequency"
+    
+    targets:
+      approval_time: "< 5 days"
+      rejection_rate: "< 15%"
+      rework_rate: "< 10%"
+
+  compliance:
+    segregation_of_duties: true
+    four_eyes_principle: true
+    audit_trail: complete
+    retention: "permanent"

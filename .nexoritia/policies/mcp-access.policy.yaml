@@ -1,0 +1,117 @@
+﻿name: mcp-access
+version: 0.1.0
+
+principle: "MCP tools are operational arms, not autonomous authority."
+
+default_mode: least_privilege
+
+servers:
+  github:
+    status: required
+    initial_mode: read_only
+    allowed:
+      - read_repository
+      - inspect_pull_requests
+      - inspect_issues
+      - inspect_actions
+      - inspect_code_security
+    blocked_without_approval:
+      - push_code
+      - merge_pull_request
+      - delete_branch
+      - change_repository_settings
+
+  supabase:
+    status: required_if_database_is_supabase
+    initial_mode: read_only_project_scoped
+    allowed:
+      - list_tables
+      - list_extensions
+      - list_migrations
+      - get_logs
+      - get_advisors
+      - get_project_url
+      - generate_typescript_types
+      - search_docs
+    blocked_without_approval:
+      - execute_sql
+      - apply_migration
+      - deploy_edge_function
+      - create_branch
+      - delete_branch
+      - merge_branch
+      - reset_branch
+      - rebase_branch
+      - update_storage_config
+      - auth_changes
+      - rls_changes
+
+  vercel:
+    status: required_if_deployed_on_vercel
+    initial_mode: diagnostic
+    allowed:
+      - inspect_projects
+      - inspect_deployments
+      - inspect_logs
+      - search_docs
+    blocked_without_approval:
+      - change_env
+      - delete_project
+      - change_domain
+      - rollback_production
+      - redeploy_production
+
+  context7:
+    status: required
+    initial_mode: documentation
+    allowed:
+      - fetch_library_docs
+      - fetch_version_specific_examples
+
+  playwright:
+    status: required
+    initial_mode: testing
+    allowed:
+      - navigate_local_app
+      - inspect_accessibility_snapshot
+      - run_e2e_flow
+      - generate_test_observations
+    blocked_without_approval:
+      - submit_real_payment
+      - modify_real_customer_data
+      - access_external_accounts_without_authorization
+
+  google_drive:
+    status: optional
+    initial_mode: read_mostly
+    allowed:
+      - search_files
+      - read_file_content
+      - get_file_metadata
+      - list_recent_files
+    blocked_without_approval:
+      - create_file
+      - change_permissions
+      - download_sensitive_files
+
+  nexoritia:
+    status: future
+    initial_mode: local_validation
+    planned_tools:
+      - nexoritia.validate_contract
+      - nexoritia.write_audit_event
+      - nexoritia.hash_evidence_chain
+      - nexoritia.inspect_regulated_output
+      - nexoritia.generate_evidence_report
+      - nexoritia.check_policy
+
+approval_required_for:
+  - destructive_actions
+  - production_changes
+  - database_writes
+  - migrations
+  - permission_changes
+  - auth_changes
+  - rls_changes
+  - real_customer_data_access
+  - confidential_document_downloads

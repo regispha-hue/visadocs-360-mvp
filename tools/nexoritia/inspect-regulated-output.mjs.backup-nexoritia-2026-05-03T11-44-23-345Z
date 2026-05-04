@@ -1,0 +1,353 @@
+#!/usr/bin/env node
+/**
+ * inspect-regulated-output.mjs
+ * Inspeciona e valida outputs regulados (documentos, código, etc.)
+ * Uso: node inspect-regulated-output.mjs --file=<arquivo> [--schema=<schema>] [--verbose]
+ */
+
+import { readFileSync, existsSync } from 'fs';
+import { resolve, join } from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..', '..');
+
+/**
+ * Detecta dados sensíveis
+ */
+function detectSensitiveData(content) {
+  const findings = [];
+  
+  // Padrões de dados sensíveis
+  const patterns = [
+    { name: 'CPF', regex: /\b\d{3}[\.\s-]?\d{3}[\.\s-]?\d{3}[\.\s-]?\d{2}\b/g },
+    { name: 'Email', regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g },
+    { name: 'Telefone', regex: /\(?\d{2}\)?[\s-]?\d{4,5}[\s-]?\d{4}/g },
+    { name: 'Senha/Password', regex: /password[:\s=]+["']?[^"'\s]+["']?/gi },
+    { name: 'Secret', regex: /secret[:\s=]+["']?[^"'\s]+["']?/gi },
+    { name: 'Token', regex: /token[:\s=]+["']?[a-zA-Z0-9_-]{20,}["']?/gi },
+    { name: 'API Key', regex: /api[_-]?key[:\s=]+["']?[a-zA-Z0-9_-]{16,}["']?/gi },
+    { name: 'Private Key', regex: /private[_-]?key/gi },
+    { name: 'Chave Privada', regex: /chave[_\s]?privada/gi }
+  ];
+  
+  for (const pattern of patterns) {
+    const matches = content.match(pattern.regex);
+    if (matches) {
+      findings.push({
+        type: pattern.name,
+        count: matches.length,
+        examples: matches.slice(0, 3).map(m => m.substring(0, 30) + (m.length > 30 ? '...' : ''))
+      });
+    }
+  }
+  
+  return findings;
+}
+
+/**
+ * Calcula métricas de qualidade de texto
+ */
+function calculateTextMetrics(content) {
+  const words = content.split(/\s+/).filter(w => w.length > 0);
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const paragraphs = content.split(/\n\n+/).filter(p => p.trim().length > 0);
+  
+  // Palavras por sentença
+  const wordsPerSentence = sentences.length > 0 ? words.length / sentences.length : 0;
+  
+  // Sentenças por parágrafo
+  const sentencesPerParagraph = paragraphs.length > 0 ? sentences.length / paragraphs.length : 0;
+  
+  // Estimativa Flesch Reading Ease (simplificada)
+  // Fórmula: 206.835 - 1.015 * (palavras/sentenças) - 84.6 * (sílabas/palavras)
+  // Aqui usamos uma aproximação simples
+  const syllableEstimate = words.reduce((acc, word) => {
+    return acc + Math.max(1, Math.floor(word.length / 3));
+  }, 0);
+  
+  const avgSyllablesPerWord = words.length > 0 ? syllableEstimate / words.length : 0;
+  
+  // Score simplificado (0-100, maior = mais fácil)
+  const fleschScore = Math.max(0, Math.min(100, 
+    206.835 - 1.015 * wordsPerSentence - 84.6 * avgSyllablesPerWord
+  ));
+  
+  return {
+    wordCount: words.length,
+    sentenceCount: sentences.length,
+    paragraphCount: paragraphs.length,
+    wordsPerSentence: wordsPerSentence.toFixed(2),
+    avgSyllablesPerWord: avgSyllablesPerWord.toFixed(2),
+    fleschScore: fleschScore.toFixed(1),
+    readability: fleschScore > 60 ? 'Fácil' : fleschScore > 30 ? 'Médio' : 'Difícil'
+  };
+}
+
+/**
+ * Inspeciona arquivo JSON
+ */
+function inspectJSON(filePath, verbose = false) {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(content);
+    
+    // Contar estrutura
+    const countKeys = (obj, depth = 0) => {
+      if (depth > 10) return 0; // Evitar recursão infinita
+      
+      if (typeof obj !== 'object' || obj === null) return 0;
+      
+      if (Array.isArray(obj)) {
+        return obj.reduce((acc, item) => acc + countKeys(item, depth + 1), 0);
+      }
+      
+      return Object.keys(obj).length + 
+        Object.values(obj).reduce((acc, val) => acc + countKeys(val, depth + 1), 0);
+    };
+    
+    const depth = (obj, d = 0) => {
+      if (typeof obj !== 'object' || obj === null) return d;
+      if (Array.isArray(obj)) {
+        return obj.reduce((max, item) => Math.max(max, depth(item, d + 1)), d);
+      }
+      return Object.values(obj).reduce((max, val) => Math.max(max, depth(val, d + 1)), d);
+    };
+    
+    const result = {
+      valid: true,
+      type: 'JSON',
+      size: content.length,
+      lines: content.split('\n').length,
+      keys: countKeys(data),
+      depth: depth(data),
+      hasArray: JSON.stringify(data).includes('['),
+      hasNested: depth(data) > 2
+    };
+    
+    if (verbose) {
+      result.preview = JSON.stringify(data).substring(0, 200) + '...';
+      
+      // Verificar dados sensíveis
+      const sensitiveData = detectSensitiveData(content);
+      if (sensitiveData.length > 0) {
+        result.sensitiveData = sensitiveData;
+        result.hasSensitiveData = true;
+      }
+    }
+    
+    return result;
+  } catch (e) {
+    return {
+      valid: false,
+      type: 'JSON',
+      error: e.message
+    };
+  }
+}
+
+/**
+ * Inspeciona arquivo de texto
+ */
+function inspectText(filePath, verbose = false) {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const metrics = calculateTextMetrics(content);
+    
+    const result = {
+      valid: true,
+      type: 'Text',
+      size: content.length,
+      lines: content.split('\n').length,
+      ...metrics
+    };
+    
+    if (verbose) {
+      result.preview = content.substring(0, 200) + (content.length > 200 ? '...' : '');
+      
+      // Verificar dados sensíveis
+      const sensitiveData = detectSensitiveData(content);
+      if (sensitiveData.length > 0) {
+        result.sensitiveData = sensitiveData;
+        result.hasSensitiveData = true;
+      }
+    }
+    
+    return result;
+  } catch (e) {
+    return {
+      valid: false,
+      type: 'Text',
+      error: e.message
+    };
+  }
+}
+
+/**
+ * Inspeciona arquivo de código
+ */
+function inspectCode(filePath, verbose = false) {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const lines = content.split('\n');
+    
+    // Métricas básicas
+    const codeLines = lines.filter(l => l.trim().length > 0 && !l.trim().startsWith('//'));
+    const commentLines = lines.filter(l => l.trim().startsWith('//') || l.includes('/*'));
+    const blankLines = lines.filter(l => l.trim().length === 0);
+    
+    // Funções/Classes (aproximação simples)
+    const functions = content.match(/function\s+\w+/g) || [];
+    const classes = content.match(/class\s+\w+/g) || [];
+    const imports = content.match(/import\s+/g) || [];
+    
+    const result = {
+      valid: true,
+      type: 'Code',
+      size: content.length,
+      lines: lines.length,
+      codeLines: codeLines.length,
+      commentLines: commentLines.length,
+      blankLines: blankLines.length,
+      functions: functions.length,
+      classes: classes.length,
+      imports: imports.length,
+      commentRatio: lines.length > 0 ? (commentLines.length / lines.length * 100).toFixed(1) : 0
+    };
+    
+    if (verbose) {
+      // Verificar dados sensíveis
+      const sensitiveData = detectSensitiveData(content);
+      if (sensitiveData.length > 0) {
+        result.sensitiveData = sensitiveData;
+        result.hasSensitiveData = true;
+      }
+      
+      // Verificar TODO/FIXME
+      const todos = content.match(/TODO|FIXME|XXX/g) || [];
+      if (todos.length > 0) {
+        result.todos = todos.length;
+      }
+    }
+    
+    return result;
+  } catch (e) {
+    return {
+      valid: false,
+      type: 'Code',
+      error: e.message
+    };
+  }
+}
+
+/**
+ * Detecta tipo de arquivo
+ */
+function detectFileType(filePath) {
+  const ext = filePath.split('.').pop().toLowerCase();
+  
+  const codeExts = ['js', 'ts', 'jsx', 'tsx', 'mjs', 'py', 'java', 'go', 'rs', 'cpp', 'c', 'h'];
+  const jsonExts = ['json', 'jsonl'];
+  const yamlExts = ['yaml', 'yml'];
+  
+  if (jsonExts.includes(ext)) return 'json';
+  if (codeExts.includes(ext)) return 'code';
+  if (yamlExts.includes(ext)) return 'yaml';
+  return 'text';
+}
+
+/**
+ * CLI
+ */
+function main() {
+  const args = process.argv.slice(2);
+  const params = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const key = args[i].slice(2);
+      const value = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+      params[key] = value;
+      if (value !== true) i++;
+    }
+  }
+  
+  // Modo: inspecionar arquivo
+  if (params.file) {
+    const filePath = resolve(params.file);
+    
+    if (!existsSync(filePath)) {
+      console.error(`\n❌ Arquivo não encontrado: ${params.file}\n`);
+      process.exit(1);
+    }
+    
+    const fileType = detectFileType(filePath);
+    const verbose = params.verbose === true || params.verbose === 'true';
+    
+    let result;
+    switch (fileType) {
+      case 'json':
+        result = inspectJSON(filePath, verbose);
+        break;
+      case 'code':
+        result = inspectCode(filePath, verbose);
+        break;
+      default:
+        result = inspectText(filePath, verbose);
+    }
+    
+    console.log('\n=== Inspeção de Output ===\n');
+    console.log(`Arquivo: ${params.file}`);
+    console.log(`Tipo: ${result.type}`);
+    console.log(`Status: ${result.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}\n`);
+    
+    if (result.error) {
+      console.log(`Erro: ${result.error}\n`);
+      process.exit(1);
+    }
+    
+    console.log('Métricas:');
+    for (const [key, value] of Object.entries(result)) {
+      if (['valid', 'type', 'sensitiveData', 'preview', 'hasSensitiveData'].includes(key)) continue;
+      console.log(`  ${key}: ${value}`);
+    }
+    
+    if (result.hasSensitiveData) {
+      console.log('\n⚠️  DADOS SENSÍVEIS DETECTADOS:');
+      for (const finding of result.sensitiveData) {
+        console.log(`  • ${finding.type}: ${finding.count} ocorrências`);
+        if (verbose && finding.examples) {
+          for (const ex of finding.examples) {
+            console.log(`    - ${ex}`);
+          }
+        }
+      }
+    }
+    
+    if (result.preview && verbose) {
+      console.log(`\nPreview:\n${result.preview}\n`);
+    }
+    
+    console.log();
+    process.exit(result.hasSensitiveData ? 1 : 0);
+  }
+  
+  // Ajuda
+  console.log(`
+Uso: node inspect-regulated-output.mjs [opções]
+
+Opções:
+  --file=<caminho>         Arquivo a inspecionar
+  --verbose                Mostrar detalhes completos
+  --schema=<schema>        Validar contra schema (futuro)
+
+Exemplos:
+  node inspect-regulated-output.mjs --file=meu-sop.json
+  node inspect-regulated-output.mjs --file=documento.txt --verbose
+`);
+  
+  process.exit(0);
+}
+
+main();

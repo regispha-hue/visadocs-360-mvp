@@ -1,0 +1,144 @@
+# Workflow: SOP Review
+# Version: 1.0.0
+# Description: Processo de revisão periódica de SOPs
+
+workflow:
+  name: sop-review
+  version: "1.0.0"
+  description: Revisão periódica de Procedimentos Operacionais
+  
+  trigger:
+    - type: scheduled
+      frequency: "2_years"
+      for: "standard_sops"
+    - type: scheduled
+      frequency: "1_year"
+      for: "high_risk_sops"
+    - type: event
+      source: "nonconformity_related_to_sop"
+    - type: event
+      source: "regulatory_change"
+    - type: manual
+      reason: "continuous_improvement"
+  
+  stages:
+    
+    STAGE_1_IDENTIFICATION:
+      name: "Identificação do SOP"
+      description: "Selecionar SOP para revisão"
+      
+      inputs:
+        - sop_id: "uuid"
+        - trigger_type: "enum[SCHEDULED, EVENT, MANUAL]"
+      
+      validations:
+        - "SOP existe e está ativo"
+        - "Permissão de revisão concedida"
+        - "Não está em revisão atual"
+      
+      outputs:
+        - current_version: "sop_snapshot"
+        - change_history: "previous_revisions"
+        - related_ncs: "nonconformities_list"
+      
+      on_success: "STAGE_2_ASSESSMENT"
+    
+    STAGE_2_ASSESSMENT:
+      name: "Avaliação de Vigência"
+      description: "Avaliar se SOP ainda é adequado"
+      
+      checklist:
+        - "Procedimento ainda reflete prática atual?"
+        - "Mudanças regulatórias afetam este SOP?"
+        - "Houve mudanças de equipamento?"
+        - "Ocorreram não-conformidades relacionadas?"
+        - "Feedback dos usuários é positivo?"
+        - "Treinamentos estão sendo efetivos?"
+      
+      decisions:
+        - CONFIRM_VIGENCY:
+            description: "SOP continua adequado"
+            next: "STAGE_6_CONFIRMATION"
+            update_review_date: true
+        
+        - MINOR_REVISION:
+            description: "Ajustes menores necessários"
+            next: "STAGE_3_MINOR_UPDATE"
+        
+        - MAJOR_REVISION:
+            description: "Reformulação necessária"
+            next: "sop-generation"
+            as: "new_version"
+        
+        - OBSOLESCENCE:
+            description: "SOP não é mais necessário"
+            next: "STAGE_5_OBSOLESCENCE"
+    
+    STAGE_3_MINOR_UPDATE:
+      name: "Atualização Menor"
+      description: "Correções e ajustes pontuais"
+      
+      allowed_changes:
+        - "Correções ortográficas"
+        - "Atualização de anexos"
+        - "Ajuste de formatação"
+        - "Atualização de referências"
+      
+      version_rule: "MINOR_increment"
+      
+      review:
+        required: true
+        by: "same_reviewer_or_delegate"
+      
+      approval:
+        required: true
+        streamlined: true
+      
+      on_success: "STAGE_6_CONFIRMATION"
+    
+    STAGE_5_OBSOLESCENCE:
+      name: "Processo de Obsolescência"
+      description: "Cancelar SOP de forma controlada"
+      
+      requirements:
+        - "Justificativa documentada"
+        - "Não há dependências ativas"
+        - "SOP substituto identificado (se aplicável)"
+        - "Aprovação da gestão da qualidade"
+      
+      actions:
+        - "Marcar como OBSOLETO"
+        - "Notificar detentores de cópias"
+        - "Recolher cópias impressas"
+        - "Atualizar índice"
+        - "Manter por período de retenção"
+      
+      status: "OBSOLETO"
+    
+    STAGE_6_CONFIRMATION:
+      name: "Confirmação"
+      description: "Finalizar processo de revisão"
+      
+      actions:
+        - "Atualizar data de próxima revisão"
+        - "Registrar resultado da revisão"
+        - "Gerar evidência de conformidade"
+        - "Notificar stakeholders"
+      
+      evidence:
+        - review_report: "completed_checklist"
+        - decision: "confirm_vigency|minor_update|obsolete"
+        - next_review_date: "calculated"
+      
+      status: "COMPLETE"
+  
+  metrics:
+    - "SOPs revisados por período"
+    - "Taxa de confirmação de vigência"
+    - "Taxa de obsolescência"
+    - "Tempo médio de revisão"
+  
+  reminders:
+    - "90 dias antes da revisão vencida"
+    - "30 dias antes (alerta crítico)"
+    - "Vencido (não-conformidade potencial)"

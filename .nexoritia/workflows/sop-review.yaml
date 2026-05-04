@@ -1,0 +1,9 @@
+name: sop-review
+version: 0.1.0
+steps:
+  - identify-document
+  - check-version
+  - review-content
+  - record-findings
+  - approve-or-return
+  - register-audit-event

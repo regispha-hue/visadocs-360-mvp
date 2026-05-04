@@ -1,0 +1,9 @@
+name: training-certification
+version: 0.1.0
+steps:
+  - bind-training-to-document
+  - enroll-participants
+  - execute-training
+  - record-completion
+  - issue-certificate
+  - register-audit-event

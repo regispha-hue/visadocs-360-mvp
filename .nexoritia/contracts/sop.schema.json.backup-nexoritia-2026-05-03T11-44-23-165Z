@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nexoritia:sop:v1",
+  "title": "SOP/POP Schema",
+  "description": "Schema para Procedimentos Operacionais Padrão em ambientes regulados ANVISA",
+  "type": "object",
+  "required": ["id", "codigo", "titulo", "versao", "status", "objetivo", "escopo", "responsaveis", "procedimento", "riscos"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "UUID único do documento",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "Código identificador (ex: POP.001, SOP.BPF.01)",
+      "pattern": "^[A-Z]{2,4}\.[0-9]{3,4}.*$",
+      "minLength": 5,
+      "maxLength": 20
+    },
+    "titulo": {
+      "type": "string",
+      "description": "Título descritivo do procedimento",
+      "minLength": 10,
+      "maxLength": 200
+    },
+    "versao": {
+      "type": "string",
+      "description": "Versão do documento (formato: MAJOR.MINOR)",
+      "pattern": "^[0-9]+\.[0-9]+$",
+      "examples": ["1.0", "2.3"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["RASCUNHO", "EM_REVISAO", "APROVADO", "OBSOLETO", "CANCELADO"],
+      "description": "Status atual do documento no ciclo de vida"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": ["HIGIENE", "BPF", "FARMACOPEIA", "RDC_67", "VALIDACAO", "QUALIDADE", "SEGURANCA", "OPERACIONAL"],
+      "description": "Categoria regulatória do procedimento"
+    },
+    "setor": {
+      "type": "string",
+      "description": "Setor de aplicação",
+      "examples": ["Manipulacao", "Qualidade", "Recepcao", "Armazenamento"]
+    },
+    "objetivo": {
+      "type": "string",
+      "description": "Objetivo claro e mensurável",
+      "minLength": 20,
+      "maxLength": 500
+    },
+    "escopo": {
+      "type": "string",
+      "description": "Abrangência do procedimento (o que inclui e exclui)",
+      "minLength": 20,
+      "maxLength": 500
+    },
+    "responsaveis": {
+      "type": "object",
+      "required": ["elaboracao", "revisao", "aprovacao"],
+      "properties": {
+        "elaboracao": {
+          "type": "object",
+          "properties": {
+            "nome": { "type": "string" },
+            "cargo": { "type": "string" },
+            "assinatura": { "type": "string", "description": "Hash ou ID da assinatura digital" },
+            "data": { "type": "string", "format": "date" }
+          },
+          "required": ["nome", "cargo"]
+        },
+        "revisao": {
+          "type": "object",
+          "properties": {
+            "nome": { "type": "string" },
+            "cargo": { "type": "string" },
+            "assinatura": { "type": "string" },
+            "data": { "type": "string", "format": "date" }
+          },
+          "required": ["nome", "cargo"]
+        },
+        "aprovacao": {
+          "type": "object",
+          "properties": {
+            "nome": { "type": "string" },
+            "cargo": { "type": "string" },
+            "assinatura": { "type": "string" },
+            "data": { "type": "string", "format": "date" }
+          },
+          "required": ["nome", "cargo"]
+        }
+      }
+    },
+    "procedimento": {
+      "type": "array",
+      "description": "Passos do procedimento em ordem sequencial",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["ordem", "descricao"],
+        "properties": {
+          "ordem": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Número sequencial do passo"
+          },
+          "descricao": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 1000,
+            "description": "Descrição detalhada da ação"
+          },
+          "cuidados": {
+            "type": "string",
+            "description": "Cuidados específicos para este passo"
+          },
+          "ferramentas": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Equipamentos/materiais necessários"
+          }
+        }
+      }
+    },
+    "riscos": {
+      "type": "array",
+      "description": "Riscos identificados e controles",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["descricao", "probabilidade", "impacto", "controles"],
+        "properties": {
+          "descricao": { "type": "string" },
+          "probabilidade": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "impacto": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "nivel_risco": { "type": "string", "enum": ["BAIXO", "MEDIO", "ALTO", "CRITICO"] },
+          "controles": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "referencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": { "type": "string", "enum": ["NORMA", "FARMACOPEIA", "LITERATURA", "INTERNA"] },
+          "codigo": { "type": "string" },
+          "titulo": { "type": "string" },
+          "link": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "anexos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string" },
+          "tipo": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      }
+    },
+    "historico_versao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "versao": { "type": "string" },
+          "data": { "type": "string", "format": "date" },
+          "autor": { "type": "string" },
+          "alteracoes": { "type": "string" },
+          "motivo": { "type": "string" }
+        }
+      }
+    },
+    "hash_integridade": {
+      "type": "string",
+      "description": "SHA-256 do conteúdo do documento para integridade",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "ID do tenant (farmácia) proprietária"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

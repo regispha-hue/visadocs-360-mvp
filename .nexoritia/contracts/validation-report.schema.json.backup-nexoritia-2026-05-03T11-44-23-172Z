@@ -1,0 +1,186 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nexoritia:validation-report:v1",
+  "title": "Validation Report Schema",
+  "description": "Schema para relatórios de validação de qualidade",
+  "type": "object",
+  "required": ["id", "timestamp", "target", "result", "checks"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "versao": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": ["SOP", "CODE", "TRAINING", "CERTIFICATE", "INTEGRATION", "RELEASE"],
+      "description": "Tipo de validação realizada"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["MANUAL", "AUTOMATED", "SCHEDULED", "PRE_DEPLOY", "PRE_COMMIT"]
+    },
+    "target": {
+      "type": "object",
+      "required": ["type", "id", "name"],
+      "properties": {
+        "type": { "type": "string" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "location": { "type": "string" },
+        "hash": { "type": "string" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASSED", "FAILED", "WARNING", "BLOCKED", "INCONCLUSIVE"]
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Score geral de qualidade"
+        },
+        "threshold": {
+          "type": "number",
+          "default": 70,
+          "description": "Score mínimo para aprovação"
+        },
+        "duration_ms": { "type": "integer" },
+        "message": { "type": "string" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "category": {
+            "type": "string",
+            "enum": ["SYNTAX", "SECURITY", "COMPLIANCE", "PERFORMANCE", "DOCUMENTATION", "TEST", "STRUCTURE"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PASSED", "FAILED", "WARNING", "SKIPPED"]
+          },
+          "message": { "type": "string" },
+          "details": { "type": "object" },
+          "severity": {
+            "type": "string",
+            "enum": ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+          },
+          "score": { "type": "number" }
+        }
+      }
+    },
+    "schema_validation": {
+      "type": "object",
+      "properties": {
+        "schema_url": { "type": "string" },
+        "valid": { "type": "boolean" },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "message": { "type": "string" },
+              "severity": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "policy_validation": {
+      "type": "object",
+      "properties": {
+        "policies_checked": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "policy": { "type": "string" },
+              "rule": { "type": "string" },
+              "severity": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+          "category": { "type": "string" },
+          "message": { "type": "string" },
+          "action": { "type": "string" }
+        }
+      }
+    },
+    "approver": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "decision": { "type": "string", "enum": ["APPROVE", "REJECT", "REQUEST_CHANGES"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "signature": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "logs_url": { "type": "string" },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": "string" },
+              "hash": { "type": "string" }
+            }
+          }
+        },
+        "screenshots": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "hash_integridade": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "tool_version": { "type": "string" },
+        "environment": { "type": "string" },
+        "triggered_by": { "type": "string" }
+      }
+    }
+  }
+}
