@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nexoritia Validation Report",
+  "type": "object",
+  "required": [
+    "id",
+    "target",
+    "status",
+    "checks"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "failed",
+        "requires-review"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

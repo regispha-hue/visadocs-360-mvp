@@ -1,0 +1,139 @@
+---
+name: Nexoritia Audit Before Change
+description: Workflow para auditar e validar alterações antes de executar. Garante que toda modificação seja rastreável e conforme.
+trigger:
+  - file_modify
+  - file_create
+  - file_delete
+---
+
+# Workflow: Audit Before Change
+
+## Propósito
+Garantir que toda alteração em arquivos seja:
+1. Auditada antes da execução
+2. Validada contra políticas
+3. Rastreável após execução
+4. Conforme com regras de governança
+
+## Quando Executar
+- Antes de modificar qualquer arquivo de produto
+- Antes de criar novos arquivos regulados
+- Antes de deletar arquivos existentes
+
+## Passos
+
+### 1. Pre-Flight Check
+```
+□ Ler NEXORITIA_KERNEL.md
+□ Verificar bloqueios ativos
+□ Confirmar permissões
+```
+
+### 2. Arquivo Audit
+```
+□ Ler arquivo atual (se existe)
+□ Documentar estado atual
+□ Identificar dependências
+□ Avaliar impacto
+```
+
+### 3. Policy Check
+```
+□ Verificar contra .nexoritia/policies/
+□ Confirmar alteração permitida
+□ Identificar aprovações necessárias
+```
+
+### 4. Plan Change
+```
+□ Documentar alteração planejada
+□ Estimar risco
+□ Definir rollback strategy
+```
+
+### 5. Execute
+```
+□ Realizar alteração
+□ Validar resultado
+□ Registrar evidência
+```
+
+### 6. Post-Flight
+```
+□ Verificar integridade
+□ Atualizar documentação
+□ Notificar stakeholders
+```
+
+## Comandos
+
+```bash
+# Auditar arquivo antes de modificar
+cat NEXORITIA_KERNEL.md
+ls -la <arquivo>
+
+# Validar políticas
+cat .nexoritia/policies/document-control.policy.yaml
+
+# Registrar alteração
+node tools/nexoritia/write-audit-event.mjs \
+  --type="FILE_MODIFICATION" \
+  --actor="agent:cascade" \
+  --resource="<arquivo>" \
+  --details='{"change_type": "modify"}'
+```
+
+## Saída Esperada
+
+### Log de Auditoria
+```json
+{
+  "event": "FILE_MODIFICATION",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "actor": "agent:cascade",
+  "resource": "path/to/file",
+  "before_hash": "sha256:abc123",
+  "after_hash": "sha256:def456",
+  "change_summary": "Modified function X",
+  "approved_by_policy": true
+}
+```
+
+## Validação
+
+### Checklist
+- [ ] Arquivo auditado antes da mudança
+- [ ] Políticas verificadas
+- [ ] Impacto avaliado
+- [ ] Evidência registrada
+- [ ] Integridade confirmada
+
+### Quality Gate
+```
+PASS: Todos os checks passaram
+FAIL: Algum check falhou (bloquear)
+```
+
+## Exceções
+
+### Arquivos Não Regulados
+- Arquivos de teste (`.test.ts`)
+- Documentação dev (`README.md`, `docs/`)
+- Configurações locais (`.env.local`)
+
+### Aprovação Rápida
+- Correções de typo
+- Comentários adicionados
+- Formatação (sem lógica)
+
+## Rollback
+
+Se alteração causar problema:
+```
+1. Identificar último estado válido
+2. Reverter para hash anterior
+3. Registrar rollback
+4. Investigar causa
+5. Prevenir recorrência
+```

@@ -1,0 +1,286 @@
+#!/usr/bin/env node
+/**
+ * validate-contracts.mjs
+ * Valida arquivos JSON contra schemas de contratos Nexoritia
+ * Uso: node validate-contracts.mjs --type=<tipo> --file=<arquivo>
+ */
+
+import { readFileSync, existsSync, readdirSync } from 'fs';
+import { resolve, dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..', '..');
+
+// Schemas disponíveis
+const SCHEMAS = {
+  sop: '.nexoritia/contracts/sop.schema.json',
+  training: '.nexoritia/contracts/training.schema.json',
+  certificate: '.nexoritia/contracts/certificate.schema.json',
+  'audit-event': '.nexoritia/contracts/audit-event.schema.json',
+  'validation-report': '.nexoritia/contracts/validation-report.schema.json'
+};
+
+/**
+ * Validação simples de schema (subset JSON Schema)
+ */
+function validateValue(value, schema, path = '') {
+  const errors = [];
+  
+  // Verificar tipo
+  if (schema.type) {
+    const actualType = Array.isArray(value) ? 'array' : typeof value;
+    if (actualType === 'object' && value === null) {
+      // null é aceitável se não for obrigatório
+    } else if (actualType !== schema.type) {
+      if (schema.type === 'integer' && actualType === 'number' && Number.isInteger(value)) {
+        // OK
+      } else if (schema.type === 'number' && actualType === 'number') {
+        // OK
+      } else {
+        errors.push(`${path}: esperado ${schema.type}, recebido ${actualType}`);
+        return errors;
+      }
+    }
+  }
+  
+  // Validar string
+  if (schema.type === 'string' && typeof value === 'string') {
+    if (schema.minLength !== undefined && value.length < schema.minLength) {
+      errors.push(`${path}: mínimo ${schema.minLength} caracteres`);
+    }
+    if (schema.maxLength !== undefined && value.length > schema.maxLength) {
+      errors.push(`${path}: máximo ${schema.maxLength} caracteres`);
+    }
+    if (schema.pattern) {
+      const regex = new RegExp(schema.pattern);
+      if (!regex.test(value)) {
+        errors.push(`${path}: não corresponde ao padrão ${schema.pattern}`);
+      }
+    }
+    if (schema.enum && !schema.enum.includes(value)) {
+      errors.push(`${path}: deve ser um de [${schema.enum.join(', ')}]`);
+    }
+  }
+  
+  // Validar número
+  if ((schema.type === 'number' || schema.type === 'integer') && typeof value === 'number') {
+    if (schema.minimum !== undefined && value < schema.minimum) {
+      errors.push(`${path}: mínimo ${schema.minimum}`);
+    }
+    if (schema.maximum !== undefined && value > schema.maximum) {
+      errors.push(`${path}: máximo ${schema.maximum}`);
+    }
+  }
+  
+  // Validar array
+  if (schema.type === 'array' && Array.isArray(value)) {
+    if (schema.minItems !== undefined && value.length < schema.minItems) {
+      errors.push(`${path}: mínimo ${schema.minItems} itens`);
+    }
+    if (schema.items) {
+      value.forEach((item, idx) => {
+        errors.push(...validateValue(item, schema.items, `${path}[${idx}]`));
+      });
+    }
+  }
+  
+  // Validar objeto
+  if (schema.type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    // Verificar campos obrigatórios
+    if (schema.required) {
+      for (const field of schema.required) {
+        if (!(field in value)) {
+          errors.push(`${path}: campo obrigatório '${field}' ausente`);
+        }
+      }
+    }
+    
+    // Validar propriedades
+    if (schema.properties) {
+      for (const [key, propSchema] of Object.entries(schema.properties)) {
+        if (key in value) {
+          errors.push(...validateValue(value[key], propSchema, `${path}.${key}`));
+        }
+      }
+    }
+  }
+  
+  return errors;
+}
+
+/**
+ * Valida arquivo contra schema
+ */
+function validateFile(filePath, schemaType) {
+  const schemaPath = SCHEMAS[schemaType];
+  
+  if (!schemaPath) {
+    return {
+      valid: false,
+      errors: [`Schema '${schemaType}' não encontrado. Disponíveis: ${Object.keys(SCHEMAS).join(', ')}`]
+    };
+  }
+  
+  const fullSchemaPath = join(PROJECT_ROOT, schemaPath);
+  const fullFilePath = resolve(filePath);
+  
+  // Verificar existência
+  if (!existsSync(fullSchemaPath)) {
+    return { valid: false, errors: [`Schema não encontrado: ${schemaPath}`] };
+  }
+  
+  if (!existsSync(fullFilePath)) {
+    return { valid: false, errors: [`Arquivo não encontrado: ${filePath}`] };
+  }
+  
+  // Carregar arquivos
+  let schema, data;
+  try {
+    schema = JSON.parse(readFileSync(fullSchemaPath, 'utf-8'));
+  } catch (e) {
+    return { valid: false, errors: [`Erro ao carregar schema: ${e.message}`] };
+  }
+  
+  try {
+    const content = readFileSync(fullFilePath, 'utf-8');
+    // Suporta JSON e YAML básico (JSON é subset de YAML)
+    data = JSON.parse(content);
+  } catch (e) {
+    return { valid: false, errors: [`Erro ao carregar arquivo: ${e.message}`] };
+  }
+  
+  // Validar
+  const errors = validateValue(data, schema);
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+    schema: schemaType,
+    file: filePath
+  };
+}
+
+/**
+ * Valida todos os contratos contra seus próprios schemas
+ */
+function validateAllContracts() {
+  const results = [];
+  const contractsDir = join(PROJECT_ROOT, '.nexoritia', 'contracts');
+  
+  if (!existsSync(contractsDir)) {
+    return [{ valid: false, errors: ['Diretório de contratos não encontrado'] }];
+  }
+  
+  const files = readdirSync(contractsDir).filter(f => f.endsWith('.schema.json'));
+  
+  for (const file of files) {
+    try {
+      const content = readFileSync(join(contractsDir, file), 'utf-8');
+      const schema = JSON.parse(content);
+      
+      // Validar estrutura básica do schema
+      const errors = [];
+      if (!schema.$schema) errors.push('$schema ausente');
+      if (!schema.title) errors.push('title ausente');
+      if (!schema.type) errors.push('type ausente');
+      
+      results.push({
+        valid: errors.length === 0,
+        errors,
+        file,
+        type: 'schema_self_validation'
+      });
+    } catch (e) {
+      results.push({
+        valid: false,
+        errors: [`Erro de parse: ${e.message}`],
+        file,
+        type: 'schema_self_validation'
+      });
+    }
+  }
+  
+  return results;
+}
+
+/**
+ * CLI
+ */
+function main() {
+  const args = process.argv.slice(2);
+  const params = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const key = args[i].slice(2);
+      const value = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+      params[key] = value;
+      if (value !== true) i++;
+    }
+  }
+  
+  // Modo: validar todos os schemas
+  if (params.all === true || params.all === 'true') {
+    const results = validateAllContracts();
+    let exitCode = 0;
+    
+    console.log('\n=== Validação de Schemas ===\n');
+    
+    for (const result of results) {
+      const status = result.valid ? '✅' : '❌';
+      console.log(`${status} ${result.file}`);
+      
+      if (!result.valid && result.errors.length > 0) {
+        exitCode = 1;
+        for (const error of result.errors) {
+          console.log(`   → ${error}`);
+        }
+      }
+    }
+    
+    const passed = results.filter(r => r.valid).length;
+    const total = results.length;
+    
+    console.log(`\nTotal: ${passed}/${total} schemas válidos\n`);
+    process.exit(exitCode);
+  }
+  
+  // Modo: validar arquivo específico
+  if (params.type && params.file) {
+    const result = validateFile(params.file, params.type);
+    
+    console.log('\n=== Validação de Contrato ===\n');
+    console.log(`Schema: ${result.schema || params.type}`);
+    console.log(`Arquivo: ${result.file}`);
+    console.log(`Status: ${result.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}\n`);
+    
+    if (!result.valid && result.errors.length > 0) {
+      console.log('Erros:');
+      for (const error of result.errors) {
+        console.log(`  • ${error}`);
+      }
+      console.log();
+    }
+    
+    process.exit(result.valid ? 0 : 1);
+  }
+  
+  // Ajuda
+  console.log(`
+Uso: node validate-contracts.mjs [opções]
+
+Opções:
+  --all                    Valida todos os schemas de contratos
+  --type=<tipo>            Tipo de schema (${Object.keys(SCHEMAS).join(', ')})
+  --file=<caminho>         Arquivo a validar
+
+Exemplos:
+  node validate-contracts.mjs --all
+  node validate-contracts.mjs --type=sop --file=meu-sop.json
+`);
+  
+  process.exit(0);
+}
+
+main();

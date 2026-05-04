@@ -1,0 +1,44 @@
+# Nexoritia OS
+
+## O que é
+
+Nexoritia OS é a camada local de governança deste projeto.
+
+Ele define como agentes de IA devem produzir, validar, registrar e auditar outputs em contextos regulados.
+
+## Como usar com Cascade
+
+Use menções explícitas quando a tarefa envolver risco:
+
+- @nexoritia-governor
+- @regulated-qms-architect
+- @policy-as-code-engineer
+- @audit-trail-architect
+- @ai-output-validator
+- @rag-evaluation-engineer
+- @mcp-security-guardian
+- @authorization-guardian
+
+## Workflows principais
+
+- nexoritia-audit-before-change
+- nexoritia-generate-regulated-document
+- nexoritia-validate-ai-output
+- nexoritia-release-readiness
+- nexoritia-evidence-report
+
+## Evidência
+
+Arquivos em .nexoritia/logs podem registrar eventos, validações e cadeia de evidência.
+
+## MVP
+
+Este MVP usa Markdown, JSON, YAML e Node.js nativo.
+
+## Expansões futuras
+
+- OPA/Rego para policy-as-code;
+- OpenFGA para autorização;
+- Temporal para workflows duráveis;
+- OpenTelemetry para observabilidade;
+- Promptfoo/RAGAS para avaliação avançada.

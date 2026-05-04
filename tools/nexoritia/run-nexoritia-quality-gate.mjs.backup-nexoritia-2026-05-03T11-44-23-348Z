@@ -1,0 +1,387 @@
+#!/usr/bin/env node
+/**
+ * run-nexoritia-quality-gate.mjs
+ * Executa quality gate completo do Nexoritia
+ * Uso: node run-nexoritia-quality-gate.mjs --type=<tipo> [--input=<arquivo>]
+ */
+
+import { readFileSync, existsSync, readdirSync } from 'fs';
+import { resolve, join } from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..', '..');
+
+// Thresholds de qualidade
+const THRESHOLDS = {
+  document: {
+    schema: { pass: true },
+    completeness: { min: 100 },
+    clarity: { min: 60 },
+    policy: { pass: true },
+    safety: { pass: true }
+  },
+  code: {
+    syntax: { pass: true },
+    tests: { min: 70 },
+    security: { pass: true },
+    coverage: { min: 70 },
+    documentation: { pass: true }
+  },
+  release: {
+    technical: { pass: true },
+    compliance: { pass: true },
+    readiness: { pass: true },
+    evidence: { pass: true }
+  }
+};
+
+/**
+ * Executa todos os checks do quality gate
+ */
+function runQualityGate(type, inputFile = null) {
+  const checks = [];
+  const thresholds = THRESHOLDS[type] || THRESHOLDS.document;
+  
+  // Check: Schema Validation
+  checks.push({
+    id: 'QG-001',
+    name: 'Schema Validation',
+    category: 'STRUCTURE',
+    run: () => {
+      if (!inputFile) return { status: 'SKIPPED', message: 'No input file' };
+      
+      try {
+        const content = readFileSync(inputFile, 'utf-8');
+        const data = JSON.parse(content);
+        return { 
+          status: 'PASSED', 
+          message: 'Valid JSON structure',
+          details: { keys: Object.keys(data).length }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Check: Policy Compliance
+  checks.push({
+    id: 'QG-002',
+    name: 'Policy Compliance',
+    category: 'COMPLIANCE',
+    run: () => {
+      const policiesDir = join(PROJECT_ROOT, '.nexoritia', 'policies');
+      
+      if (!existsSync(policiesDir)) {
+        return { status: 'FAILED', message: 'Policies directory not found' };
+      }
+      
+      try {
+        const files = readdirSync(policiesDir).filter(f => f.endsWith('.yaml'));
+        return { 
+          status: 'PASSED', 
+          message: `${files.length} policies available`,
+          details: { policies: files }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Check: Evidence Trail
+  checks.push({
+    id: 'QG-003',
+    name: 'Evidence Trail',
+    category: 'AUDIT',
+    run: () => {
+      const logsDir = join(PROJECT_ROOT, '.nexoritia', 'logs');
+      
+      if (!existsSync(logsDir)) {
+        return { status: 'WARNING', message: 'Logs directory not found (will be created)' };
+      }
+      
+      try {
+        const subdirs = readdirSync(logsDir, { withFileTypes: true })
+          .filter(d => d.isDirectory())
+          .map(d => d.name);
+        
+        return { 
+          status: 'PASSED', 
+          message: 'Evidence trail available',
+          details: { directories: subdirs }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Check: Contracts
+  checks.push({
+    id: 'QG-004',
+    name: 'Contracts Available',
+    category: 'STRUCTURE',
+    run: () => {
+      const contractsDir = join(PROJECT_ROOT, '.nexoritia', 'contracts');
+      
+      if (!existsSync(contractsDir)) {
+        return { status: 'FAILED', message: 'Contracts directory not found' };
+      }
+      
+      try {
+        const schemas = readdirSync(contractsDir).filter(f => f.endsWith('.json'));
+        return { 
+          status: 'PASSED', 
+          message: `${schemas.length} contracts available`,
+          details: { contracts: schemas }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Check: Workflows
+  checks.push({
+    id: 'QG-005',
+    name: 'Workflows Available',
+    category: 'PROCESS',
+    run: () => {
+      const workflowsDir = join(PROJECT_ROOT, '.nexoritia', 'workflows');
+      
+      if (!existsSync(workflowsDir)) {
+        return { status: 'FAILED', message: 'Workflows directory not found' };
+      }
+      
+      try {
+        const workflows = readdirSync(workflowsDir).filter(f => f.endsWith('.yaml'));
+        return { 
+          status: 'PASSED', 
+          message: `${workflows.length} workflows available`,
+          details: { workflows }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Check: Skills
+  checks.push({
+    id: 'QG-006',
+    name: 'Skills Available',
+    category: 'GOVERNANCE',
+    run: () => {
+      const skillsDir = join(PROJECT_ROOT, '.windsurf', 'skills');
+      
+      if (!existsSync(skillsDir)) {
+        return { status: 'WARNING', message: 'Skills directory not found' };
+      }
+      
+      try {
+        const skills = readdirSync(skillsDir, { withFileTypes: true })
+          .filter(d => d.isDirectory())
+          .map(d => d.name);
+        
+        return { 
+          status: 'PASSED', 
+          message: `${skills.length} skills available`,
+          details: { skills }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Check: Rules
+  checks.push({
+    id: 'QG-007',
+    name: 'Rules Available',
+    category: 'GOVERNANCE',
+    run: () => {
+      const rulesDir = join(PROJECT_ROOT, '.windsurf', 'rules');
+      
+      if (!existsSync(rulesDir)) {
+        return { status: 'FAILED', message: 'Rules directory not found' };
+      }
+      
+      try {
+        const rules = readdirSync(rulesDir).filter(f => f.endsWith('.md'));
+        return { 
+          status: 'PASSED', 
+          message: `${rules.length} rules available`,
+          details: { rules }
+        };
+      } catch (e) {
+        return { status: 'FAILED', message: e.message };
+      }
+    }
+  });
+  
+  // Executar todos os checks
+  const results = checks.map(check => {
+    const startTime = Date.now();
+    const result = check.run();
+    const duration = Date.now() - startTime;
+    
+    return {
+      id: check.id,
+      name: check.name,
+      category: check.category,
+      status: result.status,
+      message: result.message,
+      details: result.details,
+      duration_ms: duration,
+      blocking: result.status === 'FAILED'
+    };
+  });
+  
+  // Calcular score e decisão
+  const passed = results.filter(r => r.status === 'PASSED').length;
+  const failed = results.filter(r => r.status === 'FAILED').length;
+  const warnings = results.filter(r => r.status === 'WARNING').length;
+  const total = results.length;
+  
+  const score = Math.round((passed / total) * 100);
+  const blockingFailures = results.filter(r => r.blocking).length > 0;
+  
+  let finalStatus;
+  if (blockingFailures) {
+    finalStatus = 'FAILED';
+  } else if (failed > 0) {
+    finalStatus = 'WARNING';
+  } else {
+    finalStatus = 'PASSED';
+  }
+  
+  return {
+    type,
+    timestamp: new Date().toISOString(),
+    result: {
+      status: finalStatus,
+      score,
+      passed,
+      failed,
+      warnings,
+      total
+    },
+    checks: results,
+    input: inputFile
+  };
+}
+
+/**
+ * Gera relatório de período
+ */
+function generateReport(period) {
+  // Simplificado - em produção buscaria do banco
+  return {
+    period,
+    generated_at: new Date().toISOString(),
+    summary: {
+      total_gates: 10,
+      passed: 8,
+      failed: 1,
+      warning: 1
+    }
+  };
+}
+
+/**
+ * CLI
+ */
+function main() {
+  const args = process.argv.slice(2);
+  const params = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const key = args[i].slice(2);
+      const value = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+      params[key] = value;
+      if (value !== true) i++;
+    }
+  }
+  
+  // Modo: quality gate
+  if (params.type) {
+    const result = runQualityGate(params.type, params.input);
+    
+    console.log('\n=== Nexoritia Quality Gate ===\n');
+    console.log(`Tipo: ${result.type}`);
+    console.log(`Timestamp: ${result.timestamp}`);
+    console.log(`Status: ${result.result.status}`);
+    console.log(`Score: ${result.result.score}%`);
+    console.log(`Checks: ${result.result.passed}/${result.result.total} passaram\n`);
+    
+    console.log('Detalhes dos checks:');
+    for (const check of result.checks) {
+      const icon = check.status === 'PASSED' ? '✅' : 
+                   check.status === 'FAILED' ? '❌' : '⚠️';
+      console.log(`\n${icon} ${check.id}: ${check.name}`);
+      console.log(`   Status: ${check.status}`);
+      console.log(`   Mensagem: ${check.message}`);
+      if (check.duration_ms) {
+        console.log(`   Duração: ${check.duration_ms}ms`);
+      }
+    }
+    
+    console.log(`\n${'='.repeat(40)}\n`);
+    
+    if (result.result.status === 'FAILED') {
+      console.log('❌ Quality Gate FALHOU - Bloquear deploy\n');
+      process.exit(1);
+    } else if (result.result.status === 'WARNING') {
+      console.log('⚠️  Quality Gate com AVISOS - Proceder com cautela\n');
+      process.exit(0);
+    } else {
+      console.log('✅ Quality Gate PASSOU - Aprovado para deploy\n');
+      process.exit(0);
+    }
+  }
+  
+  // Modo: relatório
+  if (params.report && params.period) {
+    const report = generateReport(params.period);
+    
+    console.log('\n=== Relatório de Quality Gates ===\n');
+    console.log(JSON.stringify(report, null, 2));
+    console.log();
+    
+    if (params.output) {
+      const outputPath = resolve(params.output);
+      writeFileSync(outputPath, JSON.stringify(report, null, 2));
+      console.log(`Relatório salvo em: ${params.output}\n`);
+    }
+    
+    process.exit(0);
+  }
+  
+  // Ajuda
+  console.log(`
+Uso: node run-nexoritia-quality-gate.mjs [opções]
+
+Opções:
+  --type=<tipo>            Tipo de quality gate (document, code, release)
+  --input=<arquivo>        Arquivo a validar
+  --report                 Modo relatório
+  --period=YYYY-MM         Período do relatório
+  --output=<arquivo>       Salvar relatório
+
+Exemplos:
+  node run-nexoritia-quality-gate.mjs --type=document --input=sop.json
+  node run-nexoritia-quality-gate.mjs --type=release
+  node run-nexoritia-quality-gate.mjs --report --period=2025-01
+`);
+  
+  process.exit(0);
+}
+
+// Import necessário para relatório
+import { writeFileSync } from 'fs';
+
+main();

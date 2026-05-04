@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nexoritia Training",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "relatedDocumentId",
+    "participants",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "relatedDocumentId": {
+      "type": "string"
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "completed",
+        "cancelled"
+      ]
+    }
+  }
+}

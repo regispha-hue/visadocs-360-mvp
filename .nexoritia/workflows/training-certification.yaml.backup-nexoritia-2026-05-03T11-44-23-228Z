@@ -1,0 +1,190 @@
+# Workflow: Training and Certification
+# Version: 1.0.0
+# Description: Processo completo de treinamento e certificação BPF
+
+workflow:
+  name: training-certification
+  version: "1.0.0"
+  description: Treinamento, avaliação e certificação de colaboradores em BPF
+  
+  trigger:
+    - type: scheduled
+      event: "new_employee_onboarding"
+    - type: scheduled
+      event: "certification_expiry_approaching"
+    - type: event
+      event: "sop_updated"
+      for: "affected_personnel"
+    - type: event
+      event: "nonconformity_training_required"
+    - type: manual
+      requestor: "manager"
+  
+  pre_conditions:
+    - "Colaborador ativo no sistema"
+    - "SOP válido identificado"
+    - "Instrutor disponível"
+  
+  stages:
+    
+    STAGE_1_PLANNING:
+      name: "Planejamento"
+      description: "Definir escopo e agenda do treinamento"
+      
+      inputs:
+        - colaborador_id: "uuid"
+        - sop_id: "uuid"
+        - modalidade: "enum[PRESENCIAL, ONLINE, HIBRIDO]"
+        - urgencia: "enum[NORMAL, ALTA, EMERGENCIAL]"
+      
+      decisions:
+        - "Identificar pré-requisitos"
+        - "Definir carga horária"
+        - "Agendar datas"
+        - "Selecionar instrutor"
+        - "Preparar material"
+      
+      outputs:
+        - training_plan: "object"
+        - schedule: "datetime[]"
+        - materials_list: "resource[]"
+      
+      on_success: "STAGE_2_SCHEDULING"
+    
+    STAGE_2_SCHEDULING:
+      name: "Agendamento"
+      description: "Confirmar participação e logística"
+      
+      actions:
+        - "Enviar convite ao colaborador"
+        - "Reservar sala/equipamento"
+        - "Preparar material didático"
+        - "Configurar ambiente online (se aplicável)"
+      
+      confirmations_required:
+        - colaborador: "accepted"
+        - instrutor: "confirmed"
+        - resources: "available"
+      
+      on_success: "STAGE_3_EXECUTION"
+    
+    STAGE_3_EXECUTION:
+      name: "Execução do Treinamento"
+      description: "Realizar sessão de treinamento"
+      
+      evidence_required:
+        - "Lista de presença"
+        - "Registro fotográfico (opcional)"
+        - "Material distribuído"
+        - "Duração real"
+      
+      content_delivery:
+        - "Apresentação do SOP"
+        - "Demonstração prática (se aplicável)"
+        - "Discussão de casos"
+        - "Esclarecimento de dúvidas"
+      
+      on_success: "STAGE_4_ASSESSMENT"
+    
+    STAGE_4_ASSESSMENT:
+      name: "Avaliação"
+      description: "Verificar compreensão do treinamento"
+      
+      methods:
+        - QUIZ:
+            description: "Questionário objetivo"
+            min_score: 70
+            max_attempts: 3
+        - PRATICO:
+            description: "Demonstração de habilidade"
+            evaluated_by: "instrutor"
+        - MISTO:
+            description: "Teoria + Prática"
+            weights: ["60%", "40%"]
+      
+      ai_assistance:
+        enabled: true
+        for: "quiz_generation"
+        validation: "human_review"
+      
+      results:
+        - APROVADO:
+            next: "STAGE_5_CERTIFICATION"
+        - REPROVADO:
+            next: "STAGE_3_EXECUTION"
+            retry: true
+            max_retries: 2
+            additional_training: true
+      
+      evidence:
+        - "Nota obtida"
+        - "Respostas registradas"
+        - "Data/hora da avaliação"
+    
+    STAGE_5_CERTIFICATION:
+      name: "Certificação"
+      description: "Emitir certificado de qualificação"
+      automated: true
+      
+      certificate_generation:
+        schema: ".nexoritia/contracts/certificate.schema.json"
+        elements:
+          - "Número único (CERT-XXXXXXXX)"
+          - "Nome do colaborador"
+          - "Cargo"
+          - "SOP treinado"
+          - "Data de conclusão"
+          - "Validade (tipicamente 1-2 anos)"
+          - "Hash blockchain"
+          - "QR Code para validação"
+      
+      blockchain_anchor:
+        enabled: true
+        hash_algorithm: "sha256"
+        chain_type: "simple_linked_list"
+      
+      distribution:
+        - "Email ao colaborador"
+        - "Registro no sistema"
+        - "Disponibilização para auditoria"
+        - "Notificação ao gestor"
+      
+      on_success: "STAGE_6_FOLLOWUP"
+    
+    STAGE_6_FOLLOWUP:
+      name: "Acompanhamento"
+      description: "Monitorar validade e renovação"
+      
+      monitoring:
+        - "Alerta 90 dias antes da expiração"
+        - "Alerta 30 dias antes (crítico)"
+        - "Notificação na data de expiração"
+      
+      renewal:
+        trigger: "certification_expiry"
+        process: "STAGE_1_PLANNING"
+        simplified: true
+        if: "no_sop_changes"
+      
+      revocation:
+        conditions:
+          - "Não-conformidade grave"
+          - "Mudança de função"
+          - "Solicitação da gestão"
+        process: "formal_revocation_with_reason"
+      
+      status: "COMPLETE"
+  
+  metrics:
+    - "Treinamentos realizados por mês"
+    - "Taxa de aprovação"
+    - "Tempo médio de conclusão"
+    - "Certificações ativas"
+    - "Certificações próximo da expiração"
+    - "Retrabalho (reprovações)"
+  
+  integrations:
+    - "Sistema de gestão de pessoas"
+    - "Agenda/calendário"
+    - "Notificações (email/SMS)"
+    - "Blockchain (opcional)"

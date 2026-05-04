@@ -1,0 +1,228 @@
+# Workflow: SOP Generation
+# Version: 1.0.0
+# Description: Processo regulado para geração de SOPs/POPs
+
+workflow:
+  name: sop-generation
+  version: "1.0.0"
+  description: Geração de Procedimentos Operacionais Padrão em conformidade com BPF
+  
+  trigger:
+    - type: manual
+      actor: ["quality_analyst", "responsible_technician"]
+    - type: automated
+      condition: "scheduled_review_due"
+    - type: event
+      source: "capa_nonconformity"
+  
+  pre_conditions:
+    - "Usuário tem permissão ELABORACAO"
+    - "Template disponível"
+    - "Código único gerado"
+    - "Nenhum bloqueio ativo"
+  
+  stages:
+    
+    STAGE_1_INITIATION:
+      name: "Iniciação"
+      description: "Definir escopo e objetivo do SOP"
+      duration: "30m"
+      
+      inputs:
+        - codigo_sugerido: "string"
+        - categoria: "enum[HIGIENE, BPF, VALIDACAO, QUALIDADE]"
+        - setor: "string"
+        - objetivo: "text"
+      
+      validations:
+        - "Código segue formato {CATEGORIA}.{SEQUENCE}"
+        - "Categoria permitida para tenant"
+        - "Setor existe no cadastro"
+      
+      outputs:
+        - draft_metadata: "object"
+        - initial_risk_assessment: "object"
+      
+      on_success: "STAGE_2_GENERATION"
+      on_failure: "ABORT_WITH_REASON"
+    
+    STAGE_2_GENERATION:
+      name: "Geração de Conteúdo"
+      description: "IA gera estrutura e conteúdo inicial"
+      duration: "5m"
+      
+      ai_assistance:
+        model: "deepseek-r1"
+        temperature: 0.3
+        max_tokens: 4000
+        
+        prompt_template: |
+          Você é um especialista em BPF (Boas Práticas de Fabricação) 
+          conforme RDC 67/2007 da ANVISA.
+          
+          Gere um SOP com as seguintes características:
+          - Código: {{codigo}}
+          - Categoria: {{categoria}}
+          - Setor: {{setor}}
+          - Objetivo: {{objetivo}}
+          
+          Estrutura obrigatória:
+          1. Objetivo (claro e mensurável)
+          2. Escopo (o que inclui e exclui)
+          3. Responsabilidades (elaboração, revisão, aprovação)
+          4. Procedimento (passos numerados, ações verbais)
+          5. Riscos e Controles
+          6. Referências normativas
+          7. Anexos (se necessário)
+          
+          Regras:
+          - Use linguagem técnica precisa
+          - Cada passo deve ter apenas uma ação
+          - Inclua cuidados especiais quando necessário
+          - Mencione equipamentos e EPIs
+          - Referencie normas aplicáveis
+      
+      validations:
+        - schema: ".nexoritia/contracts/sop.schema.json"
+        - quality_gate: "completeness"
+        - policy: ".nexoritia/policies/ai-generation.policy.yaml"
+      
+      evidence:
+        - log: "generation_prompt"
+        - log: "model_response"
+        - hash: "content_hash"
+      
+      on_success: "STAGE_3_REVIEW"
+      on_failure: "RETRY_OR_ESCALATE"
+    
+    STAGE_3_REVIEW:
+      name: "Revisão Técnica"
+      description: "Especialista revisa conteúdo gerado"
+      duration: "2h"
+      
+      actor:
+        role: "REVISOR"
+        cannot_be: "elaborador"
+      
+      checklist:
+        - "Conteúdo tecnicamente correto"
+        - "Conforme com normas vigentes"
+        - "Claro e compreensível"
+        - "Completo (todas as seções)"
+        - "Sem conflitos com outros SOPs"
+        - "Riscos identificados adequadamente"
+      
+      decisions:
+        - APPROVE:
+            next: "STAGE_4_APPROVAL"
+        - REQUEST_CHANGES:
+            next: "STAGE_2_GENERATION"
+            with_feedback: true
+        - REJECT:
+            next: "ABORT_WITH_REASON"
+      
+      evidence:
+        - signature: "revisor"
+        - comments: "review_notes"
+        - timestamp: true
+    
+    STAGE_4_APPROVAL:
+      name: "Aprovação Final"
+      description: "Autoridade aprova para implementação"
+      duration: "1h"
+      
+      actor:
+        role: "APROVADOR"
+        cannot_be: ["elaborador", "revisor"]
+      
+      verification:
+        - "Revisão completa realizada"
+        - "Checklist de revisão passou"
+        - "Sem pendências críticas"
+        - "Treinamento planejado"
+      
+      decisions:
+        - APPROVE:
+            next: "STAGE_5_PUBLICATION"
+            action: "update_status_to_APROVADO"
+        - REJECT:
+            next: "STAGE_3_REVIEW"
+            with_reason: true
+      
+      evidence:
+        - signature: "aprovador"
+        - approval_date: "timestamp"
+        - effective_date: "immediate_or_scheduled"
+    
+    STAGE_5_PUBLICATION:
+      name: "Publicação e Distribuição"
+      description: "Tornar SOP disponível para uso"
+      duration: "30m"
+      automated: true
+      
+      actions:
+        - "Gerar PDF com controle de versão"
+        - "Atualizar sistema de documentos"
+        - "Notificar stakeholders"
+        - "Agendar treinamento se necessário"
+        - "Atualizar índice de documentos"
+        - "Arquivar versão anterior"
+      
+      outputs:
+        - final_document: "pdf_with_watermark"
+        - notification_log: "recipients_and_timestamp"
+        - training_schedule: "if_required"
+      
+      on_success: "COMPLETE"
+    
+    ABORT_WITH_REASON:
+      name: "Cancelamento"
+      description: "Abortar com documentação do motivo"
+      
+      actions:
+        - "Registrar motivo do cancelamento"
+        - "Notificar solicitante"
+        - "Arquivar rascunho"
+        - "Liberar código para reutilização"
+      
+      status: "CANCELADO"
+    
+    COMPLETE:
+      name: "Conclusão"
+      status: "APROVADO"
+      
+      final_actions:
+        - "Gerar hash de integridade"
+        - "Registrar em blockchain (opcional)"
+        - "Criar audit trail completo"
+        - "Disponibilizar para consulta"
+  
+  quality_gates:
+    - name: "Schema Compliance"
+      check: "validate_against_sop_schema"
+      blocking: true
+    
+    - name: "Policy Compliance"
+      check: "validate_against_document_control_policy"
+      blocking: true
+    
+    - name: "Uniqueness"
+      check: "code_not_exists"
+      blocking: true
+    
+    - name: "Approval Chain"
+      check: "three_distinct_roles"
+      blocking: true
+  
+  metrics:
+    - "Tempo médio por estágio"
+    - "Taxa de aprovação na primeira revisão"
+    - "Número de ciclos de revisão"
+    - "Satisfação do revisor"
+  
+  exceptions:
+    emergency_change:
+      trigger: "safety_or_compliance_critical"
+      fast_track: true
+      approval_time: "24h"
+      post_hoc_review: true

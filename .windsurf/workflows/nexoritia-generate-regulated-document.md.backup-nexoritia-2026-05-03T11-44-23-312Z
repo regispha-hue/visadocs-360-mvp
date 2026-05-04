@@ -1,0 +1,210 @@
+---
+name: Nexoritia Generate Regulated Document
+description: Workflow para geração de documentos regulados (SOP, POP, Certificado) com validação completa e rastreabilidade.
+trigger:
+  - document_generation
+  - sop_creation
+  - certificate_generation
+---
+
+# Workflow: Generate Regulated Document
+
+## Propósito
+Garantir que documentos regulados sejam gerados com:
+1. Validação de schema
+2. Conformidade com políticas
+3. Quality gates
+4. Trilha de auditoria completa
+
+## Tipos Suportados
+- SOP (Standard Operating Procedure)
+- POP (Procedimento Operacional Padrão)
+- Certificados de Qualificação
+- Registros de Treinamento
+
+## Pré-condições
+- Código único definido
+- Tenant identificado
+- Permissão ELABORACAO confirmada
+- Template disponível
+
+## Passos
+
+### 1. Initiation
+```
+□ Validar pre-condições
+□ Gerar código único
+□ Carregar template
+□ Inicializar audit trail
+```
+
+### 2. Content Generation (IA)
+```
+□ Preparar prompt
+□ Invocar modelo (DeepSeek R1)
+□ Temperatura: 0.3
+□ Max tokens: 4000
+```
+
+### 3. Schema Validation
+```
+□ Validar contra schema JSON
+□ Verificar campos obrigatórios
+□ Confirmar formatação
+□ Reportar erros se houver
+```
+
+### 4. Policy Compliance
+```
+□ Checar document-control.policy
+□ Verificar ai-generation.policy
+□ Confirmar regulated-output.policy
+□ Flag violations
+```
+
+### 5. Quality Assessment
+```
+□ Calcular métricas de qualidade
+□ Verificar clareza
+□ Confirmar precisão técnica
+□ Avaliar completude
+```
+
+### 6. Safety Check
+```
+□ Scan por dados sensíveis
+□ Verificar precisão de fatos
+□ Confirmar segurança
+□ Flag para revisão se necessário
+```
+
+### 7. Evidence Generation
+```
+□ Gerar hash do documento
+□ Criar audit event
+□ Registrar validações
+□ Atualizar chain of custody
+```
+
+### 8. Human Review Trigger
+```
+□ Marcar para revisão
+□ Notificar revisor
+□ Agendar aprovação
+□ Definir prazo
+```
+
+## Comandos
+
+```bash
+# Validar schema
+node tools/nexoritia/validate-contracts.mjs \
+  --type=sop \
+  --file=documento-gerado.json
+
+# Quality gate
+node tools/nexoritia/run-nexoritia-quality-gate.mjs \
+  --type=document \
+  --input=documento.yaml
+
+# Inspecionar output
+node tools/nexoritia/inspect-regulated-output.mjs \
+  --file=documento.json \
+  --schema=.nexoritia/contracts/sop.schema.json
+
+# Registrar evidência
+node tools/nexoritia/write-audit-event.mjs \
+  --type="DOCUMENT_GENERATION" \
+  --actor="agent:cascade" \
+  --resource="<codigo>" \
+  --result="SUCCESS" \
+  --details='{"schema_valid": true, "quality_score": 85}'
+```
+
+## Quality Gates
+
+### Mínimos para Passar
+
+| Check | Threshold | Bloqueante |
+|-------|-----------|------------|
+| Schema | 0 erros | Sim |
+| Completude | 100% | Sim |
+| Policy | 0 violations | Sim |
+| Safety | 0 issues | Sim |
+| Quality | Score > 70 | Não |
+
+### Decisão
+```
+PASS: Todos bloqueantes passaram
+WARNING: Quality score < 70
+FAIL: Qualquer bloqueante falhou
+```
+
+## Evidências
+
+### O que Registrar
+- Timestamp de geração
+- Modelo usado
+- Temperatura
+- Prompt (hash)
+- Output (hash)
+- Resultado de validações
+- Quality score
+
+### Formato
+```json
+{
+  "event": "DOCUMENT_GENERATION",
+  "document_type": "SOP",
+  "code": "POP.001",
+  "generation": {
+    "model": "deepseek-r1",
+    "temperature": 0.3,
+    "prompt_hash": "sha256:abc",
+    "output_hash": "sha256:def"
+  },
+  "validation": {
+    "schema_passed": true,
+    "policy_passed": true,
+    "safety_passed": true,
+    "quality_score": 85
+  },
+  "status": "PENDING_REVIEW",
+  "timestamp": "2025-01-15T10:30:00Z"
+}
+```
+
+## Aprovação
+
+### Workflow de Aprovação
+1. **Elaborador** (IA/Agente): Gera documento
+2. **Revisor**: Valida conteúdo técnico
+3. **Aprovador**: Autoriza implementação
+
+### Papéis
+- Não podem ser a mesma pessoa
+- Segregação obrigatória
+- Assinaturas digitais
+
+## Rollback
+
+Se documento rejeitado:
+```
+1. Registrar rejeição
+2. Capturar feedback
+3. Marcar para reelaboração
+4. Preservar versão original
+5. Iniciar novo ciclo
+```
+
+## Sucesso
+
+Documento gerado, validado e em revisão:
+```
+✓ Schema validado
+✓ Políticas conferidas
+✓ Quality gate passou
+✓ Segurança verificada
+✓ Evidência registrada
+✓ Revisor notificado
+```

@@ -1,0 +1,270 @@
+# AGENTS.md - Agentes do Projeto VISADOCS 360
+
+**Versão:** 1.0.0  
+**Data:** 2025-01-15  
+**Projeto:** VISADOCS 360 MVP + Nexoritia Regulated AI OS
+
+---
+
+## 1. MISSÃO DO PROJETO
+
+**VISADOCS 360** é uma plataforma SaaS multi-tenant para gestão de BPF (Boas Práticas de Fabricação) em farmácias de manipulação, integrando:
+
+- **Gestão de POPs/SOPs:** Biblioteca de 252 procedimentos operacionais
+- **Treinamentos e Certificações:** Blockchain-based com hash chain
+- **Compliance em Tempo Real:** QR Code para fiscais ANVISA
+- **Assistente IA:** 10 especialistas técnicos (OpenRouter)
+- **Integração Universal:** Bridge para ERPs (Fagron, Trier, HOS)
+
+**Objetivo:** Tornar a conformidade com RDC 67/2007 simples, auditável e automatizada.
+
+---
+
+## 2. NEXORITIA GOVERNANCE
+
+### 2.1 Comando Obligatório
+
+Antes de **qualquer ação regulada**, o agente deve:
+
+```bash
+# Ler o kernel de governança
+cat NEXORITIA_KERNEL.md
+```
+
+Este arquivo contém:
+- Princípios operacionais
+- Critérios de validação e bloqueio
+- Matriz de risco
+- Regra anti-overcoding
+
+### 2.2 Regras de Governança
+
+#### Regra 1: Auditar Antes de Alterar
+> Nenhum arquivo de produto pode ser alterado sem:
+> 1. Leitura do arquivo atual
+> 2. Entendimento do contexto
+> 3. Validação de impacto
+> 4. Geração de evidência em `.nexoritia/logs/`
+
+#### Regra 2: Validar Antes de Concluir
+> Nenhum documento regulado (POP, SOP, Certificado) é considerado final sem:
+> 1. Validação de schema (`validate-contracts.mjs`)
+> 2. Passagem no quality gate (`run-nexoritia-quality-gate.mjs`)
+> 3. Registro de evidência auditável
+
+#### Regra 3: Preservar Comportamento Existente
+> Ao modificar código:
+> - Manter interfaces públicas
+> - Preservar contratos de API
+> - Não alterar comportamento de features existentes
+> - Adicionar, nunca remover, funcionalidade sem explicit request
+
+### 2.3 Hierarquia de Instruções
+
+Quando conflito entre instruções:
+
+```
+1. NEXORITIA_KERNEL.md (mais alta)
+2. AGENTS.md (esta seção)
+3. .windsurf/rules/00-nexoritia-governance.md
+4. .windsurf/skills/ (específicas)
+5. User Request (mais baixa)
+```
+
+**Princípio:** Segurança > Conformidade > Funcionalidade
+
+### 2.4 Workflow de Governança
+
+```
+User Request
+    ↓
+[LEITURA OBRIGATÓRIA]
+NEXORITIA_KERNEL.md
+    ↓
+[VALIDAÇÃO DE PERMISSÃO]
+A ação é permitida?
+    ↓ NÃO
+[BLOQUEIO COM JUSTIFICATIVA]
+    ↓ SIM
+[EXECUÇÃO]
+Com governança aplicada
+    ↓
+[VALIDAÇÃO]
+Quality gate passou?
+    ↓ NÃO
+[EVIDÊNCIA DE FALHA]
+    ↓ SIM
+[EVIDÊNCIA DE SUCESSO]
+    ↓
+[ENTREGA]
+Ao usuário
+```
+
+---
+
+## 3. COMANDOS DO AGENTE
+
+### 3.1 Leitura de Contexto
+
+```bash
+# Kernel de governança (SEMPRE PRIMEIRO)
+cat NEXORITIA_KERNEL.md
+
+# Regras de execução
+cat .windsurf/rules/00-nexoritia-governance.md
+cat .windsurf/rules/10-regulated-output-safety.md
+
+# Skills disponíveis
+ls .windsurf/skills/
+
+# Workflows disponíveis
+ls .windsurf/workflows/
+```
+
+### 3.2 Validação
+
+```bash
+# Validar contratos
+node tools/nexoritia/validate-contracts.mjs
+
+# Validar output
+node tools/nexoritia/inspect-regulated-output.mjs <arquivo>
+
+# Quality gate
+node tools/nexoritia/run-nexoritia-quality-gate.mjs
+```
+
+### 3.3 Evidência
+
+```bash
+# Escrever evento de auditoria
+node tools/nexoritia/write-audit-event.mjs \
+  --type="CODE_GENERATION" \
+  --severity="LOW" \
+  --details='{"file": "component.tsx"}'
+
+# Gerar hash chain
+node tools/nexoritia/hash-evidence-chain.mjs
+```
+
+---
+
+## 4. ESTRUTURA DE DIRETÓRIOS
+
+```
+visadocs-360-mvp/
+├── NEXORITIA_KERNEL.md          # Kernel de governança
+├── AGENTS.md                    # Este arquivo
+├── .nexoritia/                  # Camada de governança
+│   ├── contracts/               # Schemas JSON
+│   ├── policies/                # Políticas YAML
+│   ├── workflows/               # Workflows YAML
+│   ├── evals/                   # Avaliações
+│   │   ├── promptfoo/           # Testes de prompt
+│   │   ├── ragas/               # Avaliação RAG
+│   │   └── golden-datasets/     # Datasets de referência
+│   └── logs/                    # Logs de auditoria
+├── .windsurf/
+│   ├── skills/                  # Skills do agente
+│   ├── rules/                   # Regras de execução
+│   └── workflows/               # Workflows IDE
+├── tools/nexoritia/             # Scripts de governança
+│   ├── validate-contracts.mjs
+│   ├── write-audit-event.mjs
+│   ├── hash-evidence-chain.mjs
+│   ├── inspect-regulated-output.mjs
+│   └── run-nexoritia-quality-gate.mjs
+└── (código de produto inalterado)
+```
+
+---
+
+## 5. PROTOCOLOS ESPECÍFICOS
+
+### 5.1 Geração de POP/SOP
+
+1. Consultar skill `regulated-qms-architect`
+2. Usar template do workflow `sop-generation.yaml`
+3. Validar contra `contracts/sop.schema.json`
+4. Registrar em `logs/sop-generation/`
+5. Quality gate antes de marcar como done
+
+### 5.2 Geração de Certificado
+
+1. Validar dados do treinamento
+2. Usar `contracts/certificate.schema.json`
+3. Calcular hash chain
+4. Registrar em `logs/certificates/`
+5. Nunca entregar sem validação
+
+### 5.3 Alteração de Código
+
+1. Auditar arquivo atual
+2. Entender contexto e dependências
+3. Aplicar regra `30-anti-overcoding.md`
+4. Não alterar banco, auth, ou deploy
+5. Validar sintaxe antes de concluir
+6. Registrar em `logs/code-changes/`
+
+---
+
+## 6. CONTATOS E SUPORTE
+
+| Papel | Responsabilidade |
+|-------|-----------------|
+| **Agente Cascade** | Execução com governança |
+| **Nexoritia Kernel** | Definição de regras |
+| **Nexoritia Governor** | Validação e bloqueio |
+| **User (Desenvolvedor)** | Solicitações e revisão |
+| **Fiscal ANVISA** | Auditoria de evidências |
+
+---
+
+## 7. HISTÓRICO DE ALTERAÇÕES
+
+| Data | Versão | Alteração | Autor |
+|------|--------|-----------|-------|
+| 2025-01-15 | 1.0.0 | Criação inicial + Nexoritia Governance | Architect |
+
+---
+
+**"Regulamentação não é obstáculo, é qualidade garantida."**
+
+*© 2025 VISADOCS 360 + Nexoritia Regulated AI OS*
+
+
+<!-- NEXORITIA_GOVERNANCE_SECTION -->
+
+# Nexoritia Governance
+
+## Mandatory Reading
+
+Before any relevant change, read:
+
+- NEXORITIA_KERNEL.md
+- .nexoritia/README.md
+- applicable .windsurf/rules
+- applicable .windsurf/skills
+
+## Operating Rules
+
+1. Audit before changing.
+2. Preserve existing behavior.
+3. Validate before concluding.
+4. Never expose secrets.
+5. Never alter database, authentication, deployment or environment contracts without impact analysis.
+6. For regulated outputs, apply evidence minimum.
+7. Do not claim validation passed unless commands or checks actually ran.
+
+## Default Workflow
+
+For any risky task:
+
+1. diagnose;
+2. identify files;
+3. choose skill;
+4. apply policy;
+5. implement minimal patch;
+6. validate;
+7. register evidence;
+8. report residual risks.

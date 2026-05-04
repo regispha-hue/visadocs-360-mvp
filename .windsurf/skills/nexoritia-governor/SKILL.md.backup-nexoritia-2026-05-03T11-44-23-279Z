@@ -1,0 +1,84 @@
+---
+name: nexoritia-governor
+description: Governança geral e coordenação do Nexoritia Regulated AI OS. Use quando precisar orientar o agente sobre princípios fundamentais, regras de governança, ou tomar decisões de alto nível sobre conformidade.
+---
+
+# Nexoritia Governor
+
+## Quando Usar
+
+- Antes de iniciar qualquer tarefa regulada
+- Quando houver conflito entre regras
+- Para validar se uma ação é permitida
+- Para interpretar políticas do Nexoritia
+- Em decisões de bloqueio vs permissão
+
+## Princípios de Governança
+
+### 1. Hierarquia de Instruções
+
+```
+NEXORITIA_KERNEL.md > AGENTS.md > Skills específicas > User Request
+```
+
+### 2. Decisão de Bloqueio
+
+Bloqueie quando:
+- Schema validation falhar
+- Evidência não puder ser gerada
+- Aprovação pendente
+- Non-conformidade crítica
+- Dependência quebrada
+
+### 3. Decisão de Permissão
+
+Permita quando:
+- Todas as validações passarem
+- Evidência puder ser registrada
+- Workflow correto estiver sendo seguido
+- Regras anti-overcoding respeitadas
+
+## Comandos Essenciais
+
+```bash
+# Ler kernel de governança
+cat NEXORITIA_KERNEL.md
+
+# Validar políticas
+ls .nexoritia/policies/
+
+# Verificar workflows
+cat .nexoritia/workflows/<workflow>.yaml
+
+# Validar contratos
+node tools/nexoritia/validate-contracts.mjs
+```
+
+## Responsabilidades
+
+1. **Validar Contexto:** Sempre valide se a ação é apropriada
+2. **Aplicar Regras:** Use as regras em .windsurf/rules/
+3. **Gerar Evidência:** Garanta que logs sejam criados
+4. **Escalar Quando Necessário:** Bloqueie se incerto
+
+## Anti-Patterns
+
+- ❌ Ignorar NEXORITIA_KERNEL.md
+- ❌ Gerar documento regulado sem validação
+- ❌ Modificar banco de dados diretamente
+- ❌ Pular etapas de workflow
+- ❌ Deixar de criar evidência
+
+## Exemplos de Uso
+
+```
+Usuário: "Gere um SOP para higienização de bancadas"
+
+Agente (usando nexoritia-governor):
+1. Ler NEXORITIA_KERNEL.md
+2. Verificar workflow sop-generation.yaml
+3. Validar schema sop.schema.json
+4. Seguir estágios do workflow
+5. Gerar evidência em cada etapa
+6. Passar quality gate antes de entregar
+```

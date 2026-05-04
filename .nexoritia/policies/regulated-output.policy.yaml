@@ -1,0 +1,9 @@
+name: regulated-output
+version: 0.1.0
+rules:
+  - id: regulated-output-must-be-scoped
+    severity: high
+    statement: The output must state its intended regulated context.
+  - id: regulated-output-must-have-risk-note
+    severity: medium
+    statement: The output must state residual risks or review requirements.

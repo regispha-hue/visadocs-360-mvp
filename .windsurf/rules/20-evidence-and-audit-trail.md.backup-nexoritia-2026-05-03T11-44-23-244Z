@@ -1,0 +1,203 @@
+---
+name: evidence-and-audit-trail
+order: 20
+---
+
+# Regra 20: Evidence and Audit Trail
+
+## Propósito
+Garantir que cada ação gere evidência rastreável e auditável, mantendo a trilha de auditoria completa.
+
+## Princípio Fundamental
+> *"Se não está registrado, não aconteceu."*
+
+## Requisitos de Evidência
+
+### 1. Atributos Obrigatórios
+
+Toda evidência DEVE conter:
+- **WHO:** Quem executou (actor ID)
+- **WHAT:** O que foi feito (action)
+- **WHEN:** Quando (timestamp ISO8601)
+- **WHERE:** Contexto (tenant, resource)
+- **RESULT:** Sucesso ou falha
+- **HASH:** Integridade (SHA-256)
+
+### 2. Formatos de Evidência
+
+#### Evento de Auditoria (Audit Event)
+```json
+{
+  "id": "uuid",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "actor": {
+    "type": "AGENT|USER|SYSTEM",
+    "id": "identifier",
+    "tenant_id": "tenant-abc"
+  },
+  "action": {
+    "type": "CREATE|UPDATE|DELETE",
+    "category": "SOP|TRAINING|CODE"
+  },
+  "resource": {
+    "type": "DOCUMENT|FILE|RECORD",
+    "id": "resource-uuid"
+  },
+  "result": {
+    "status": "SUCCESS|FAILURE|BLOCKED",
+    "details": {}
+  },
+  "hash": "sha256:abc123..."
+}
+```
+
+#### Log de Validação (Validation Log)
+```json
+{
+  "validation_id": "uuid",
+  "target": "sop-123",
+  "checks": [
+    {"name": "schema", "result": "PASSED"},
+    {"name": "policy", "result": "PASSED"}
+  ],
+  "timestamp": "ISO8601",
+  "validator": "ai-output-validator"
+}
+```
+
+## Quando Registrar Evidência
+
+### SEMPRE (100% das vezes)
+- Criação de documento regulado
+- Alteração de status de aprovação
+- Deploy em produção
+- Acesso a dados sensíveis
+- Tentativa de acesso negada
+
+### QUANDO APLICÁVEL
+- Geração de código (>50 linhas)
+- Modificação de configuração
+- Execução de workflow
+- Validação de output
+
+### NÃO NECESSÁRIO
+- Leitura de arquivo (apenas consulta)
+- Execução de teste local
+- Debug em ambiente dev
+
+## Chain of Custody
+
+### Hash Chain
+```
+Evento 1: Hash(E1) = H1
+Evento 2: Hash(E2 + H1) = H2
+Evento 3: Hash(E3 + H2) = H3
+
+Verificação: Recalcular e comparar
+```
+
+### Implementação
+```javascript
+// Pseudo-código
+function createEvidence(data, previousHash) {
+  const content = JSON.stringify(data);
+  const hash = sha256(content + previousHash);
+  
+  return {
+    ...data,
+    hash,
+    previous_hash: previousHash,
+    timestamp: now()
+  };
+}
+```
+
+## Ferramentas
+
+### Registrar Evento
+```bash
+node tools/nexoritia/write-audit-event.mjs \
+  --type="DOCUMENT_CREATION" \
+  --actor="agent:cascade" \
+  --resource="sop-123" \
+  --result="SUCCESS" \
+  --details='{"version": "1.0"}'
+```
+
+### Verificar Cadeia
+```bash
+node tools/nexoritia/hash-evidence-chain.mjs \
+  --verify \
+  --from="2025-01-01" \
+  --to="2025-01-31"
+```
+
+### Gerar Relatório
+```bash
+node tools/nexoritia/write-audit-event.mjs \
+  --report \
+  --period="2025-01" \
+  --output="audit-report.json"
+```
+
+## Localização dos Logs
+
+```
+.nexoritia/logs/
+├── audit-events/           # Eventos de auditoria
+│   └── YYYY-MM/
+│       └── DD-events.jsonl
+├── validations/            # Logs de validação
+│   └── YYYY-MM/
+│       └── validation-reports.jsonl
+├── code-changes/           # Alterações de código
+│   └── YYYY-MM/
+│       └── changes.jsonl
+└── governance-decisions/   # Decisões de governança
+    └── YYYY-MM/
+        └── decisions.jsonl
+```
+
+## Retenção
+
+| Tipo de Evidência | Período | Formato |
+|-------------------|---------|---------|
+| Audit Events | 5 anos | JSONL |
+| Validation Logs | 5 anos | JSONL |
+| Code Changes | 2 anos | JSONL |
+| Governance Decisions | Permanente | JSONL |
+
+## Preparação para Auditoria
+
+### Checklist Pré-Auditoria
+- [ ] Verificar integridade da cadeia de hash
+- [ ] Confirmar período de retenção
+- [ ] Organizar logs por categoria
+- [ ] Extrair relatórios consolidados
+- [ ] Validar acesso aos logs
+
+### Durante Auditoria
+- [ ] Fornecer acesso somente leitura
+- [ ] Registrar acesso do auditor
+- [ ] Acompanhar consultas
+- [ ] Documentar evidências fornecidas
+
+### Pós-Auditoria
+- [ ] Arquivar relatório da auditoria
+- [ ] Registrar findings e respostas
+- [ ] Atualizar controles se necessário
+- [ ] Documentar lições aprendidas
+
+## Violations
+
+### Evidência Não Gerada
+**Gravidade:** Alta
+**Ação:** Investigar, complementar evidência, prevenir recorrência
+
+### Evidência Corrompida
+**Gravidade:** Crítica
+**Ação:** Investigação imediata, possível incidente de segurança
+
+### Cadeia de Hash Quebrada
+**Gravidade:** Crítica
+**Ação:** Parar operações, investigar, recuperar de backup

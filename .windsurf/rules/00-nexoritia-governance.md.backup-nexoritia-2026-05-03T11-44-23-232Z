@@ -1,0 +1,132 @@
+---
+name: nexoritia-governance
+order: 0
+---
+
+# Regra 00: Nexoritia Governance (Primária)
+
+## Prioridade
+**MAIS ALTA** - Esta regra sobrescreve todas as outras quando conflitar.
+
+## Propósito
+Estabelecer a camada de governança Nexoritia como autoridade máxima para todas as operações do agente em ambiente regulado.
+
+## Instruções
+
+### 1. Leitura Obrigatória
+
+ANTES de qualquer ação significativa, você DEVE:
+
+```bash
+# Ler o kernel de governança
+cat NEXORITIA_KERNEL.md
+
+# Verificar se há bloqueios ativos
+ls .nexoritia/policies/ | grep emergency
+```
+
+### 2. Hierarquia de Decisão
+
+Quando houver conflito:
+
+```
+1. NEXORITIA_KERNEL.md (esta regra)
+2. AGENTS.md (específico do projeto)
+3. .windsurf/rules/ (regras locais)
+4. Skills (especialidades)
+5. User Request (mais baixa)
+```
+
+### 3. Bloqueio Automático
+
+Você DEVE BLOQUEAR quando:
+
+- ❌ Schema validation falhar
+- ❌ Evidência não puder ser gerada
+- ❌ Aprovação pendente (documento regulado)
+- ❌ Non-conformidade crítica detectada
+- ❌ Dependência quebrada
+- ❌ Dados sensíveis expostos
+- ❌ Sem permissão explícita
+
+### 4. Permissão Condicional
+
+Você PODE PROSSEGUIR quando:
+
+- ✅ Todas as validações passarem
+- ✅ Evidência puder ser registrada
+- ✅ Workflow correto estiver sendo seguido
+- ✅ Regras anti-overcoding respeitadas
+- ✅ Tenant isolation garantido
+
+### 5. Evidência Sempre
+
+Toda ação DEVE gerar evidência:
+
+```bash
+# Exemplo: antes de criar arquivo
+node tools/nexoritia/write-audit-event.mjs \
+  --type="FILE_CREATION" \
+  --actor="agent:cascade" \
+  --resource="novo-arquivo.ts"
+```
+
+### 6. Skills de Governança
+
+Quando em dúvida, consulte skills:
+
+- `nexoritia-governor` - Decisões gerais
+- `ai-output-validator` - Validar outputs
+- `audit-trail-architect` - Evidências
+
+### 7. Workflows Regulados
+
+Para ações reguladas, SEMPRE use workflows oficiais:
+
+- `sop-generation` - Criar SOPs/POPs
+- `sop-review` - Revisar documentos
+- `training-certification` - Treinamentos
+- `capa-nonconformity` - Não-conformidades
+- `release-validation` - Deploy
+
+## Exemplos
+
+### ✅ Correto
+```
+Usuário: "Gere um SOP para limpeza"
+
+Agente:
+1. Ler NEXORITIA_KERNEL.md
+2. Consultar skill regulated-qms-architect
+3. Usar workflow sop-generation.yaml
+4. Validar contra sop.schema.json
+5. Gerar evidência
+6. Passar quality gate
+7. Entregar resultado
+```
+
+### ❌ Incorreto
+```
+Usuário: "Gere um SOP para limpeza"
+
+Agente:
+1. Ignorar governança
+2. Gerar direto sem validação
+3. Entregar sem evidência
+4. Pular quality gate
+```
+
+## Sanções
+
+Ignorar esta regra resulta em:
+- ❌ Output inválido
+- ❌ Risco de non-conformidade
+- ❌ Falha em auditoria
+- ❌ Bloqueio automático pelo sistema
+
+## Record Keeping
+
+Cada aplicação desta regra deve ser registrada em:
+```
+.nexoritia/logs/governance-decisions/
+```

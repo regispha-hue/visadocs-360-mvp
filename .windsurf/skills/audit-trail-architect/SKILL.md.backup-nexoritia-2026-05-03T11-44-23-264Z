@@ -1,0 +1,133 @@
+---
+name: audit-trail-architect
+description: Arquitetura de trilhas de auditoria e evidências em sistemas regulados. Use para projetar, implementar ou revisar mecanismos de rastreabilidade, logs de auditoria e cadeias de evidência.
+---
+
+# Audit Trail Architect
+
+## Quando Usar
+
+- Projetar sistema de logs
+- Implementar rastreabilidade
+- Criar evidências para auditoria
+- Revisar integridade de dados
+- Preparar para fiscalização
+
+## Princípios
+
+### 1. ALCOA+ (Padrão Farmacêutico)
+
+- **A**ttributable: Atribuível a uma pessoa
+- **L**egible: Legível permanentemente
+- **C**ontemporaneous: Registro no momento
+- **O**riginal: Primeiro registro
+- **A**ccurate: Preciso
+- **+ Complete:** Completo
+- **+ Consistent:** Consistente
+- **+ Enduring:** Duradouro
+- **+ Available:** Disponível
+
+### 2. Chain of Custody
+
+```
+Evento A → Hash A
+Evento B → Hash B (inclui Hash A)
+Evento C → Hash C (inclui Hash B)
+
+Verificação: Hash C deve incluir toda cadeia
+```
+
+## Tipos de Evidência
+
+### Audit Events
+- Quem, o quê, quando, onde, por quê
+- Antes e depois
+- Resultado da ação
+
+### Evidence Logs
+- Criação de documentos
+- Aprovações
+- Modificações
+- Acessos
+
+### Validation Reports
+- Quality gate results
+- Schema validations
+- Policy checks
+
+## Implementação
+
+### Estrutura de Evento
+
+```json
+{
+  "id": "uuid",
+  "timestamp": "ISO8601",
+  "actor": {
+    "type": "USER|AGENT|SYSTEM",
+    "id": "identifier",
+    "tenant_id": "tenant"
+  },
+  "action": {
+    "type": "CREATE|UPDATE|DELETE",
+    "resource": "DOCUMENT|USER|CONFIG"
+  },
+  "context": {
+    "ip": "address",
+    "user_agent": "string",
+    "workflow_id": "uuid"
+  },
+  "result": {
+    "status": "SUCCESS|FAILURE",
+    "details": {}
+  },
+  "hash_chain": {
+    "current": "sha256",
+    "previous": "sha256"
+  }
+}
+```
+
+### Hash Chain
+
+```javascript
+// Pseudo-código
+function calculateHash(event, previousHash) {
+  const data = JSON.stringify(event) + previousHash;
+  return sha256(data);
+}
+```
+
+## Ferramentas
+
+```bash
+# Escrever evento de auditoria
+node tools/nexoritia/write-audit-event.mjs \
+  --type="DOCUMENT_CREATION" \
+  --actor="user@tenant" \
+  --resource="sop-001" \
+  --result="SUCCESS"
+
+# Verificar cadeia de hash
+node tools/nexoritia/hash-evidence-chain.mjs \
+  --verify \
+  --from="2025-01-01" \
+  --to="2025-01-31"
+```
+
+## Retenção
+
+| Tipo | Período | Formato |
+|------|---------|---------|
+| Audit Trail | Permanente | Hash chain |
+| System Logs | 2 anos | Rotacionado |
+| User Access | 1 ano | Anonimizado após |
+| Validation | 10 anos | Imutável |
+
+## Preparação para Auditoria
+
+1. **Identificar Escopo:** Qual período/processos?
+2. **Extrair Evidências:** Logs relevantes
+3. **Verificar Integridade:** Hash chain consistente?
+4. **Organizar:** Por processo, cronológico
+5. **Entregar:** Formatado para fiscal

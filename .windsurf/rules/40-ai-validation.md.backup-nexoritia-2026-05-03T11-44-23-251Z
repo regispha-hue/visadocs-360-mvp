@@ -1,0 +1,263 @@
+---
+name: ai-validation
+order: 40
+---
+
+# Regra 40: AI Validation
+
+## Propósito
+Estabelecer processo rigoroso de validação para outputs gerados por inteligência artificial, garantindo qualidade e conformidade.
+
+## Contexto
+
+Outputs de IA podem conter:
+- Alucinações (informações inventadas)
+- Imprecisões técnicas
+- Violações de política
+- Bias não intencional
+
+Esta regra minimiza esses riscos.
+
+## Processo de Validação
+
+### Fase 1: Geração
+```
+Input + Prompt → Modelo → Output Bruto
+```
+
+### Fase 2: Validação Automática
+```
+Output Bruto → Validadores → Resultado
+```
+
+### Fase 3: Revisão Humana (quando aplicável)
+```
+Resultado → Revisor → Aprovação Final
+```
+
+### Fase 4: Entrega
+```
+Aprovado → Usuário Final
+```
+
+## Validadores
+
+### 1. Schema Validator (BLOQUEANTE)
+```
+Verifica: Output conforme com schema JSON
+Ferramenta: validate-contracts.mjs
+Threshold: 0 erros
+```
+
+### 2. Policy Validator (BLOQUEANTE)
+```
+Verifica: Conformidade com políticas
+Ferramenta: Inspeção de políticas YAML
+Threshold: 0 violações
+```
+
+### 3. Fact Checker (WARNING)
+```
+Verifica: Fatos contra fontes confiáveis
+Ferramenta: RAG + Knowledge Base
+Threshold: > 85% confiança
+```
+
+### 4. Safety Scanner (BLOQUEANTE)
+```
+Verifica: Sem dados sensíveis, instruções perigosas
+Ferramenta: Regex + NLP
+Threshold: 0 violações
+```
+
+### 5. Quality Metrics (WARNING)
+```
+Verifica: Clareza, completude, precisão
+Ferramenta: Métricas calculadas
+Threshold: Score > 70
+```
+
+## Tipos de Output
+
+### Documentos Regulados (SOP/POP)
+```
+Validações Obrigatórias:
+✓ Schema compliance (BLOCKING)
+✓ Policy compliance (BLOCKING)
+✓ Safety scan (BLOCKING)
+✓ Fact check (BLOCKING)
+✓ Quality metrics (WARNING)
+
+Workflow: sop-generation.yaml
+Revisão Humana: Obrigatória (3 papéis)
+```
+
+### Código
+```
+Validações Obrigatórias:
+✓ Sintaxe válida (BLOCKING)
+✓ Security scan (BLOCKING)
+✓ Testes passam (BLOCKING)
+✓ Documentação presente (WARNING)
+
+Revisão Humana: Code review
+```
+
+### Texto/Respostas
+```
+Validações Obrigatórias:
+✓ Safety scan (BLOCKING)
+✓ Fact check (WARNING)
+✓ Bias check (WARNING)
+
+Revisão Humana: Depende do contexto
+```
+
+## Tratamento de Falhas
+
+### Schema Validation Failed
+```
+Ação: Bloquear
+Notificar: Usuário com erros específicos
+Próximo Passo: Correção e re-submissão
+```
+
+### Policy Violation
+```
+Ação: Bloquear
+Notificar: Usuário + Compliance Officer
+Próximo Passo: Investigação se recorrente
+```
+
+### Fact Check Failed
+```
+Ação: Flag para revisão
+Notificar: Revisor
+Próximo Passo: Verificação manual
+```
+
+### Safety Issue
+```
+Ação: Bloquear imediato
+Notificar: Security Team
+Próximo Passo: Investigação
+```
+
+## Prompt Engineering
+
+### Melhores Práticas
+
+1. **Contexto Explícito**
+```
+"Você é um especialista em BPF da ANVISA..."
+```
+
+2. **Restrições Claras**
+```
+"Não inclua informações médicas..."
+"Use apenas termos da farmacopeia..."
+```
+
+3. **Formato Definido**
+```
+"Responda em JSON com os campos..."
+```
+
+4. **Referências Fornecidas**
+```
+"Baseado neste contexto: {{context}}"
+```
+
+### Temperaturas Recomendadas
+
+| Tarefa | Temperatura | Razão |
+|--------|-------------|-------|
+| SOP Generation | 0.3 | Precisão > Criatividade |
+| Code Generation | 0.2 | Determinístico |
+| Quiz Questions | 0.4 | Alguma variedade |
+| Documentation | 0.4 | Natural mas preciso |
+
+## Evidência
+
+Cada validação gera:
+```json
+{
+  "validation_id": "uuid",
+  "output_id": "uuid",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "model": "deepseek-r1",
+  "temperature": 0.3,
+  "prompt_hash": "sha256:abc123",
+  "output_hash": "sha256:def456",
+  "validators": [
+    {"name": "schema", "result": "PASSED"},
+    {"name": "policy", "result": "PASSED"},
+    {"name": "safety", "result": "PASSED"}
+  ],
+  "human_review": {
+    "required": true,
+    "completed": false,
+    "assigned_to": "user@example.com"
+  }
+}
+```
+
+## Hallucination Prevention
+
+### Técnicas
+
+1. **RAG (Retrieval Augmented Generation)**
+   - Fornecer contexto verificado
+   - Limitar ao knowledge base
+
+2. **Constrained Generation**
+   - Schemas JSON
+   - Enumerações fixas
+   - Templates rígidos
+
+3. **Self-Consistency Checks**
+   - Verificar contradições internas
+   - Validar lógica
+
+4. **Citation Requirements**
+   - Exigir referências
+   - Verificar fontes
+
+### Verificação de Fato
+
+```
+Fato Gerado → Consultar KB → Confirmar/Rejeitar
+```
+
+Fontes confiáveis:
+- ANVISA (normas vigentes)
+- Farmácia Brasileira (conteúdo validado)
+- Documentos internos aprovados
+- Literatura científica revisada por pares
+
+## Métricas
+
+### Track
+- Acceptance rate (% aceito)
+- Validation pass rate (% passa gates)
+- Hallucination rate (% com erros de fato)
+- Revision rate (% que precisa revisão)
+
+### Targets
+- Acceptance rate: > 90%
+- Hallucination rate: < 2%
+- Revision rate: < 15%
+
+## Ferramentas
+
+```bash
+# Inspecionar output
+node tools/nexoritia/inspect-regulated-output.mjs \
+  --file=output.json \
+  --schema=sop.schema.json
+
+# Quality gate completo
+node tools/nexoritia/run-nexoritia-quality-gate.mjs \
+  --type=document \
+  --input=output.json
+```

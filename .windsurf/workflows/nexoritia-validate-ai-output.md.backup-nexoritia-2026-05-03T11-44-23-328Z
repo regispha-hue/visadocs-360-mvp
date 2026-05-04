@@ -1,0 +1,236 @@
+---
+name: Nexoritia Validate AI Output
+description: Workflow para validação completa de outputs gerados por IA, incluindo schema, policy, safety e quality checks.
+trigger:
+  - ai_output_generated
+  - document_generated
+  - code_generated
+---
+
+# Workflow: Validate AI Output
+
+## Propósito
+Validar rigorosamente todo output de IA antes de entrega ao usuário ou commit em produção.
+
+## Tipos de Output
+- Documentos (SOP, POP, certificados)
+- Código (produção, scripts, configurações)
+- Dados (exportações, relatórios)
+- Texto (respostas, análises)
+
+## Validadores
+
+### 1. Schema Validator
+**Escopo:** Estrutura e formato
+**Bloqueante:** Sim
+**Ferramenta:** JSON Schema validation
+
+### 2. Policy Validator
+**Escopo:** Conformidade com políticas
+**Bloqueante:** Sim
+**Ferramenta:** YAML policy checker
+
+### 3. Fact Checker
+**Escopo:** Precisão de informações
+**Bloqueante:** Não (flag para revisão)
+**Ferramenta:** RAG + Knowledge Base
+
+### 4. Safety Scanner
+**Escopo:** Segurança e privacidade
+**Bloqueante:** Sim
+**Ferramenta:** Regex + NLP
+
+### 5. Quality Metrics
+**Escopo:** Clareza, completude, precisão
+**Bloqueante:** Não (warning se < 70)
+**Ferramenta:** Métricas calculadas
+
+## Fluxo de Validação
+
+```
+Output Gerado
+    ↓
+Schema Validator
+    ↓ PASS
+Policy Validator
+    ↓ PASS
+Fact Checker
+    ↓ PASS/REVIEW
+Safety Scanner
+    ↓ PASS
+Quality Metrics
+    ↓ SCORE
+Resultado Final
+```
+
+## Passos
+
+### 1. Receber Output
+```
+□ Identificar tipo de output
+□ Carregar schema apropriado
+□ Inicializar validadores
+```
+
+### 2. Schema Validation
+```
+□ Validar estrutura JSON/YAML
+□ Verificar campos obrigatórios
+□ Confirmar tipos de dados
+□ Reportar erros específicos
+```
+
+### 3. Policy Validation
+```
+□ Carregar políticas aplicáveis
+□ Verificar cada regra
+□ Flag violations
+□ Calcular compliance score
+```
+
+### 4. Fact Checking
+```
+□ Extrair afirmações factuais
+□ Consultar knowledge base
+□ Verificar precisão
+□ Flag uncertain claims
+```
+
+### 5. Safety Scan
+```
+□ Scan por PII/PHI
+□ Verificar secrets
+□ Checar instruções perigosas
+□ Confirmar LGPD compliance
+```
+
+### 6. Quality Assessment
+```
+□ Calcular readability score
+□ Verificar completude
+□ Avaliar precisão técnica
+□ Calcular score geral
+```
+
+### 7. Generate Report
+```
+□ Consolidar resultados
+□ Gerar evidência
+□ Criar validation report
+□ Atualizar audit trail
+```
+
+### 8. Decision
+```
+□ PASS: Aprovar entrega
+□ WARNING: Aprovar com flag
+□ FAIL: Bloquear e reportar
+```
+
+## Comandos
+
+```bash
+# Validação completa
+node tools/nexoritia/run-nexoritia-quality-gate.mjs \
+  --type=document \
+  --input=output.json \
+  --schema=sop.schema.json \
+  --policies=all
+
+# Inspeção detalhada
+node tools/nexoritia/inspect-regulated-output.mjs \
+  --file=output.json \
+  --verbose
+
+# Verificar schema específico
+node tools/nexoritia/validate-contracts.mjs \
+  --type=certificate \
+  --file=cert.json
+```
+
+## Resultados
+
+### PASS
+```json
+{
+  "result": "PASSED",
+  "score": 85,
+  "checks": [
+    {"name": "schema", "status": "PASSED"},
+    {"name": "policy", "status": "PASSED"},
+    {"name": "safety", "status": "PASSED"},
+    {"name": "quality", "status": "PASSED", "score": 85}
+  ],
+  "approved_for": "delivery"
+}
+```
+
+### WARNING
+```json
+{
+  "result": "WARNING",
+  "score": 65,
+  "checks": [
+    {"name": "schema", "status": "PASSED"},
+    {"name": "quality", "status": "WARNING", "score": 65}
+  ],
+  "approved_for": "delivery_with_review",
+  "recommendations": ["Improve clarity"]
+}
+```
+
+### FAIL
+```json
+{
+  "result": "FAILED",
+  "score": 0,
+  "checks": [
+    {"name": "schema", "status": "FAILED", "errors": [...]},
+    {"name": "safety", "status": "FAILED", "reason": "PII detected"}
+  ],
+  "approved_for": "none",
+  "action": "reject_and_notify"
+}
+```
+
+## Tratamento de Falhas
+
+### Schema Error
+- Bloquear output
+- Retornar erros específicos
+- Solicitar regeneração
+
+### Policy Violation
+- Bloquear output
+- Identificar política violada
+- Escalonar se recorrente
+
+### Safety Issue
+- Bloquear IMEDIATAMENTE
+- Notificar security team
+- Investigar
+
+### Quality Warning
+- Permitir com flag
+- Notificar revisor
+- Documentar risco
+
+## Evidência
+
+Toda validação gera:
+- Validation report JSON
+- Audit event
+- Hash do output validado
+- Timestamp
+
+## Sucesso
+
+Output validado e pronto:
+```
+✓ Schema validado (0 erros)
+✓ Políticas conferidas (0 violations)
+✓ Segurança verificada (0 issues)
+✓ Quality score calculado (> 70)
+✓ Evidência registrada
+✓ Aprovado para entrega
+```

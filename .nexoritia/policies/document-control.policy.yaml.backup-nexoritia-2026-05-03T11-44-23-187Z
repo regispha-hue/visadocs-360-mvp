@@ -1,0 +1,184 @@
+# Policy: Document Control
+# Version: 1.0.0
+# Date: 2025-01-15
+# Scope: SOP, POP, IT, Manual BPF
+
+policy:
+  name: document-control
+  description: Controle documental para procedimentos operacionais em ambientes regulados
+  version: "1.0.0"
+  effective_date: "2025-01-15"
+  regulatory_basis:
+    - "RDC 67/2007 - BPF Farmácias"
+    - "RDC 222/2018 - Boas Práticas"
+    - "ISO 9001:2015 - Gestão da Qualidade"
+
+  lifecycle_states:
+    - RASCUNHO:
+        description: "Documento em elaboração"
+        editable: true
+        approvable: false
+        distributable: false
+    - EM_REVISAO:
+        description: "Em processo de revisão"
+        editable: true
+        approvable: false
+        distributable: false
+    - APROVADO:
+        description: "Aprovado para uso"
+        editable: false
+        approvable: true
+        distributable: true
+    - OBSOLETO:
+        description: "Substituído por nova versão"
+        editable: false
+        approvable: false
+        distributable: false
+        retention: 5_years
+    - CANCELADO:
+        description: "Cancelado sem substituto"
+        editable: false
+        approvable: false
+        distributable: false
+        retention: 10_years
+
+  version_control:
+    format: "MAJOR.MINOR"
+    major_increment:
+      - "Mudança significativa no procedimento"
+      - "Alteração de responsáveis"
+      - "Mudança de equipamentos críticos"
+    minor_increment:
+      - "Correção ortográfica"
+      - "Ajuste de formatação"
+      - "Atualização de anexos"
+
+  approval_workflow:
+    roles:
+      - ELABORACAO:
+          min_required: 1
+          can_delegate: false
+          typical_role: "Analista de Qualidade"
+      - REVISAO:
+          min_required: 1
+          can_delegate: true
+          typical_role: "Responsável Técnico"
+      - APROVACAO:
+          min_required: 1
+          can_delegate: false
+          typical_role: "Gerente de Qualidade"
+    
+    segregation:
+      rule: "Quem elabora não revisa, quem revisa não aprova"
+      exceptions: ["startup_mode", "single_person_operation"]
+    
+    signatures:
+      required: true
+      format: "digital_hash"
+      retention: "permanent"
+
+  identification:
+    code_format: "{CATEGORY}.{SEQUENCE:000}"
+    categories:
+      POP: "Procedimento Operacional Padrão"
+      SOP: "Standard Operating Procedure"
+      IT: "Instrução de Trabalho"
+      MAN: "Manual"
+      FORM: "Formulário"
+    
+    header_required:
+      - codigo
+      - titulo
+      - versao
+      - data_aprovacao
+      - pagina_atual
+      - total_paginas
+
+  change_control:
+    change_types:
+      - EMERGENCIAL:
+          approval_time: "24h"
+          documentation: "reduced"
+          post_hoc_review: true
+      - PLANEJADA:
+          approval_time: "5d"
+          documentation: "full"
+          training_required: true
+      - CORRETIVA:
+          approval_time: "48h"
+          documentation: "full"
+          root_cause_required: true
+
+    review_periodicity:
+      standard: "2_years"
+      high_risk: "1_year"
+      critical: "6_months"
+
+  distribution:
+    controlled_copies:
+      max_per_document: 10
+      numbered: true
+      recipient_registry: true
+    
+    master_copy:
+      location: "system_of_record"
+      access: "quality_team_only"
+      backup: "daily"
+
+  obsolescence:
+    trigger:
+      - "Nova versão aprovada"
+      - "Processo descontinuado"
+      - "Norma revogada"
+    
+    action:
+      - "Marcar como OBSOLETO"
+      - "Notificar detentores de cópias"
+      - "Recolher cópias impressas"
+      - "Manter por período de retenção"
+
+  compliance_checks:
+    - id: DOC-001
+      name: "Codification Check"
+      rule: "Document must have unique, formatted code"
+      severity: BLOCKING
+    
+    - id: DOC-002
+      name: "Approval Chain Check"
+      rule: "All three roles (elaborate, review, approve) must be distinct"
+      severity: BLOCKING
+    
+    - id: DOC-003
+      name: "Version Check"
+      rule: "Version must follow MAJOR.MINOR format"
+      severity: WARNING
+    
+    - id: DOC-004
+      name: "Review Date Check"
+      rule: "Next review date must be set and within allowed period"
+      severity: WARNING
+    
+    - id: DOC-005
+      name: "Hash Integrity Check"
+      rule: "Document hash must match stored value"
+      severity: BLOCKING
+
+  retention:
+    active_documents: "current_version_only"
+    obsolete_documents: "5_years"
+    audit_trail: "permanent"
+    format: "immutable_hash_chain"
+
+  ai_generation_rules:
+    allowed: true
+    requirements:
+      - "Must use approved template"
+      - "Must validate against schema"
+      - "Must include all required sections"
+      - "Must pass quality gate"
+    
+    prohibited:
+      - "Generating without human review"
+      - "Skipping approval workflow"
+      - "Modifying approved documents"
+      - "Generating without evidence"

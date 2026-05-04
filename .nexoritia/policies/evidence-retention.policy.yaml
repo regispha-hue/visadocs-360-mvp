@@ -1,0 +1,9 @@
+name: evidence-retention
+version: 0.1.0
+rules:
+  - id: audit-log-required
+    severity: high
+    statement: Regulated actions must generate audit events.
+  - id: evidence-minimum-required
+    severity: high
+    statement: Regulated outputs must preserve minimum evidence.

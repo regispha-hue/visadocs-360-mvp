@@ -1,0 +1,306 @@
+#!/usr/bin/env node
+/**
+ * hash-evidence-chain.mjs
+ * Gerencia cadeia de hash de evidências e verifica integridade
+ * Uso: node hash-evidence-chain.mjs --verify [--from=<data>] [--to=<data>]
+ */
+
+import { readFileSync, existsSync, readdirSync } from 'fs';
+import { resolve, join } from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..', '..');
+
+/**
+ * Calcula SHA-256
+ */
+function sha256(data) {
+  return createHash('sha256').update(data).digest('hex');
+}
+
+/**
+ * Recalcula hash de um evento
+ */
+function recalculateHash(event) {
+  // Remover hash_chain para calcular hash do conteúdo
+  const { hash_chain, ...eventData } = event;
+  const content = JSON.stringify(eventData);
+  const previousHash = hash_chain?.previous || '0'.repeat(64);
+  return sha256(content + previousHash);
+}
+
+/**
+ * Verifica integridade de arquivo de log
+ */
+function verifyLogFile(filePath) {
+  const violations = [];
+  
+  if (!existsSync(filePath)) {
+    return { valid: false, violations: ['Arquivo não encontrado'] };
+  }
+  
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
+    
+    if (lines.length === 0) {
+      return { valid: true, violations: [], count: 0 };
+    }
+    
+    let previousHash = '0'.repeat(64);
+    
+    for (let i = 0; i < lines.length; i++) {
+      try {
+        const event = JSON.parse(lines[i]);
+        
+        // Verificar se tem hash_chain
+        if (!event.hash_chain) {
+          violations.push(`Linha ${i + 1}: hash_chain ausente`);
+          continue;
+        }
+        
+        // Verificar previous hash
+        if (event.hash_chain.previous !== previousHash) {
+          violations.push(`Linha ${i + 1}: previous hash inconsistente`);
+        }
+        
+        // Recalcular e comparar
+        const calculatedHash = recalculateHash(event);
+        if (calculatedHash !== event.hash_chain.current) {
+          violations.push(`Linha ${i + 1}: hash atual não corresponde`);
+        }
+        
+        previousHash = event.hash_chain.current;
+      } catch (e) {
+        violations.push(`Linha ${i + 1}: erro de parse JSON`);
+      }
+    }
+    
+    return {
+      valid: violations.length === 0,
+      violations,
+      count: lines.length,
+      lastHash: previousHash.substring(0, 16) + '...'
+    };
+  } catch (e) {
+    return { valid: false, violations: [`Erro ao ler arquivo: ${e.message}`] };
+  }
+}
+
+/**
+ * Verifica todos os logs em um período
+ */
+function verifyPeriod(period) {
+  const [year, month] = period.split('-');
+  const periodDir = join(PROJECT_ROOT, '.nexoritia', 'logs', 'audit-events', period);
+  
+  if (!existsSync(periodDir)) {
+    return {
+      valid: false,
+      period,
+      violations: [`Período ${period} não encontrado`],
+      files: []
+    };
+  }
+  
+  const files = readdirSync(periodDir).filter(f => f.endsWith('.jsonl'));
+  const results = [];
+  let totalValid = 0;
+  let totalInvalid = 0;
+  let totalEvents = 0;
+  
+  for (const file of files) {
+    const filePath = join(periodDir, file);
+    const result = verifyLogFile(filePath);
+    
+    results.push({
+      file,
+      valid: result.valid,
+      events: result.count,
+      violations: result.violations
+    });
+    
+    if (result.valid) {
+      totalValid++;
+    } else {
+      totalInvalid++;
+    }
+    
+    totalEvents += result.count;
+  }
+  
+  return {
+    valid: totalInvalid === 0,
+    period,
+    totalFiles: files.length,
+    validFiles: totalValid,
+    invalidFiles: totalInvalid,
+    totalEvents,
+    files: results
+  };
+}
+
+/**
+ * Verifica toda a cadeia de evidências
+ */
+function verifyAll() {
+  const logsDir = join(PROJECT_ROOT, '.nexoritia', 'logs', 'audit-events');
+  
+  if (!existsSync(logsDir)) {
+    return { valid: false, error: 'Diretório de logs não encontrado' };
+  }
+  
+  const periods = readdirSync(logsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name)
+    .sort();
+  
+  const results = [];
+  let hasInvalid = false;
+  
+  for (const period of periods) {
+    const result = verifyPeriod(period);
+    results.push(result);
+    
+    if (!result.valid) {
+      hasInvalid = true;
+    }
+  }
+  
+  return {
+    valid: !hasInvalid,
+    periods: results
+  };
+}
+
+/**
+ * Gera hash de arquivo
+ */
+function hashFile(filePath) {
+  if (!existsSync(filePath)) {
+    return { error: 'Arquivo não encontrado' };
+  }
+  
+  try {
+    const content = readFileSync(filePath);
+    const hash = sha256(content);
+    
+    return {
+      file: filePath,
+      hash,
+      algorithm: 'SHA-256'
+    };
+  } catch (e) {
+    return { error: `Erro ao ler arquivo: ${e.message}` };
+  }
+}
+
+/**
+ * CLI
+ */
+function main() {
+  const args = process.argv.slice(2);
+  const params = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const key = args[i].slice(2);
+      const value = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+      params[key] = value;
+      if (value !== true) i++;
+    }
+  }
+  
+  // Modo: verificar período
+  if (params.verify && params.period) {
+    const result = verifyPeriod(params.period);
+    
+    console.log('\n=== Verificação de Cadeia de Evidências ===\n');
+    console.log(`Período: ${result.period}`);
+    console.log(`Status: ${result.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}\n`);
+    
+    if (result.files && result.files.length > 0) {
+      console.log(`Arquivos verificados: ${result.totalFiles}`);
+      console.log(`Válidos: ${result.validFiles}`);
+      console.log(`Inválidos: ${result.invalidFiles}`);
+      console.log(`Total de eventos: ${result.totalEvents}\n`);
+      
+      for (const file of result.files) {
+        const status = file.valid ? '✅' : '❌';
+        console.log(`${status} ${file.file} (${file.events} eventos)`);
+        
+        if (!file.valid && file.violations.length > 0) {
+          for (const v of file.violations) {
+            console.log(`   → ${v}`);
+          }
+        }
+      }
+    }
+    
+    console.log();
+    process.exit(result.valid ? 0 : 1);
+  }
+  
+  // Modo: verificar todos
+  if (params.verify && !params.period) {
+    const result = verifyAll();
+    
+    console.log('\n=== Verificação Completa da Cadeia ===\n');
+    console.log(`Status geral: ${result.valid ? '✅ VÁLIDO' : '❌ INVÁLIDO'}\n`);
+    
+    if (result.error) {
+      console.log(`Erro: ${result.error}\n`);
+      process.exit(1);
+    }
+    
+    if (result.periods) {
+      for (const period of result.periods) {
+        const status = period.valid ? '✅' : '❌';
+        console.log(`${status} ${period.period}: ${period.totalFiles} arquivos, ${period.totalEvents} eventos`);
+      }
+    }
+    
+    console.log();
+    process.exit(result.valid ? 0 : 1);
+  }
+  
+  // Modo: hash de arquivo
+  if (params.file) {
+    const result = hashFile(params.file);
+    
+    if (result.error) {
+      console.error(`\n❌ ${result.error}\n`);
+      process.exit(1);
+    }
+    
+    console.log('\n=== Hash de Arquivo ===\n');
+    console.log(`Arquivo: ${result.file}`);
+    console.log(`Algoritmo: ${result.algorithm}`);
+    console.log(`Hash: ${result.hash}\n`);
+    
+    process.exit(0);
+  }
+  
+  // Ajuda
+  console.log(`
+Uso: node hash-evidence-chain.mjs [opções]
+
+Opções:
+  --verify                 Verificar integridade da cadeia
+  --period=YYYY-MM         Verificar período específico
+  --file=<caminho>         Gerar hash de arquivo
+  --all                    Verificar todos os períodos (com --verify)
+
+Exemplos:
+  node hash-evidence-chain.mjs --verify --period=2025-01
+  node hash-evidence-chain.mjs --verify
+  node hash-evidence-chain.mjs --file=meu-arquivo.txt
+`);
+  
+  process.exit(0);
+}
+
+main();

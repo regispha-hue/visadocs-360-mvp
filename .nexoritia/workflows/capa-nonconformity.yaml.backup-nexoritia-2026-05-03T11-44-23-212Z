@@ -1,0 +1,232 @@
+# Workflow: CAPA (Corrective and Preventive Action)
+# Version: 1.0.0
+# Description: Gestão de não-conformidades e ações corretivas
+
+workflow:
+  name: capa-nonconformity
+  version: "1.0.0"
+  description: Processo de tratamento de não-conformidades e ações corretivas/preventivas
+  
+  trigger:
+    - type: event
+      source: "audit_finding"
+    - type: event
+      source: "internal_audit"
+    - type: event
+      source: "customer_complaint"
+    - type: event
+      source: "regulatory_inspection"
+    - type: manual
+      reporter: "any_employee"
+  
+  severity_classification:
+    CRITICA:
+      definition: "Risco imediato à segurança ou saúde"
+      response_time: "4h"
+      escalation: "immediate"
+    
+    ALTA:
+      definition: "Violação de BPF ou risco significativo"
+      response_time: "24h"
+      escalation: "same_day"
+    
+    MEDIA:
+      definition: "Desvio de procedimento, sem risco imediato"
+      response_time: "72h"
+      escalation: "if_unresolved_7d"
+    
+    BAIXA:
+      definition: "Oportunidade de melhoria"
+      response_time: "5d"
+      escalation: "if_unresolved_30d"
+  
+  stages:
+    
+    STAGE_1_DETECTION:
+      name: "Detecção e Registro"
+      description: "Registrar a não-conformidade"
+      
+      inputs:
+        - descricao: "text (detalhada)"
+        - data_ocorrencia: "datetime"
+        - local: "string"
+        - envolvidos: "string[]"
+        - evidencias: "files[]"
+        - severidade_inicial: "enum[CRITICA, ALTA, MEDIA, BAIXA]"
+      
+      validations:
+        - "Descrição clara e objetiva"
+        - "Evidências anexadas (se possível)"
+        - "Data coerente"
+      
+      outputs:
+        - nc_id: "NC-YYYY-XXXX"
+        - status: "ABERTA"
+        - timestamp: "now"
+      
+      notifications:
+        - to: "quality_manager"
+        - to: "responsible_area"
+        - urgency: "based_on_severity"
+      
+      on_success: "STAGE_2_CONTAINMENT"
+    
+    STAGE_2_CONTAINMENT:
+      name: "Ação Imediata (Containment)"
+      description: "Isolar o problema imediatamente"
+      required_for: ["CRITICA", "ALTA"]
+      
+      actions:
+        - "Parar processo (se necessário)"
+        - "Isolar produto/lote afetado"
+        - "Notificar stakeholders"
+        - "Documentar ação tomada"
+      
+      evidence:
+        - "Registro da ação"
+        - "Fotos (se aplicável)"
+        - "Lista de itens isolados"
+      
+      timeframe:
+        CRITICA: "4h"
+        ALTA: "24h"
+      
+      on_success: "STAGE_3_INVESTIGATION"
+    
+    STAGE_3_INVESTIGATION:
+      name: "Investigação (Análise de Causa)"
+      description: "Determinar raiz da não-conformidade"
+      
+      methods:
+        - "5 Porquês (5 Whys)"
+        - "Diagrama de Ishikawa"
+        - "Análise de árvore de falhas"
+        - "Brainstorming estruturado"
+      
+      team:
+        - responsável: "quality_analyst"
+        - membros: ["area_expert", "process_owner"]
+      
+      outputs:
+        - causa_raiz: "detailed_description"
+        - fatores_contribuintes: "list"
+        - evidencias_analise: "files"
+        - metodo_usado: "enum"
+      
+      validation:
+        - "Causa raiz identificada?"
+        - "Fatos verificáveis?"
+        - "Não é sintoma, é causa?"
+      
+      on_success: "STAGE_4_ACTION_PLAN"
+    
+    STAGE_4_ACTION_PLAN:
+      name: "Plano de Ação"
+      description: "Definir ações corretivas e preventivas"
+      
+      action_types:
+        CORRETIVA:
+          description: "Eliminar a causa raiz"
+          deadline: "based_on_severity"
+          responsible: "assigned"
+        
+        PREVENTIVA:
+          description: "Prevenir recorrência"
+          deadline: "reasonable"
+          responsible: "assigned"
+        
+        CONTENCAO:
+          description: "Mitigação imediata"
+          status: "done_in_stage_2"
+      
+      plan_elements:
+        - "Descrição da ação"
+        - "Responsável"
+        - "Prazo"
+        - "Critério de eficácia"
+        - "Recursos necessários"
+      
+      approval:
+        required: true
+        by: "quality_manager"
+      
+      on_success: "STAGE_5_IMPLEMENTATION"
+    
+    STAGE_5_IMPLEMENTATION:
+      name: "Implementação"
+      description: "Executar ações definidas"
+      
+      tracking:
+        - status: "enum[PENDENTE, EM_ANDAMENTO, CONCLUIDA]"
+        - progress: "percentage"
+        - updates: "regular"
+      
+      alerts:
+        - "50% do prazo"
+        - "80% do prazo (urgente)"
+        - "Prazo vencido (crítico)"
+      
+      on_all_complete: "STAGE_6_VERIFICATION"
+    
+    STAGE_6_VERIFICATION:
+      name: "Verificação de Eficácia"
+      description: "Confirmar que ação resolveu o problema"
+      
+      verification_methods:
+        - "Dados de monitoramento"
+        - "Auditoria de follow-up"
+        - "Feedback dos usuários"
+        - "Métricas de performance"
+      
+      timeframe:
+        min: "30_days"
+        typical: "60_90_days"
+      
+      criteria:
+        - "NC não se repetiu?"
+        - "Indicadores melhoraram?"
+        - "Não gerou novos problemas?"
+      
+      decisions:
+        - EFETIVA:
+            next: "STAGE_7_CLOSURE"
+        - INEFETIVA:
+            next: "STAGE_4_ACTION_PLAN"
+            new_action: true
+    
+    STAGE_7_CLOSURE:
+      name: "Encerramento"
+      description: "Finalizar CAPA de forma documentada"
+      
+      actions:
+        - "Atualizar status para FECHADA"
+        - "Documentar lições aprendidas"
+        - "Atualizar riscos (se necessário)"
+        - "Comunicar aos stakeholders"
+        - "Arquivar evidências"
+      
+      if_training_required:
+        trigger: "training-certification"
+        for: "affected_personnel"
+      
+      if_sop_update_required:
+        trigger: "sop-generation"
+        as: "revision"
+      
+      status: "FECHADA"
+  
+  metrics:
+    - "NCs abertas por severidade"
+    - "Tempo médio de fechamento"
+    - "Taxa de eficácia das ações"
+    - "NCs recorrentes (indicador crítico)"
+    - "Custo das não-conformidades"
+  
+  reporting:
+    frequency: "monthly"
+    audience: ["quality_council", "management"]
+    include:
+      - "Tendências"
+      - "Áreas críticas"
+      - "Ações atrasadas"
+      - "Taxa de eficácia"

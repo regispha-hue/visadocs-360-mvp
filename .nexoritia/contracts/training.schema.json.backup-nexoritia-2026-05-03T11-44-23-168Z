@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nexoritia:training:v1",
+  "title": "Training Record Schema",
+  "description": "Schema para registros de treinamento em BPF",
+  "type": "object",
+  "required": ["id", "colaborador_id", "pop_id", "status", "data_treinamento"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "Código único do treinamento",
+      "pattern": "^TRE-[0-9]{6}-[0-9]{4}$",
+      "examples": ["TRE-000001-2025"]
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "UUID do colaborador treinado"
+    },
+    "colaborador_nome": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200
+    },
+    "colaborador_cargo": {
+      "type": "string"
+    },
+    "pop_id": {
+      "type": "string",
+      "description": "UUID do POP/SOP treinado"
+    },
+    "pop_codigo": {
+      "type": "string",
+      "description": "Código do POP (ex: POP.001)"
+    },
+    "pop_titulo": {
+      "type": "string"
+    },
+    "pop_versao": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["AGENDADO", "EM_ANDAMENTO", "CONCLUIDO", "CANCELADO", "REPROVADO"]
+    },
+    "modalidade": {
+      "type": "string",
+      "enum": ["PRESENCIAL", "ONLINE", "HIBRIDO"]
+    },
+    "data_treinamento": {
+      "type": "string",
+      "format": "date"
+    },
+    "duracao_minutos": {
+      "type": "integer",
+      "minimum": 15,
+      "maximum": 480,
+      "description": "Duração do treinamento em minutos"
+    },
+    "instrutor": {
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string" },
+        "qualificacao": { "type": "string" },
+        "registro": { "type": "string" }
+      },
+      "required": ["nome"]
+    },
+    "conteudo_programatico": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "avaliacao": {
+      "type": "object",
+      "properties": {
+        "tipo": { "type": "string", "enum": ["QUIZ", "PRATICO", "TEORICO", "MISTO"] },
+        "nota": { "type": "number", "minimum": 0, "maximum": 100 },
+        "aprovado": { "type": "boolean" },
+        "nota_minima": { "type": "number", "minimum": 0, "maximum": 100, "default": 70 },
+        "data_avaliacao": { "type": "string", "format": "date" },
+        "observacoes": { "type": "string" }
+      }
+    },
+    "certificado": {
+      "type": "object",
+      "properties": {
+        "emitido": { "type": "boolean" },
+        "numero": { "type": "string", "pattern": "^CERT-[0-9]{8}$" },
+        "data_emissao": { "type": "string", "format": "date" },
+        "data_validade": { "type": "string", "format": "date" },
+        "hash_validacao": { "type": "string" },
+        "url_qr_code": { "type": "string", "format": "uri" }
+      }
+    },
+    "evidencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": { "type": "string", "enum": ["LISTA_PRESENCA", "MATERIAL", "FOTO", "VIDEO", "ASSINATURA", "QUIZ"] },
+          "url": { "type": "string" },
+          "hash": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "observacoes": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "tenant_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "hash_integridade": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nexoritia Certificate",
+  "type": "object",
+  "required": [
+    "id",
+    "participant",
+    "trainingId",
+    "issuedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "participant": {
+      "type": "string"
+    },
+    "trainingId": {
+      "type": "string"
+    },
+    "issuedAt": {
+      "type": "string"
+    },
+    "issuer": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,99 @@
+---
+name: policy-as-code-engineer
+description: Implementação de políticas como código (Policy as Code) para governança automatizada. Use para criar, validar ou modificar políticas YAML/JSON que serão aplicadas automaticamente pelo sistema.
+---
+
+# Policy as Code Engineer
+
+## Quando Usar
+
+- Criar nova política de governança
+- Modificar política existente
+- Validar políticas contra schema
+- Implementar regras de negócio automatizadas
+- Criar quality gates
+
+## Estrutura de Política
+
+```yaml
+policy:
+  name: "nome-da-politica"
+  version: "1.0.0"
+  description: "Descrição clara"
+  effective_date: "YYYY-MM-DD"
+  
+  regras:
+    - id: "RULE-001"
+      name: "Nome descritivo"
+      condition: "quando aplicar"
+      action: "o que fazer"
+      severity: "BLOCKING|WARNING|INFO"
+```
+
+## Tipos de Políticas
+
+### Document Control
+- Versionamento
+- Aprovação
+- Distribuição
+- Obsolescência
+
+### AI Generation
+- Qualidade mínima
+- Prompts permitidos
+- Validação obrigatória
+- Evidência necessária
+
+### Approval Workflow
+- Papéis envolvidos
+- Segregação de funções
+- Assinaturas digitais
+- Escalonamento
+
+### Evidence Retention
+- Períodos de retenção
+- Formato de armazenamento
+- Acesso e segurança
+- Destruição segura
+
+## Validação
+
+```bash
+# Validar sintaxe YAML
+node tools/nexoritia/validate-contracts.mjs \
+  --type=policy \
+  --file=.nexoritia/policies/<policy>.yaml
+```
+
+## Boas Práticas
+
+1. **IDs Únicos:** Cada regra tem ID único
+2. **Versionamento:** Políticas são versionadas
+3. **Descrição Clara:** Explique o propósito
+4. **Testável:** Deve ser possível validar
+5. **Granular:** Regras atômicas, não monolitos
+
+## Exemplo Completo
+
+```yaml
+policy:
+  name: document-versioning
+  version: "1.0.0"
+  description: Regras para versionamento de documentos
+  
+  rules:
+    - id: DOC-VER-001
+      name: "Formato de Versão"
+      description: "Versões devem seguir MAJOR.MINOR"
+      condition: "campo 'versao' presente"
+      validation: "regex_match('^[0-9]+\\.[0-9]+$')"
+      severity: BLOCKING
+      message: "Versão deve estar no formato X.Y"
+    
+    - id: DOC-VER-002
+      name: "Incremento Major"
+      description: "Major incrementa em mudanças significativas"
+      condition: "mudanca_significativa == true"
+      action: "incrementar_major"
+      severity: WARNING
+```

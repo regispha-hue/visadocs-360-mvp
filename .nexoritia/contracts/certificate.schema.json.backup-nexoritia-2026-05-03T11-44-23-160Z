@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nexoritia:certificate:v1",
+  "title": "Certificate Schema",
+  "description": "Schema para certificados de qualificação BPF",
+  "type": "object",
+  "required": ["id", "numero", "colaborador", "treinamento", "emitido_em", "valido_ate", "hash_blockchain"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "numero": {
+      "type": "string",
+      "pattern": "^CERT-[0-9]{8}$",
+      "description": "Número único do certificado",
+      "examples": ["CERT-00012345"]
+    },
+    "versao": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["VALIDO", "EXPIRADO", "REVOGADO", "SUSPENSO"],
+      "default": "VALIDO"
+    },
+    "colaborador": {
+      "type": "object",
+      "required": ["id", "nome", "cargo", "cpf"],
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string", "minLength": 3 },
+        "cargo": { "type": "string" },
+        "cpf": { 
+          "type": "string", 
+          "pattern": "^[0-9]{11}$",
+          "description": "CPF sem formatação"
+        },
+        "registro_crf": { "type": "string" },
+        "departamento": { "type": "string" }
+      }
+    },
+    "treinamento": {
+      "type": "object",
+      "required": ["id", "codigo", "pop_codigo", "pop_titulo", "carga_horaria"],
+      "properties": {
+        "id": { "type": "string" },
+        "codigo": { "type": "string", "pattern": "^TRE-[0-9]{6}-[0-9]{4}$" },
+        "pop_codigo": { "type": "string" },
+        "pop_titulo": { "type": "string" },
+        "pop_versao": { "type": "string" },
+        "conteudo": { 
+          "type": "array", 
+          "items": { "type": "string" } 
+        },
+        "carga_horaria": { 
+          "type": "integer", 
+          "minimum": 1,
+          "description": "Carga horária em horas"
+        },
+        "modalidade": { "type": "string", "enum": ["PRESENCIAL", "ONLINE", "HIBRIDO"] }
+      }
+    },
+    "avaliacao": {
+      "type": "object",
+      "properties": {
+        "nota": { "type": "number", "minimum": 0, "maximum": 100 },
+        "nota_minima": { "type": "number", "default": 70 },
+        "aprovado": { "type": "boolean" },
+        "tipo": { "type": "string", "enum": ["QUIZ", "PRATICO", "TEORICO"] }
+      }
+    },
+    "instrutor": {
+      "type": "object",
+      "properties": {
+        "nome": { "type": "string" },
+        "qualificacao": { "type": "string" },
+        "assinatura_digital": { "type": "string" }
+      }
+    },
+    "emitido_em": {
+      "type": "string",
+      "format": "date"
+    },
+    "valido_ate": {
+      "type": "string",
+      "format": "date"
+    },
+    "periodo_renovacao_dias": {
+      "type": "integer",
+      "default": 30,
+      "description": "Dias antes da expiração para notificar renovação"
+    },
+    "hash_blockchain": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Hash SHA-256 para imutabilidade"
+    },
+    "hash_anterior": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Hash do certificado anterior na cadeia"
+    },
+    "qr_code_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL para validação via QR Code"
+    },
+    "url_validacao": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL pública de validação"
+    },
+    "evidencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": { "type": "string" },
+          "url": { "type": "string" },
+          "hash": { "type": "string" }
+        }
+      }
+    },
+    "revogacao": {
+      "type": "object",
+      "description": "Dados em caso de revogação",
+      "properties": {
+        "data": { "type": "string", "format": "date" },
+        "motivo": { "type": "string" },
+        "autorizado_por": { "type": "string" },
+        "hash_revogacao": { "type": "string" }
+      }
+    },
+    "tenant_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "norma_referencia": { "type": "string" },
+        "versao_bpf": { "type": "string" },
+        "farmacia_nome": { "type": "string" },
+        "farmacia_cnpj": { "type": "string" }
+      }
+    }
+  }
+}

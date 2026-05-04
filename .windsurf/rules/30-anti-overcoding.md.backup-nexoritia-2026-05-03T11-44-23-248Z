@@ -1,0 +1,213 @@
+---
+name: anti-overcoding
+order: 30
+---
+
+# Regra 30: Anti-Overcoding
+
+## Propósito
+Prevenir overengineering, gold plating e soluções desnecessariamente complexas. Preferir simplicidade e pragmatismo.
+
+## Definição
+> *"Overcoding é quando a solução é mais complexa que o problema exige."*
+
+## Heurísticas de Detecção
+
+### Sinais de Overcoding
+
+- ❌ **Abstração Prematura:** Generalização antes da necessidade
+- ❌ **Boilerplate Excessivo:** Mais código estrutural que funcional
+- ❌ **Gold Plating:** Features não solicitadas
+- ❌ **Reinvenção:** Refazer o que já existe
+- ❌ **Complexidade Acidental:** Complicação desnecessária
+- ❌ **Dependências Desnecessárias:** Bibliotecas para funções simples
+
+### Sinais de Solução Adequada
+
+- ✅ **Resolve o problema:** Faz o que foi pedido
+- ✅ **Legível:** Outro dev entende em 5 minutos
+- ✅ **Testável:** Pode ser verificado
+- ✅ **Mantível:** Fácil de modificar
+- ✅ **Sem dependências:** Usa Node.js nativo quando possível
+
+## Princípios
+
+### 1. YAGNI (You Ain't Gonna Need It)
+```
+Não implemente features que:
+→ Não foram solicitadas
+→ "Podem ser úteis no futuro"
+→ São "boas práticas" sem contexto
+```
+
+### 2. KISS (Keep It Simple, Stupid)
+```
+A solução mais simples que funciona
+é a melhor solução.
+```
+
+### 3. DRY (Don't Repeat Yourself)
+```
+Mas não à custa de:
+→ Abstrações complexas
+→ Acoplamento excessivo
+→ Generalização prematura
+```
+
+### 4. Worse is Better
+```
+Melhor ter algo que funciona agora
+do que algo perfeito nunca.
+```
+
+## Checklist Anti-Overcoding
+
+### Antes de Implementar
+
+- [ ] Entendi completamente o problema?
+- [ ] Existe solução similar no projeto?
+- [ ] Preciso mesmo de dependência externa?
+- [ ] Posso explicar a solução em 2 minutos?
+- [ ] A solução resolve APENAS o que foi pedido?
+
+### Durante Implementação
+
+- [ ] Código é legível?
+- [ ] Sem comentários óbvios?
+- [ ] Sem camadas de abstração desnecessárias?
+- [ ] Testes são simples?
+- [ ] Sem "padrões arquiteturais" forçados?
+
+### Após Implementação
+
+- [ ] Posso excluir código sem quebrar?
+- [ ] Há código morto?
+- [ ] Complexidade ciclomática < 10?
+- [ ] Linhas de código proporcionais ao valor?
+
+## Exemplos
+
+### ❌ Overcoding
+```javascript
+// Sistema complexo de "plugins" para uma função simples
+class DocumentGenerator {
+  constructor() {
+    this.plugins = [];
+    this.hooks = new EventEmitter();
+  }
+  
+  registerPlugin(plugin) {
+    this.plugins.push(plugin);
+    this.hooks.emit('plugin:registered', plugin);
+  }
+  
+  generate(data) {
+    this.hooks.emit('generate:start', data);
+    let result = this.plugins.reduce((acc, plugin) => {
+      return plugin.process(acc);
+    }, data);
+    this.hooks.emit('generate:end', result);
+    return result;
+  }
+}
+
+// VS
+
+// ✅ Simples
+function generateDocument(data) {
+  return {
+    ...data,
+    generated_at: new Date().toISOString()
+  };
+}
+```
+
+### ❌ Dependências Desnecessárias
+```javascript
+// Usando lodash para map simples
+import _ from 'lodash';
+const doubled = _.map(numbers, n => n * 2);
+
+// VS
+
+// ✅ Nativo
+const doubled = numbers.map(n => n * 2);
+```
+
+## Preferências Técnicas
+
+### Node.js Nativo
+```
+Preferir:
+- fs/promises ao invés de fs-extra
+- fetch ao invés de axios (se disponível)
+- util.parseArgs ao invés de yargs (para CLI simples)
+- crypto ao invés de bcrypt para hash simples
+- Date nativo ao invés de moment.js
+```
+
+### Estrutura de Dados
+```
+Preferir:
+- Objetos literais ao invés de classes
+- Arrays ao invés de iteradores complexos
+- Map/Set quando apropriado
+- JSON ao invés de XML/Protobuf (salvo requisito)
+```
+
+### Funções
+```
+Preferir:
+- Funções puras
+- Parâmetros explícitos
+- Retorno claro
+- Sem efeitos colaterais ocultos
+```
+
+## Exceções
+
+Overcoding pode ser aceitável quando:
+- **Escalabilidade:** Sistema precisa crescer 100x
+- **Reusabilidade:** Componente será usado em 5+ lugares
+- **Manutenibilidade:** Código legado requer abstração
+- **Segurança:** Validação extra é necessária
+
+**Mas:** Documentar e justificar a decisão.
+
+## Sanções
+
+Code review deve rejeitar:
+- Código que não resolve diretamente o problema
+- Abstrações sem uso imediato
+- Dependências sem necessidade clara
+- Complexidade acidental
+
+## Métricas
+
+### Linhas por Feature
+```
+Alarme se:
+→ < 10 linhas: Provavelmente OK
+→ 10-50 linhas: Normal
+→ 50-100 linhas: Revisar necessidade
+→ > 100 linhas: Provavelmente overcoding
+```
+
+### Complexidade
+```
+Ciclomática:
+→ 1-5: Simples ✅
+→ 6-10: Moderado ⚠️
+→ > 10: Complexo ❌ (revisar)
+```
+
+## Regra de Ouro
+
+> *"Se você precisa explicar por que é complexo, provavelmente é overcoding."*
+
+Quando em dúvida, pergunte:
+- "Isso é necessário AGORA?"
+- "Posso fazer mais simples?"
+- "Alguém entenderá em 6 meses?"
+
+Se a resposta for não/não/talvez → Simplifique.

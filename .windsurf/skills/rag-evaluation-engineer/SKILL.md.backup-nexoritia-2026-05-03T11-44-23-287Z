@@ -1,0 +1,164 @@
+---
+name: rag-evaluation-engineer
+description: Avaliação de sistemas RAG (Retrieval Augmented Generation) para garantir qualidade, relevância e conformidade em recuperação de informações. Use para testar, medir e otimizar pipelines RAG.
+---
+
+# RAG Evaluation Engineer
+
+## Quando Usar
+
+- Avaliar qualidade de retrieval
+- Medir relevância de respostas
+- Testar pipeline RAG
+- Otimizar embeddings
+- Validar fontes de conhecimento
+
+## Métricas de Avaliação
+
+### Retrieval Quality
+- **Precision@K:** % de documentos relevantes nos K primeiros
+- **Recall:** % de documentos relevantes recuperados
+- **MRR:** Mean Reciprocal Rank
+- **NDCG:** Normalized Discounted Cumulative Gain
+
+### Generation Quality
+- **Faithfulness:** Resposta é fiel às fontes?
+- **Answer Relevance:** Resposta responde à pergunta?
+- **Context Precision:** Contexto usado é relevante?
+- **Context Recall:** Todo contexto necessário foi usado?
+
+### Frameworks
+- **RAGAS:** Framework específico para RAG
+- **Promptfoo:** Testes de prompt
+- **Golden Datasets:** Perguntas/respostas conhecidas
+
+## Estrutura de Teste
+
+```yaml
+eval:
+  name: "sop-knowledge-test"
+  dataset: ".nexoritia/evals/golden-datasets/sops.json"
+  
+  queries:
+    - question: "Qual o procedimento para higienização de bancadas?"
+      expected_topics: ["POP.001", "detergente", "enxágue", "secagem"]
+      
+  metrics:
+    - name: "context_recall"
+      threshold: 0.8
+    - name: "faithfulness"
+      threshold: 0.9
+```
+
+## Avaliação de Fontes
+
+### Critérios de Qualidade
+
+1. **Autoridade:** Fonte é confiável?
+   - ANVISA: ✅ Alta
+   - Farmácia Brasileira: ✅ Alta
+   - Blog genérico: ⚠️ Baixa
+
+2. **Atualidade:** Informação está atualizada?
+   - Norma vigente: ✅ Sim
+   - Norma revogada: ❌ Não
+
+3. **Relevância:** Diretamente relacionada?
+   - Diretamente: ✅ Sim
+   - Tangencialmente: ⚠️ Parcial
+   - Não relacionada: ❌ Não
+
+4. **Completude:** Cobertura suficiente?
+   - Completa: ✅ Sim
+   - Parcial: ⚠️ Requer complemento
+   - Insuficiente: ❌ Não
+
+## Dataset de Ouro (Golden Dataset)
+
+```json
+[
+  {
+    "query": "Como validar método analítico?",
+    "expected_answer": "Validação requer especificidade...",
+    "expected_sources": ["RDC 301/2019", "USP <1225>"],
+    "relevant_chunks": ["chunk-uuid-1", "chunk-uuid-2"],
+    "metadata": {
+      "domain": "quality",
+      "difficulty": "advanced",
+      "regulatory": true
+    }
+  }
+]
+```
+
+## Testes com Promptfoo
+
+```yaml
+# .nexoritia/evals/promptfoo/sop-retrieval.yaml
+prompts:
+  - 'Dado o contexto: {{context}}
+     Responda: {{query}}'
+
+tests:
+  - vars:
+      query: "Qual o procedimento de limpeza?"
+    assert:
+      - type: contains
+        value: "POP.001"
+      - type: contains
+        value: "detergente neutro"
+```
+
+## Pipeline de Avaliação
+
+```
+┌─────────────────────────────────────┐
+│ 1. Preparar Dataset                 │
+│    → Coletar queries representativas│
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 2. Executar Retrieval               │
+│    → Para cada query, recuperar topK│
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 3. Avaliar Relevância               │
+│    → Julgar se documentos são       │
+│      relevantes para query          │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 4. Gerar Respostas                  │
+│    → Usar contexto recuperado       │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 5. Avaliar Qualidade                │
+│    → Faithfulness, relevance        │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 6. Calcular Métricas                │
+│    → Agregar scores                 │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 7. Reportar                         │
+│    → Métricas e insights            │
+└─────────────────────────────────────┘
+```
+
+## Interpretação de Resultados
+
+### Retrieval < 70%
+- Problema: Embeddings não capturam semântica
+- Ação: Ajustar chunking, retreinar embeddings
+
+### Faithfulness < 80%
+- Problema: LLM alucina ou ignora contexto
+- Ação: Refinar prompt, aumentar contexto
+
+### Latência > 2s
+- Problema: Performance insuficiente
+- Ação: Otimizar índice, caching
