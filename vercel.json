@@ -2,8 +2,7 @@
   "buildCommand": "prisma generate && next build",
   "outputDirectory": ".next",
   "cleanUrls": true,
-  "trailingSlash": false
-}
+  "trailingSlash": false,
   "env": {
     "DATABASE_URL": "@database_url",
     "NEXTAUTH_SECRET": "@nextauth_secret",
