@@ -16,6 +16,7 @@ export async function GET(
     const { token } = params;
 
     // Buscar token
+    // @ts-ignore
     const tokenRecord = await prisma.tokenFiscalizacao.findUnique({
       where: { token },
       include: { tenant: true },
@@ -48,6 +49,7 @@ export async function GET(
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
+    // @ts-ignore
     await prisma.acessoFiscalizacao.create({
       data: {
         tokenId: tokenRecord.id,

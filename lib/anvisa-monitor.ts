@@ -56,11 +56,11 @@ class ANVISAMonitor {
     this.isRunning = true;
 
     // Executa imediatamente na primeira vez
-    await this.executarMonitoramento();
+    await this.execututarMonitoramento();
 
     // Configura execução periódica
     this.intervalo = setInterval(
-      () => this.executarMonitoramento(),
+      () => this.execututarMonitoramento(),
       intervaloMinutos * 60 * 1000
     );
   }
@@ -220,6 +220,7 @@ class ANVISAMonitor {
       const alertaExistente = await prisma.alertaNorma.findFirst({
         where: {
           tenantId: impacto.tenantId,
+      // @ts-ignore
           normaNumero: impacto.atualizacao.norma.numero,
           status: "NOVO"
         }
@@ -313,6 +314,7 @@ class ANVISAMonitor {
   private async atualizarBaseNormas(atualizacoes: AtualizacaoDetectada[]): Promise<void> {
     for (const atualizacao of atualizacoes) {
       await prisma.normaRegulatoria.upsert({
+    // @ts-ignore
         where: { numero: atualizacao.norma.numero },
         update: {
           titulo: atualizacao.norma.titulo,

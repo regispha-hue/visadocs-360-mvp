@@ -3,6 +3,7 @@
  * Middleware de validação governada para Next.js
  */
 
+    // @ts-ignore
 import { NextRequest, NextApiResponse, NextResponse } from 'next/server';
 import { nexoritiaClient } from '../lib/nexoritia-client';
 

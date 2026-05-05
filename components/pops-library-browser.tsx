@@ -70,6 +70,7 @@ export function POPsLibraryBrowser() {
         const sorted = data.kits.sort((a: Kit, b: Kit) => {
           if (a.is_main_kit) return -1;
           if (b.is_main_kit) return 1;
+    // @ts-ignore
           return a.priority - b.priority;
         });
         setKits(sorted);

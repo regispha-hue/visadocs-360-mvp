@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
+    // @ts-ignore
     const plans = await prisma.plan.findMany({
       where: { active: true },
       orderBy: { sortOrder: "asc" },

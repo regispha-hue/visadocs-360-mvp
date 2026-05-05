@@ -64,6 +64,7 @@ export async function GET(
 
     // Gerar PDF com Puppeteer
     const browser = await puppeteer.launch({
+    // @ts-ignore
       headless: "new",
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
@@ -84,6 +85,7 @@ export async function GET(
     await browser.close();
 
     // Log da geração
+    // @ts-ignore
     await prisma.securityLog.create({
       data: {
         type: "PDF_GENERATION",

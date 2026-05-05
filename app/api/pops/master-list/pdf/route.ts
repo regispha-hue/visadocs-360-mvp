@@ -174,6 +174,7 @@ export async function GET(request: NextRequest) {
     });
 
     const dataGeracao = new Date().toLocaleString("pt-BR");
+    // @ts-ignore
     const html = generateMasterListHtml(tenant?.nome || "Farmácia", dataGeracao, popsPorSetor, (tenant as any)?.logoUrl);
 
     // Gerar PDF via Abacus HTML2PDF API

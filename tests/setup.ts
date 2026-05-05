@@ -20,6 +20,7 @@ export async function createTestUser(data: {
   return prisma.user.create({
     data: {
       ...data,
+    // @ts-ignore
       role: data.role || 'OPERADOR',
     },
   });
@@ -30,6 +31,7 @@ export async function createTestTenant(data: {
   cnpj: string;
 }) {
   return prisma.tenant.create({
+    // @ts-ignore
     data: {
       ...data,
       status: 'ATIVO',

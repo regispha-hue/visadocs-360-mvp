@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             tenantId: user.tenantId,
             tenantName: user.tenant?.nome || null,
-            tenantLogoUrl: (user.tenant? as any).logoUrl || null,
+            tenantLogoUrl: (user.tenant as any)?.logoUrl || null,
           };
         } else {
           throw new Error("Email ou senha inválidos.");

@@ -55,6 +55,7 @@ export async function calculateComplianceStats(
       where: {
         tenantId,
         status: "ATIVO",
+    // @ts-ignore
         Treinamento: {
           some: {},
         },

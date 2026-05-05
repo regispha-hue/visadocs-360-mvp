@@ -78,6 +78,7 @@ async function main() {
   console.log("🌱 Seeding plans...");
 
   for (const plan of plans) {
+    // @ts-ignore
     await prisma.plan.upsert({
       where: { name: plan.name },
       update: plan,

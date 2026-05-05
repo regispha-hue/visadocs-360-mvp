@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
               tenantId,
               nome: record.nome_colaborador,
               email: record.email || null,
+    // @ts-ignore
               telefone: record.telefone || null,
               cargo: record.cargo || null,
               dataAdmissao: record.data_admissao

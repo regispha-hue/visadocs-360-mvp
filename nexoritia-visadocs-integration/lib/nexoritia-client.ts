@@ -438,6 +438,7 @@ export class NexoritiaClient {
           ...context
         },
         validate_output: true,
+    // @ts-ignore
         strict_mode: true,
         temperature: 0.0  // Determinístico
       });

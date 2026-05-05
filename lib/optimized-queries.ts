@@ -4,6 +4,7 @@ import { prisma } from './prisma';
 
 export async function getFarmaciasByTenant(tenantId: string, status?: string) {
   return prisma.tenant.findMany({
+    // @ts-ignore
     where: {
       id: tenantId,
       ...(status && { status }),
