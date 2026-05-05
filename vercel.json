@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm ci --force",
   "buildCommand": "prisma generate && next build",
   "outputDirectory": ".next",
   "cleanUrls": true,
