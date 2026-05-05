@@ -287,7 +287,7 @@ export default function FiscalizacaoPage() {
               <div>
                 <p className="text-sm text-gray-600">Período de Acesso</p>
                 <p className="font-semibold">
-                  {formatarData(acessoData.dataGeracao)} - {formatarData(acessoData.dataExpiracao)}
+                  {formatarData(acessoData.dataGeracao?.toISOString() ?? "")} - {formatarData(acessoData.dataExpiracao?.toISOString() ?? "")}
                 </p>
               </div>
             </div>

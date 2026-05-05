@@ -1,0 +1,626 @@
+{
+  "created_at": "2026-05-02T14:54:19.210102",
+  "source": "POPs OneDrive Migration",
+  "total_documents": 75,
+  "documents": [
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.001 Avaliação de Receita Antimicrobianos + Cit e Horm",
+      "title": "POP.001 Avaliação de Receita Antimicrobianos + Cit e Horm",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.001 Avaliação de Receita Antimicrobianos + Cit e Horm",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.002 Aquisição e Recebimento de Atb, Cit e Horm",
+      "title": "POP.002 Aquisição e Recebimento de Atb, Cit e Horm",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.002 Aquisição e Recebimento de Atb, Cit e Horm",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.003 Armazenamento e Estocagem",
+      "title": "POP.003 Armazenamento e Estocagem",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.003 Armazenamento e Estocagem",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.004 CQ de Atb. Cit e Horm",
+      "title": "POP.004 CQ de Atb. Cit e Horm",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.004 CQ de Atb. Cit e Horm",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.005 Rotulagem Auxiliar das Fórmulas",
+      "title": "POP.005 Rotulagem Auxiliar das Fórmulas",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.005 Rotulagem Auxiliar das Fórmulas",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.006 Manipulação de Atb. Cit. Horm",
+      "title": "POP.006 Manipulação de Atb. Cit. Horm",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.006 Manipulação de Atb. Cit. Horm",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.007 Classificação dos Utensílios",
+      "title": "POP.007 Classificação dos Utensílios",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.007 Classificação dos Utensílios",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.008 Prevenção da Contaminação Cruzada",
+      "title": "POP.008 Prevenção da Contaminação Cruzada",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.008 Prevenção da Contaminação Cruzada",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.009 Dispensação de Fórmulas ao Cliente",
+      "title": "POP.009 Dispensação de Fórmulas ao Cliente",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.009 Dispensação de Fórmulas ao Cliente",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.010 Escrituração de Antibióticos",
+      "title": "POP.010 Escrituração de Antibióticos",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.010 Escrituração de Antibióticos",
+      "files": []
+    },
+    {
+      "id": "01_antibioticos_citostaticos_hormonios_POP.011 Devolução ou Troca de Antibióticos",
+      "title": "POP.011 Devolução ou Troca de Antibióticos",
+      "kit": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "category": "Manipulação Especial",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios\\POPs\\POP.011 Devolução ou Troca de Antibióticos",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.001 Recebimento e Avaliação da Receita",
+      "title": "POP.001 Recebimento e Avaliação da Receita",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.001 Recebimento e Avaliação da Receita",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.002 Aquisição e Recebimento de SBIT",
+      "title": "POP.002 Aquisição e Recebimento de SBIT",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.002 Aquisição e Recebimento de SBIT",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.003 Armazenamento e Estocagem",
+      "title": "POP.003 Armazenamento e Estocagem",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.003 Armazenamento e Estocagem",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.004 CQ de SBIT",
+      "title": "POP.004 CQ de SBIT",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.004 CQ de SBIT",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.005 Diluição de Matéria-Prima SBIT",
+      "title": "POP.005 Diluição de Matéria-Prima SBIT",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.005 Diluição de Matéria-Prima SBIT",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.006 Manipulação de SBIT",
+      "title": "POP.006 Manipulação de SBIT",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.006 Manipulação de SBIT",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.007 Classificação dos Utensílios",
+      "title": "POP.007 Classificação dos Utensílios",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.007 Classificação dos Utensílios",
+      "files": []
+    },
+    {
+      "id": "03_sbit_bioterápicos_POP.008 SBIT - Bula Simplificada para Pacientes",
+      "title": "POP.008 SBIT - Bula Simplificada para Pacientes",
+      "kit": "POPs+MBP_SBIT",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos\\POPs\\POP.008 SBIT - Bula Simplificada para Pacientes",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.1 - Preparações homeopáticas",
+      "title": "POP.1 - Preparações homeopáticas",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.1 - Preparações homeopáticas",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.10 - Parâmetros para água potável e purificada",
+      "title": "POP.10 - Parâmetros para água potável e purificada",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.10 - Parâmetros para água potável e purificada",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.11 - Práticas de higiene",
+      "title": "POP.11 - Práticas de higiene",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.11 - Práticas de higiene",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.12 - Higienização Antisséptica",
+      "title": "POP.12 - Higienização Antisséptica",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.12 - Higienização Antisséptica",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.13 - Utilização e conservação de Uniformes",
+      "title": "POP.13 - Utilização e conservação de Uniformes",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.13 - Utilização e conservação de Uniformes",
+      "files": [
+        "POP.013 - Utilização e Conservação de uniformes.docx"
+      ]
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.14 - Utilização de EPI's",
+      "title": "POP.14 - Utilização de EPI's",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.14 - Utilização de EPI's",
+      "files": [
+        "POP.014 - Utilização de EPI's.docx"
+      ]
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.15 - Treinamento de Colaboradores",
+      "title": "POP.15 - Treinamento de Colaboradores",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.15 - Treinamento de Colaboradores",
+      "files": [
+        "POP.015 - Treinamento de colaboradores.docx"
+      ]
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.16 - Atribuições do Farmacêutico",
+      "title": "POP.16 - Atribuições do Farmacêutico",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.16 - Atribuições do Farmacêutico",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.17 - Monitoramento de Temperatura e Umidade",
+      "title": "POP.17 - Monitoramento de Temperatura e Umidade",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.17 - Monitoramento de Temperatura e Umidade",
+      "files": [
+        "POP.17 - Monitoramento de Temperatura e Umidade.docx"
+      ]
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.18 - Programa de Gerenciamento de Riscos",
+      "title": "POP.18 - Programa de Gerenciamento de Riscos",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.18 - Programa de Gerenciamento de Riscos",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.19 - Orientações sobre limpeza dos Laboratórios",
+      "title": "POP.19 - Orientações sobre limpeza dos Laboratórios",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.19 - Orientações sobre limpeza dos Laboratórios",
+      "files": [
+        "POP.19 - Orientações sobre a limpeza dos Laboratórios.docx"
+      ]
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.2 - Manipulação de fórmulas homeopáticas",
+      "title": "POP.2 - Manipulação de fórmulas homeopáticas",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.2 - Manipulação de fórmulas homeopáticas",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.20 - Padronização do numero de gotas com cânulas padronizadas",
+      "title": "POP.20 - Padronização do numero de gotas com cânulas padronizadas",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.20 - Padronização do numero de gotas com cânulas padronizadas",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.21 - Condutas área manipulação",
+      "title": "POP.21 - Condutas área manipulação",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.21 - Condutas área manipulação",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.22 - Operação da balança",
+      "title": "POP.22 - Operação da balança",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.22 - Operação da balança",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.23 - Roteiro de inspeção para farmácia",
+      "title": "POP.23 - Roteiro de inspeção para farmácia",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.23 - Roteiro de inspeção para farmácia",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.3 - Alcoolmetria e diluições alcoólicas",
+      "title": "POP.3 - Alcoolmetria e diluições alcoólicas",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.3 - Alcoolmetria e diluições alcoólicas",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.4 - Bioterápicos",
+      "title": "POP.4 - Bioterápicos",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.4 - Bioterápicos",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.5 - Equipamentos",
+      "title": "POP.5 - Equipamentos",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.5 - Equipamentos",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.6 - Inativação de materiais",
+      "title": "POP.6 - Inativação de materiais",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.6 - Inativação de materiais",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.7 - Biossegurança",
+      "title": "POP.7 - Biossegurança",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.7 - Biossegurança",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.8 - Controle de qualidade",
+      "title": "POP.8 - Controle de qualidade",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.8 - Controle de qualidade",
+      "files": []
+    },
+    {
+      "id": "04_homeopatia_magistral_POP.9 - Rotulagem",
+      "title": "POP.9 - Rotulagem",
+      "kit": "POPs_Manipulação Magistral Homeopática",
+      "category": "Homeopatia",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral\\POPs\\POP.9 - Rotulagem",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.001 Atribuições do Farmacêutico",
+      "title": "POP.001 Atribuições do Farmacêutico",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.001 Atribuições do Farmacêutico",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.002 Higienização da Sala de Serviços Farmacêuticos",
+      "title": "POP.002 Higienização da Sala de Serviços Farmacêuticos",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.002 Higienização da Sala de Serviços Farmacêuticos",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.003 Descarte de Resíduo e Retirada do Lixo",
+      "title": "POP.003 Descarte de Resíduo e Retirada do Lixo",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.003 Descarte de Resíduo e Retirada do Lixo",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.004 Manutenção e Calibração dos Equipamentos",
+      "title": "POP.004 Manutenção e Calibração dos Equipamentos",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.004 Manutenção e Calibração dos Equipamentos",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.005 Uso de EPIs",
+      "title": "POP.005 Uso de EPIs",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.005 Uso de EPIs",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.006 Higienização das Mãos",
+      "title": "POP.006 Higienização das Mãos",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.006 Higienização das Mãos",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.007 Higiene Pessoal",
+      "title": "POP.007 Higiene Pessoal",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.007 Higiene Pessoal",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.008 Treinamento de Funcionários",
+      "title": "POP.008 Treinamento de Funcionários",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.008 Treinamento de Funcionários",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.009 Autoinspeção",
+      "title": "POP.009 Autoinspeção",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.009 Autoinspeção",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.010 Aplicação de Injetáveis - Agulhas e Seringas",
+      "title": "POP.010 Aplicação de Injetáveis - Agulhas e Seringas",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.010 Aplicação de Injetáveis - Agulhas e Seringas",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.011 Aplicação de Injetáveis - Preparação",
+      "title": "POP.011 Aplicação de Injetáveis - Preparação",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.011 Aplicação de Injetáveis - Preparação",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.012 Aplicação de Injetáveis - Vias de Administração",
+      "title": "POP.012 Aplicação de Injetáveis - Vias de Administração",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.012 Aplicação de Injetáveis - Vias de Administração",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.013 Monitoramento da Glicemia Capilar",
+      "title": "POP.013 Monitoramento da Glicemia Capilar",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.013 Monitoramento da Glicemia Capilar",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.014 Monitoramento da Pressão Arterial",
+      "title": "POP.014 Monitoramento da Pressão Arterial",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.014 Monitoramento da Pressão Arterial",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.015 Aferição da Temperatura Corporal",
+      "title": "POP.015 Aferição da Temperatura Corporal",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.015 Aferição da Temperatura Corporal",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.016 Inaloterapia",
+      "title": "POP.016 Inaloterapia",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.016 Inaloterapia",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.017 Perfuração de Lóbulo Auricular para Brincos",
+      "title": "POP.017 Perfuração de Lóbulo Auricular para Brincos",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.017 Perfuração de Lóbulo Auricular para Brincos",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.018 Saturação de Oxigênio",
+      "title": "POP.018 Saturação de Oxigênio",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.018 Saturação de Oxigênio",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.019 Vacinação",
+      "title": "POP.019 Vacinação",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.019 Vacinação",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.020 Acidentes com Perfurocortantes",
+      "title": "POP.020 Acidentes com Perfurocortantes",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.020 Acidentes com Perfurocortantes",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.021 Atenção Farmacêutica",
+      "title": "POP.021 Atenção Farmacêutica",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.021 Atenção Farmacêutica",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.022 Consulta Farmacêutica",
+      "title": "POP.022 Consulta Farmacêutica",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.022 Consulta Farmacêutica",
+      "files": [
+        "POP.022 Consulta Farmacêutica.docx",
+        "RQ.012.02 Rev00 Declaração de Serviços Farmacêuticos.docx",
+        "RQ.022.01 Rev00 Anamnese - Triagem - Prontuário do Paciente.docx",
+        "RQ.022.02 Rev00 Monitoramento das Condições de Saúde.docx",
+        "RQ.022.03 Rev00 Percepção Saúde Geral e Qualidade de Vida.docx",
+        "RQ.022.04 Rev00 Monitoramento de Serviços Farmacêuticos.docx",
+        "RQ.022.05 Rev00 Calendário Posológico.docx",
+        "RQ.022.06 Rev00 Modelo de Encaminhamento.docx"
+      ]
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.023 Farmacovigilância",
+      "title": "POP.023 Farmacovigilância",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.023 Farmacovigilância",
+      "files": []
+    },
+    {
+      "id": "05_servicos_consulta_farmaceutica_POP.024 Prescrição Farmacêutica",
+      "title": "POP.024 Prescrição Farmacêutica",
+      "kit": "POPs_Serviços e Consulta Farmacêutica",
+      "category": "Serviços Farmacêuticos",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica\\POPs\\POP.024 Prescrição Farmacêutica",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.001 - Dados Pessoais - Clientes e Prescritores",
+      "title": "POP.001 - Dados Pessoais - Clientes e Prescritores",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.001 - Dados Pessoais - Clientes e Prescritores",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.002 - Dados Pessoais - Colaboradores",
+      "title": "POP.002 - Dados Pessoais - Colaboradores",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.002 - Dados Pessoais - Colaboradores",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.003 - Dados Pessoais - Visitantes e Prestadores de Serviço",
+      "title": "POP.003 - Dados Pessoais - Visitantes e Prestadores de Serviço",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.003 - Dados Pessoais - Visitantes e Prestadores de Serviço",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.004 - Dados Pessoais Compartilhados com Terceiros",
+      "title": "POP.004 - Dados Pessoais Compartilhados com Terceiros",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.004 - Dados Pessoais Compartilhados com Terceiros",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.005 - Segurança dos Dados Pessoais em Sistemas Internos",
+      "title": "POP.005 - Segurança dos Dados Pessoais em Sistemas Internos",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.005 - Segurança dos Dados Pessoais em Sistemas Internos",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.006 - Diretrizes para Comunicação Digital e Marketing",
+      "title": "POP.006 - Diretrizes para Comunicação Digital e Marketing",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.006 - Diretrizes para Comunicação Digital e Marketing",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.007 - IDP, RIPD e PGC",
+      "title": "POP.007 - IDP, RIPD e PGC",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.007 - IDP, RIPD e PGC",
+      "files": []
+    },
+    {
+      "id": "06_lgpd_compliance_POP.008 - Diretrizes para Anonimização e Descarte de Arquivos",
+      "title": "POP.008 - Diretrizes para Anonimização e Descarte de Arquivos",
+      "kit": "POPs_LGPD para Farmácias de Manipulação",
+      "category": "Compliance",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance\\POPs\\POP.008 - Diretrizes para Anonimização e Descarte de Arquivos",
+      "files": []
+    },
+    {
+      "id": "08_veterinaria_mapa_anvisa_POPs",
+      "title": "POPs",
+      "kit": "POPs_Manipulação Veterinária - Complementar MAPA-ANVISA",
+      "category": "Veterinária",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\08_veterinaria_mapa_anvisa\\POPs\\POPs",
+      "files": []
+    }
+  ]
+}

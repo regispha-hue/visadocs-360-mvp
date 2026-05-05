@@ -63,4 +63,6 @@ export const AUDIT_ACTIONS = {
   QUIZ_UPDATED: "QUIZ_UPDATED",
   QUIZ_DELETED: "QUIZ_DELETED",
   QUIZ_ATTEMPTED: "QUIZ_ATTEMPTED",
+  SUBSCRIPTION_UPDATED: "subscription.updated",
+  SUBSCRIPTION_CANCELED: "subscription.canceled",
 };

@@ -1,0 +1,463 @@
+# NEXORITIA REGULATED AI OS
+## Kernel de Governança para Agentes de IA em Ambientes Regulados
+
+**Versão:** 1.0.0  
+**Data:** 2025-01-15  
+**Status:** Arquitetura Inicial  
+**Regulamentação Base:** ANVISA (RDC 67/2007, RDC 222/2018, RDC 301/2019), LGPD, ISO 9001:2015
+
+---
+
+## 1. DEFINIÇÃO
+
+Nexoritia é um **sistema operacional de governança** para agentes de inteligência artificial que operam em ambientes regulados, auditáveis e de missão crítica.
+
+Não é um produto separado. É uma **camada governante** que transforma qualquer aplicação em uma aplicação regulada, auditável e mercadologicamente palpável.
+
+### Propósito Central
+> Transformar o agente Windsurf/Cascade em um **agente regulado**, capaz de gerar, revisar e auditar documentos, treinamentos e certificações em conformidade com normas ANVISA e BPF (Boas Práticas de Fabricação).
+
+---
+
+## 2. MISSÃO
+
+**"Garantir que cada linha de código, cada documento gerado e cada decisão automatizada pelo agente de IA seja rastreável, validável e conforme com regulamentações aplicáveis."**
+
+### Objetivos Estratégicos
+
+1. **Rastreabilidade Total:** Cada ação do agente deixa evidência auditável
+2. **Conformidade Automática:** Validação em tempo real contra políticas regulatórias
+3. **Redução de Risco:** Prevenção de non-conformidades antes da produção
+4. **Auditoria Contínua:** Evidências disponíveis para fiscais a qualquer momento
+5. **Qualidade Consistente:** Padronização de outputs independente do contexto
+
+---
+
+## 3. ESCOPO PARA ÁREAS REGULADAS
+
+### Setores de Aplicação
+
+| Setor | Regulamentação | Caso de Uso |
+|-------|---------------|-------------|
+| Farmácias de Manipulação | RDC 67/2007 (BPF) | POPs, treinamentos BPF |
+| Indústria Farmacêutica | RDC 222/2018 | SOPs, lotes, validação |
+| Cosméticos | RDC 07/2015 | Boas práticas de fabricação |
+| Alimentos | RDC 275/2002 | APPCC, rastreabilidade |
+| Dispositivos Médicos | RDC 185/2001 | Controle de qualidade |
+| Laboratórios Clínicos | RDC 302/2005 | Gestão de amostras |
+
+### Documentos Regulados Suportados
+
+- **POP** (Procedimento Operacional Padrão)
+- **SOP** (Standard Operating Procedure)
+- **IT** (Instrução de Trabalho)
+- **Manual de BPF**
+- **Registro de Treinamento**
+- **Certificado de Qualificação**
+- **Relatório de Auditoria**
+- **Análise de Risco**
+- **CAPA** (Correção Ação Preventiva)
+
+---
+
+## 4. PRINCÍPIOS OPERACIONAIS
+
+### 4.1 Princípio da Evidência
+> *"Se não está registrado, não aconteceu."*
+
+Toda ação do agente deve gerar evidência em `.nexoritia/logs/`
+
+### 4.2 Princípio da Validação
+> *"Nenhum output regulado sem validação."*
+
+Documentos SOP/POP gerados por IA devem passar por quality gate antes de serem considerados válidos.
+
+### 4.3 Princípio da Imutabilidade
+> *"Evidências não são alteradas, apenas complementadas."*
+
+Logs e evidências são imutáveis. Correções geram novos registros com hash chain.
+
+### 4.4 Princípio da Segregação
+> *"Quem gera não valida, quem valida não aprova."*
+
+Workflows de aprovação exigem múltiplos papéis (autor → revisor → aprovador).
+
+### 4.5 Princípio da Mínima Intervenção
+> *"Não alterar código de produto para atender governança."*
+
+Governança é camada externa, não modificação do core.
+
+### 4.6 Princípio do Anti-Overcoding
+> *"Solução simples > solução perfeita."*
+
+Preferir implementações Node.js nativas sem dependências externas.
+
+---
+
+## 5. ARQUITETURA
+
+### 5.1 Visão Geral
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    VISADOCS 360 MVP                         │
+│                  (Aplicação de Produto)                     │
+├─────────────────────────────────────────────────────────────┤
+│                   NEXORITIA GOVERNANCE LAYER                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
+│  │  CONTRACTS  │  │  POLICIES   │  │  WORKFLOWS  │       │
+│  │   (JSON)    │  │   (YAML)    │  │   (YAML)    │       │
+│  └─────────────┘  └─────────────┘  └─────────────┘       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
+│  │   SKILLS    │  │   RULES     │  │    EVALS    │       │
+│  │  (Markdown) │  │  (Markdown) │  │  (Datasets) │       │
+│  └─────────────┘  └─────────────┘  └─────────────┘       │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              SCRIPTS (tools/nexoritia/)              │ │
+│  │     validate | audit | hash | inspect | quality    │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+│                   CASCASE AGENT                            │
+│              (Windsurf/IDE Intelligence)                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 5.2 Componentes
+
+#### Contracts (.nexoritia/contracts/)
+Definem schemas de validação para entidades reguladas.
+
+- `sop.schema.json` - Schema para SOPs/POPs
+- `training.schema.json` - Schema para registros de treinamento
+- `certificate.schema.json` - Schema para certificados
+- `audit-event.schema.json` - Schema para eventos de auditoria
+- `validation-report.schema.json` - Schema para relatórios de validação
+
+#### Policies (.nexoritia/policies/)
+Definem regras de negócio e conformidade.
+
+- `document-control.policy.yaml` - Controle documental
+- `ai-generation.policy.yaml` - Geração por IA
+- `approval-workflow.policy.yaml` - Fluxos de aprovação
+- `evidence-retention.policy.yaml` - Retenção de evidências
+- `regulated-output.policy.yaml` - Outputs regulados
+
+#### Workflows (.nexoritia/workflows/)
+Definem processos regulados passo a passo.
+
+- `sop-generation.yaml` - Geração de SOP
+- `sop-review.yaml` - Revisão de SOP
+- `training-certification.yaml` - Treinamento e certificação
+- `capa-nonconformity.yaml` - CAPA para não-conformidades
+- `release-validation.yaml` - Validação de release
+
+#### Skills (.windsurf/skills/)
+Instruções de comportamento para o agente.
+
+- `nexoritia-governor` - Governança geral
+- `regulated-qms-architect` - Arquitetura de QMS
+- `policy-as-code-engineer` - Políticas como código
+- `audit-trail-architect` - Trilha de auditoria
+- `ai-output-validator` - Validação de outputs
+- `rag-evaluation-engineer` - Avaliação RAG
+- `mcp-security-guardian` - Segurança MCP
+- `authorization-guardian` - Autorização
+
+#### Rules (.windsurf/rules/)
+Regras de execução do agente.
+
+- `00-nexoritia-governance.md` - Governança primária
+- `10-regulated-output-safety.md` - Segurança de output
+- `20-evidence-and-audit-trail.md` - Evidência e auditoria
+- `30-anti-overcoding.md` - Anti-overcoding
+- `40-ai-validation.md` - Validação de IA
+
+#### Scripts (tools/nexoritia/)
+Utilitários de validação e governança.
+
+- `validate-contracts.mjs` - Validar schemas
+- `write-audit-event.mjs` - Escrever evento de auditoria
+- `hash-evidence-chain.mjs` - Cadeia de hash
+- `inspect-regulated-output.mjs` - Inspecionar output
+- `run-nexoritia-quality-gate.mjs` - Quality gate
+
+---
+
+## 6. CRITÉRIOS DE VALIDAÇÃO
+
+### 6.1 Quality Gate para Documentos
+
+Um documento SOP/POP é considerado **VÁLIDO** quando:
+
+| Critério | Métrica | Threshold |
+|-----------|---------|-----------|
+| Completude | Campos obrigatórios preenchidos | 100% |
+| Conformidade Estrutural | Schema validation | 0 erros |
+| Clareza | Score de legibilidade (Flesch) | > 60 |
+| Precisão Técnica | Termos técnicos validados | 100% |
+| Rastreabilidade | IDs e versões presentes | 100% |
+| Aprovação | Assinaturas digitais | 2 de 3 papéis |
+
+### 6.2 Quality Gate para Código
+
+Código gerado por IA é considerado **VÁLIDO** quando:
+
+| Critério | Métrica | Threshold |
+|-----------|---------|-----------|
+| Sintaxe | Compilação/interpretação | 0 erros |
+| Testes | Cobertura mínima | 70% |
+| Segurança | Vulnerabilidades (SAST) | 0 críticas |
+| Performance | Complexidade ciclomática | < 10 |
+| Documentação | Comentários JSDoc | Presente |
+
+---
+
+## 7. CRITÉRIOS DE BLOQUEIO
+
+### 7.1 Bloqueio Automático
+
+O agente deve BLOQUEAR a operação quando:
+
+1. **Schema Inválido:** Documento não conforme com contract
+2. **Sem Evidência:** Ação sem registro em log
+3. **Approval Pending:** Documento aguardando aprovação
+4. **Non-Conformidade Crítica:** Severidade HIGH ou CRITICAL
+5. **Dependência Quebrada:** Referência a documento inexistente
+6. **Token Excedido:** Rate limit de API externa
+7. **Secret Exposed:** Variável sensível no código
+
+### 7.2 Bloqueio Manual
+
+Administrador pode bloquear via:
+
+```yaml
+# .nexoritia/policies/emergency-stop.policy.yaml
+emergency_stop:
+  activated_by: admin@visadocs.com
+  reason: "Auditoria ANVISA em andamento"
+  scope: ["sop-generation", "training-certification"]
+  expires_at: "2025-02-15T00:00:00Z"
+```
+
+---
+
+## 8. MATRIZ DE RISCO
+
+### 8.1 Classificação de Risco
+
+| ID | Risco | Probabilidade | Impacto | Mitigação |
+|----|-------|--------------|---------|-----------|
+| R1 | IA gera documento não conforme | Média | Alto | Quality gate obrigatório |
+| R2 | Evidência corrompida ou perdida | Baixa | Alto | Hash chain + backup |
+| R3 | Aprovação sem revisão adequada | Média | Alto | Segregação de papéis |
+| R4 | Dependência externa indisponível | Média | Médio | Fallback local |
+| R5 | Vazamento de dado sensível | Baixa | Alto | Sanitização de output |
+| R6 | Overcoding em solução simples | Alta | Médio | Regra anti-overcoding |
+| R7 | Inconsistência entre tenants | Baixa | Alto | Isolamento obrigatório |
+
+### 8.2 Score de Risco
+
+```
+Risco Total = Σ (Probabilidade × Impacto) / N
+
+Onde:
+- Probabilidade: 1-5 (muito baixa a muito alta)
+- Impacto: 1-5 (muito baixo a muito alto)
+- N: número de riscos identificados
+
+Thresholds:
+- < 2.0: Verde (aceitável)
+- 2.0-3.5: Amarelo (atenção)
+- > 3.5: Vermelho (bloqueio)
+```
+
+---
+
+## 9. RELAÇÃO COM VISADOCS
+
+### 9.1 Integração
+
+Nexoritia governa o agente que trabalha NO Visadocs, não altera o Visadocs.
+
+```
+┌─────────────────────────────────────────┐
+│           NEXORITIA LAYER               │
+│  - Define regras                        │
+│  - Valida outputs                       │
+│  - Gera evidências                      │
+│  - Bloqueia non-conformidades           │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│         CASCADE AGENT                   │
+│  - Recebe instruções                    │
+│  - Executa tarefas                      │
+│  - Consulta Nexoritia                   │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│          VISADOCS 360                   │
+│  - Recebe código/documentos           │
+│  - Persiste em banco                   │
+│  - Serve aplicação                     │
+└─────────────────────────────────────────┘
+```
+
+### 9.2 Pontos de Contato
+
+| Visadocs Component | Nexoritia Governance |
+|-------------------|---------------------|
+| POP/SOP generation | Schema validation + Audit trail |
+| Training records | Certificate validation |
+| Quiz generation | Content validation |
+| User actions | Audit logging |
+| Document approval | Workflow enforcement |
+
+---
+
+## 10. RELAÇÃO COM WINDSURF/CASCADE
+
+### 10.1 Governance Hooks
+
+Nexoritia intercepta ações do agente em pontos críticos:
+
+```
+User Request
+    ↓
+[PRE-FLIGHT] ← Nexoritia valida permissão
+    ↓
+Cascade Planning
+    ↓
+[PRE-EXECUTION] ← Nexoritia verifica regras
+    ↓
+Code/Document Generation
+    ↓
+[POST-GENERATION] ← Nexoritia valida output
+    ↓
+User Delivery
+    ↓
+[POST-DELIVERY] ← Nexoritia registra evidência
+```
+
+### 10.2 Comunicação
+
+O agente consulta Nexoritia via:
+
+1. **Skills:** Instruções de comportamento (`SKILL.md`)
+2. **Rules:** Regras de execução (`00-*.md`)
+3. **Workflows:** Processos passo a passo (`*.md`)
+4. **Scripts:** Validações técnicas (`.mjs`)
+
+### 10.3 Autonomia vs Governança
+
+| Aspecto | Autonomia do Agente | Governança Nexoritia |
+|---------|-------------------|---------------------|
+| Refatoração de código | ✅ Livre | ❌ Não interfere |
+| Geração de testes | ✅ Livre | ❌ Não interfere |
+| Criação de SOP | ⚠️ Com template | ✅ Valida schema |
+| Alteração de banco | ❌ Bloqueada | ✅ Bloqueia automaticamente |
+| Deploy | ❌ Bloqueada | ✅ Requer validação |
+| Geração de certificado | ⚠️ Com workflow | ✅ Valida chain |
+
+---
+
+## 11. REGRA ANTI-OVERCODING
+
+### 11.1 Definição
+
+> *"A solução mais simples que resolve o problema é a melhor solução."*
+
+### 11.2 Heurísticas
+
+1. **No Boilerplate:** Se gera mais código que valor, é overcoding
+2. **No Premature Abstraction:** Generalização antes da necessidade
+3. **No Gold Plating:** Features não solicitadas
+4. **No Dependencies:** Preferir Node.js nativo
+5. **No Complexity:** KISS (Keep It Simple, Stupid)
+
+### 11.3 Checklist Anti-Overcoding
+
+- [ ] Solução funciona sem instalar dependências?
+- [ ] Código é legível para humano médio?
+- [ ] Resolve APENAS o problema solicitado?
+- [ ] Pode ser mantido por outro desenvolvedor?
+- [ ] Não reinventa roda já existente no projeto?
+
+---
+
+## 12. EVIDÊNCIA E AUDITORIA
+
+### 12.1 O que é Evidência?
+
+Todo arquivo em `.nexoritia/` é evidência potencial:
+
+- Contracts: Definição de conformidade
+- Policies: Regras aplicadas
+- Workflows: Processos executados
+- Logs: Registro de ações
+- Evals: Resultados de validação
+
+### 12.2 Ciclo de Vida da Evidência
+
+```
+Criação → Validação → Arquivamento → Retenção → Descarte
+(0 dias)   (imediato)    (automático)    (5 anos)    (LGPD)
+```
+
+### 12.3 Chain of Custody
+
+```
+event_id: uuid
+parent_id: uuid (evento anterior)
+hash: sha256(evento + parent_hash)
+timestamp: ISO8601
+actor: agent|user|system
+action: what
+context: where
+result: success|failure|blocked
+```
+
+---
+
+## 13. GOVERNANCE CHECKLIST
+
+Antes de qualquer deploy ou release:
+
+### Pre-Flight
+- [ ] NEXORITIA_KERNEL.md revisado
+- [ ] Contratos validados (`validate-contracts.mjs`)
+- [ ] Políticas atuais conferidas
+- [ ] Nenhum bloqueio ativo
+
+### Durante Execução
+- [ ] Skills carregadas
+- [ ] Rules aplicadas
+- [ ] Workflow seguido
+- [ ] Logs sendo gravados
+
+### Post-Execution
+- [ ] Output validado (`inspect-regulated-output.mjs`)
+- [ ] Quality gate passou (`run-nexoritia-quality-gate.mjs`)
+- [ ] Evidência no log
+- [ ] Hash chain consistente
+
+---
+
+## 14. PRÓXIMOS PASSOS
+
+1. **Implementar Estrutura:** Criar diretórios e arquivos base
+2. **Validar Contratos:** Testar schemas com dados reais
+3. **Criar Workflows:** Implementar fluxos SOP e CAPA
+4. **Treinar Agente:** Validar comportamento com skills
+5. **Testar Quality Gate:** Rodar validação em documento de teste
+6. **Documentar:** Criar guia de uso para desenvolvedores
+
+---
+
+**© 2025 Nexoritia Regulated AI OS**  
+**Licença:** MIT (arquitetura) + Commercial (runtime)  
+**Governança:** VISADOCS 360 + ANVISA Compliance
+
+---
+
+*"Regulamentação não é obstáculo, é qualidade garantida."*

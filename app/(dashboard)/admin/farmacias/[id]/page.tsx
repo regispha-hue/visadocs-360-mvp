@@ -1,4 +1,5 @@
 "use client";
+import { EnderecoTenant } from '@/types';
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -164,7 +165,7 @@ export default function FarmaciaDetailPage({ params }: { params: { id: string } 
   }
 
   const statusBadge = STATUS_BADGES[tenant.status] ?? { variant: "secondary", label: tenant.status };
-  const endereco = tenant.endereco ?? {};
+  const endereco = (tenant.endereco ?? {}) as EnderecoTenant;
 
   return (
     <div>

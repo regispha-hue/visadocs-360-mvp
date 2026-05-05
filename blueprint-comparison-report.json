@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-05-02T13:35:39.721Z",
+  "summary": {
+    "totalBlueprintItems": 116,
+    "found": 99,
+    "missing": 17,
+    "completionRate": "85.3"
+  },
+  "missingByCategory": {
+    "api": [
+      "/api/auth/login",
+      "/api/cargos",
+      "/api/cargos/[id]",
+      "/api/cargos/aplicar-trilha",
+      "/api/fiscalizacao/tokens",
+      "/api/fiscalizacao/tokens/[id]",
+      "/api/fiscalizacao/public/[token]",
+      "/api/kits"
+    ],
+    "pages": [
+      "app/fiscalizacao/[token]/page.tsx",
+      "app/fiscalizacao/[token]/layout.tsx",
+      "app/(dashboard)/dashboard/cargos/page.tsx"
+    ],
+    "components": [],
+    "lib": [
+      "lib/auth-options.ts",
+      "lib/aws-config.ts",
+      "lib/kit-catalog.ts"
+    ],
+    "prisma": [
+      "CargoModelo",
+      "TokenFiscalizacao",
+      "AcessoFiscalizacao"
+    ]
+  }
+}

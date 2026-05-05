@@ -1,0 +1,220 @@
+{
+  "generated_at": "2026-05-02T14:54:19.199500",
+  "total_kits": 13,
+  "total_pops": 252,
+  "kits": [
+    {
+      "name": "POPs+MBP_Antibióticos Citostáticos e Hormônios",
+      "folder": "01_antibioticos_citostaticos_hormonios",
+      "category": "Manipulação Especial",
+      "priority": 1,
+      "expected_pops": 11,
+      "found_pops": 11,
+      "pops": [
+        "POP.001 Avaliação de Receita Antimicrobianos + Cit e Horm",
+        "POP.002 Aquisição e Recebimento de Atb, Cit e Horm",
+        "POP.003 Armazenamento e Estocagem",
+        "POP.004 CQ de Atb. Cit e Horm",
+        "POP.005 Rotulagem Auxiliar das Fórmulas",
+        "POP.006 Manipulação de Atb. Cit. Horm",
+        "POP.007 Classificação dos Utensílios",
+        "POP.008 Prevenção da Contaminação Cruzada",
+        "POP.009 Dispensação de Fórmulas ao Cliente",
+        "POP.010 Escrituração de Antibióticos",
+        "POP.011 Devolução ou Troca de Antibióticos"
+      ],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\01_antibioticos_citostaticos_hormonios"
+    },
+    {
+      "name": "POPs+MBP_Farmácia de Manipulação Veterinária Exclusiva",
+      "folder": "02_veterinaria_exclusiva",
+      "category": "Farmácia Veterinária",
+      "priority": 2,
+      "expected_pops": 20,
+      "found_pops": 0,
+      "pops": [],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\02_veterinaria_exclusiva"
+    },
+    {
+      "name": "POPs+MBP_SBIT",
+      "folder": "03_sbit_bioterápicos",
+      "category": "Homeopatia",
+      "priority": 3,
+      "expected_pops": 8,
+      "found_pops": 8,
+      "pops": [
+        "POP.001 Recebimento e Avaliação da Receita",
+        "POP.002 Aquisição e Recebimento de SBIT",
+        "POP.003 Armazenamento e Estocagem",
+        "POP.004 CQ de SBIT",
+        "POP.005 Diluição de Matéria-Prima SBIT",
+        "POP.006 Manipulação de SBIT",
+        "POP.007 Classificação dos Utensílios",
+        "POP.008 SBIT - Bula Simplificada para Pacientes"
+      ],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\03_sbit_bioterápicos"
+    },
+    {
+      "name": "POPs_Manipulação Magistral Homeopática",
+      "folder": "04_homeopatia_magistral",
+      "category": "Homeopatia",
+      "priority": 4,
+      "expected_pops": 23,
+      "found_pops": 23,
+      "pops": [
+        "POP.1 - Preparações homeopáticas",
+        "POP.10 - Parâmetros para água potável e purificada",
+        "POP.11 - Práticas de higiene",
+        "POP.12 - Higienização Antisséptica",
+        "POP.13 - Utilização e conservação de Uniformes",
+        "POP.14 - Utilização de EPI's",
+        "POP.15 - Treinamento de Colaboradores",
+        "POP.16 - Atribuições do Farmacêutico",
+        "POP.17 - Monitoramento de Temperatura e Umidade",
+        "POP.18 - Programa de Gerenciamento de Riscos",
+        "POP.19 - Orientações sobre limpeza dos Laboratórios",
+        "POP.2 - Manipulação de fórmulas homeopáticas",
+        "POP.20 - Padronização do numero de gotas com cânulas padronizadas",
+        "POP.21 - Condutas área manipulação",
+        "POP.22 - Operação da balança",
+        "POP.23 - Roteiro de inspeção para farmácia",
+        "POP.3 - Alcoolmetria e diluições alcoólicas",
+        "POP.4 - Bioterápicos",
+        "POP.5 - Equipamentos",
+        "POP.6 - Inativação de materiais",
+        "POP.7 - Biossegurança",
+        "POP.8 - Controle de qualidade",
+        "POP.9 - Rotulagem"
+      ],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\04_homeopatia_magistral"
+    },
+    {
+      "name": "POPs_Serviços e Consulta Farmacêutica",
+      "folder": "05_servicos_consulta_farmaceutica",
+      "category": "Serviços Farmacêuticos",
+      "priority": 5,
+      "expected_pops": 24,
+      "found_pops": 24,
+      "pops": [
+        "POP.001 Atribuições do Farmacêutico",
+        "POP.002 Higienização da Sala de Serviços Farmacêuticos",
+        "POP.003 Descarte de Resíduo e Retirada do Lixo",
+        "POP.004 Manutenção e Calibração dos Equipamentos",
+        "POP.005 Uso de EPIs",
+        "POP.006 Higienização das Mãos",
+        "POP.007 Higiene Pessoal",
+        "POP.008 Treinamento de Funcionários",
+        "POP.009 Autoinspeção",
+        "POP.010 Aplicação de Injetáveis - Agulhas e Seringas",
+        "POP.011 Aplicação de Injetáveis - Preparação",
+        "POP.012 Aplicação de Injetáveis - Vias de Administração",
+        "POP.013 Monitoramento da Glicemia Capilar",
+        "POP.014 Monitoramento da Pressão Arterial",
+        "POP.015 Aferição da Temperatura Corporal",
+        "POP.016 Inaloterapia",
+        "POP.017 Perfuração de Lóbulo Auricular para Brincos",
+        "POP.018 Saturação de Oxigênio",
+        "POP.019 Vacinação",
+        "POP.020 Acidentes com Perfurocortantes",
+        "POP.021 Atenção Farmacêutica",
+        "POP.022 Consulta Farmacêutica",
+        "POP.023 Farmacovigilância",
+        "POP.024 Prescrição Farmacêutica"
+      ],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\05_servicos_consulta_farmaceutica"
+    },
+    {
+      "name": "POPs_LGPD para Farmácias de Manipulação",
+      "folder": "06_lgpd_compliance",
+      "category": "Compliance",
+      "priority": 6,
+      "expected_pops": 8,
+      "found_pops": 8,
+      "pops": [
+        "POP.001 - Dados Pessoais - Clientes e Prescritores",
+        "POP.002 - Dados Pessoais - Colaboradores",
+        "POP.003 - Dados Pessoais - Visitantes e Prestadores de Serviço",
+        "POP.004 - Dados Pessoais Compartilhados com Terceiros",
+        "POP.005 - Segurança dos Dados Pessoais em Sistemas Internos",
+        "POP.006 - Diretrizes para Comunicação Digital e Marketing",
+        "POP.007 - IDP, RIPD e PGC",
+        "POP.008 - Diretrizes para Anonimização e Descarte de Arquivos"
+      ],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\06_lgpd_compliance"
+    },
+    {
+      "name": "POP Polícia Civil [2025]",
+      "folder": "07_fiscalizacao_policia_civil",
+      "category": "Fiscalização",
+      "priority": 7,
+      "expected_pops": 10,
+      "found_pops": 0,
+      "pops": [],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\07_fiscalizacao_policia_civil"
+    },
+    {
+      "name": "POPs_Manipulação Veterinária - Complementar MAPA-ANVISA",
+      "folder": "08_veterinaria_mapa_anvisa",
+      "category": "Veterinária",
+      "priority": 8,
+      "expected_pops": 15,
+      "found_pops": 1,
+      "pops": [
+        "POPs"
+      ],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\08_veterinaria_mapa_anvisa"
+    },
+    {
+      "name": "Manual para Solicitação de AE",
+      "folder": "09_manuais_regulatorios/AE",
+      "category": "Regulatório",
+      "priority": 9,
+      "expected_pops": 0,
+      "found_pops": 0,
+      "pops": [],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\09_manuais_regulatorios\\AE"
+    },
+    {
+      "name": "Manual para Solicitação de AFE",
+      "folder": "09_manuais_regulatorios/AFE",
+      "category": "Regulatório",
+      "priority": 9,
+      "expected_pops": 0,
+      "found_pops": 0,
+      "pops": [],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\09_manuais_regulatorios\\AFE"
+    },
+    {
+      "name": "Manual para Solicitação de Registro no MAPA",
+      "folder": "09_manuais_regulatorios/MAPA",
+      "category": "Regulatório",
+      "priority": 9,
+      "expected_pops": 0,
+      "found_pops": 0,
+      "pops": [],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\09_manuais_regulatorios\\MAPA"
+    },
+    {
+      "name": "PGRSS_Farmácia de Manipulação e Drogarias",
+      "folder": "10_pgrss_meio_ambiente",
+      "category": "Meio Ambiente",
+      "priority": 10,
+      "expected_pops": 0,
+      "found_pops": 0,
+      "pops": [],
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\10_pgrss_meio_ambiente"
+    },
+    {
+      "name": "POPs+MBP_Farmácias_de_Manipulação",
+      "folder": "99_pops_principais_manipulacao",
+      "category": "Farmácia de Manipulação - Principal",
+      "priority": 99,
+      "expected_pops": 181,
+      "found_pops": 177,
+      "description": "Kit principal com POPs de operações padrão de farmácia de manipulação - RDC 67/2007",
+      "path": "C:\\Users\\Usuario\\visadocs-360-mvp\\pops_kits\\99_pops_principais_manipulacao",
+      "is_main_kit": true
+    }
+  ],
+  "updated_at": "2026-05-02T14:56:06.602092"
+}
