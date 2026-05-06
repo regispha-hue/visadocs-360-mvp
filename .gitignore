@@ -48,3 +48,5 @@ desktop.ini
 build-output.tmp
 build.log
 build-fix-log.txt
+.vercel
+.env*.local
