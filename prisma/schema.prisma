@@ -91,12 +91,14 @@ model Tenant {
   fornecedores       Fornecedor[]
   documentos         Documento[]
   quizzes            Quiz[]
-
-  alertas AlertaNorma[]
-
+  alertas            AlertaNorma[]
   verificacoesPraticas VerificacaoPratica[]
-
   auditoriasFiscalizacao AuditoriaFiscalizacao[]
+  subscriptions      Subscription[]
+  payments           Payment[]
+  alertasPersonalizadas Alerta[]
+  certificados        Certificado[]
+  cargosModelo        CargoModelo[]
 }
 
 model User {

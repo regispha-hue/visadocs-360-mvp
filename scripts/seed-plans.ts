@@ -10,9 +10,10 @@ const prisma = new PrismaClient();
 const plans = [
   {
     name: "Starter",
-    description: "Ideal para pequenas farmácias iniciando na conformidade",
-    priceMonthly: 99.0,
-    priceYearly: 999.0, // ~15% desconto
+    slug: "starter",
+    price: 99.0,
+    currency: "BRL",
+    interval: "month",
     features: [
       "Até 5 colaboradores",
       "Até 50 POPs",
@@ -21,18 +22,15 @@ const plans = [
       "Certificados",
       "Suporte por email",
     ],
-    limits: {
-      maxUsers: 5,
-      maxPOPs: 50,
-      maxStorage: 1024, // MB
-    },
-    sortOrder: 1,
+    maxUsers: 5,
+    isActive: true,
   },
   {
     name: "Professional",
-    description: "Para farmácias em crescimento com necessidades avançadas",
-    priceMonthly: 199.0,
-    priceYearly: 1999.0, // ~16% desconto
+    slug: "professional",
+    price: 199.0,
+    currency: "BRL",
+    interval: "month",
     features: [
       "Até 20 colaboradores",
       "POPs ilimitados",
@@ -43,18 +41,15 @@ const plans = [
       "Modo auditoria fiscalização",
       "Suporte prioritário",
     ],
-    limits: {
-      maxUsers: 20,
-      maxPOPs: -1, // ilimitado
-      maxStorage: 5120, // 5GB
-    },
-    sortOrder: 2,
+    maxUsers: 20,
+    isActive: true,
   },
   {
     name: "Enterprise",
-    description: "Solução completa para grandes farmácias e redes",
-    priceMonthly: 499.0,
-    priceYearly: 4999.0, // ~16% desconto
+    slug: "enterprise",
+    price: 499.0,
+    currency: "BRL",
+    interval: "month",
     features: [
       "Colaboradores ilimitados",
       "POPs ilimitados",
@@ -65,12 +60,8 @@ const plans = [
       "Onboarding dedicado",
       "Customizações",
     ],
-    limits: {
-      maxUsers: -1, // ilimitado
-      maxPOPs: -1,
-      maxStorage: 51200, // 50GB
-    },
-    sortOrder: 3,
+    maxUsers: 1000,
+    isActive: true,
   },
 ];
 
@@ -78,9 +69,8 @@ async function main() {
   console.log("🌱 Seeding plans...");
 
   for (const plan of plans) {
-    // @ts-ignore
     await prisma.plan.upsert({
-      where: { name: plan.name },
+      where: { slug: plan.slug },
       update: plan,
       create: plan,
     });

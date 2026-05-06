@@ -85,21 +85,19 @@ export async function GET(
     await browser.close();
 
     // Log da geração
-    // @ts-ignore
     await prisma.securityLog.create({
       data: {
-        type: "PDF_GENERATION",
+        action: "PDF_GENERATION",
         severity: "LOW",
         userId,
         tenantId,
-        contentId: id,
-        details: JSON.stringify({
+        details: {
           popId: id,
           popTitulo: pop.titulo,
           ip,
-          userAgent: userAgent.substring(0, 200), // Limitar tamanho
+          userAgent: userAgent.substring(0, 200),
           timestamp,
-        }),
+        },
         ip,
         userAgent: userAgent.substring(0, 255),
       },

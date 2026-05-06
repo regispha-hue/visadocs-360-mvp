@@ -43,16 +43,12 @@ export async function POST(request: NextRequest) {
     const eventType = request.headers.get("x-event-type") || "data.sync";
 
     // Log do webhook recebido
-    // @ts-ignore
     await prisma.webhookLog.create({
       data: {
-        tenantId,
-        eventType,
-        payload: JSON.stringify(payload),
-        source: payload.source || "unknown",
-        ip: request.headers.get("x-forwarded-for") || request.ip || "unknown",
-        userAgent: request.headers.get("user-agent") || "unknown",
-        status: "RECEIVED",
+        event: eventType,
+        payload: payload,
+        source: payload.source || "erp",
+        status: "received",
       },
     });
 
@@ -207,18 +203,20 @@ export async function GET() {
 async function processColaborador(payload: any, tenantId: string) {
   const { nome, email, cargo, dataAdmissao, cpf, telefone } = payload;
 
-  // Verificar se já existe
+  // Verificar se já existe por nome ou email
   const existing = await prisma.colaborador.findFirst({
     where: {
       tenantId,
       OR: [
-        { nome: { contains: nome } },
-        { email: email || "" },
-    // @ts-ignore
-        { cpf: cpf || "" },
+        { nome: { equals: nome } },
+        { email: email || undefined },
       ],
     },
   });
+
+  // Gerar hash e máscara do CPF (simplificado)
+  const cpfHash = cpf ? require('crypto').createHash('sha256').update(cpf).digest('hex') : '';
+  const cpfMasked = cpf ? cpf.replace(/(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})/, '$1.***.***-$4') : '';
 
   if (existing) {
     // Atualizar
@@ -227,12 +225,7 @@ async function processColaborador(payload: any, tenantId: string) {
       data: {
         nome: nome || existing.nome,
         email: email || existing.email,
-    // @ts-ignore
-        cargo: cargo || existing.cargo,
-    // @ts-ignore
-        telefone: telefone || existing.telefone,
-    // @ts-ignore
-        cpf: cpf || existing.cpf,
+        funcao: cargo || existing.funcao,
         dataAdmissao: dataAdmissao ? new Date(dataAdmissao) : existing.dataAdmissao,
         updatedAt: new Date(),
       },
@@ -244,13 +237,12 @@ async function processColaborador(payload: any, tenantId: string) {
         tenantId,
         nome,
         email: email || null,
-    // @ts-ignore
-        cargo: cargo || null,
-        telefone: telefone || null,
-        cpf: cpf || null,
-        dataAdmissao: dataAdmissao ? new Date(dataAdmissao) : null,
+        funcao: cargo || 'Não informado',
+        setor: 'Não informado',
+        cpfHash,
+        cpfMasked,
+        dataAdmissao: dataAdmissao ? new Date(dataAdmissao) : new Date(),
         status: "ATIVO",
-        fonteIntegracao: "WEBHOOK_ERP",
       },
     });
   }

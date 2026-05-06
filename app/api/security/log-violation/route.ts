@@ -31,22 +31,21 @@ export async function POST(request: NextRequest) {
                "unknown";
 
     // Salvar log de violação
-    // @ts-ignore
     const violation = await prisma.securityLog.create({
       data: {
-        type: "CONTENT_VIOLATION",
+        action: "CONTENT_VIOLATION",
         severity: "MEDIUM",
         userId,
         tenantId,
-        contentId,
-        details: JSON.stringify({
+        details: {
+          contentId,
           violationType: type,
           violationDetails: details,
           ip,
           userAgent,
           url,
           timestamp,
-        }),
+        },
         ip,
         userAgent: userAgent || "unknown",
       },
@@ -66,15 +65,13 @@ export async function POST(request: NextRequest) {
 
     if (violationsCount >= 5) {
       // Criar alerta para admin
-    // @ts-ignore
       await prisma.alerta.create({
         data: {
           tenantId,
-          tipo: "SEGURANCA",
-          titulo: `Múltiplas tentativas de violação - Usuário ${userId}`,
-          descricao: `Usuário tentou violar proteção de conteúdo ${violationsCount} vezes nas últimas 24h`,
-          severidade: "ALTA",
-          status: "PENDENTE",
+          type: "SEGURANCA",
+          title: `Múltiplas tentativas de violação - Usuário ${userId}`,
+          message: `Usuário tentou violar proteção de conteúdo ${violationsCount} vezes nas últimas 24h`,
+          severity: "ALTA",
         },
       });
     }

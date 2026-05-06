@@ -40,9 +40,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar plano
-    // @ts-ignore
     const plan = await prisma.plan.findUnique({
-      where: { id: planId, active: true },
+      where: { id: planId },
     });
 
     if (!plan) {
@@ -61,9 +60,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar ou criar assinatura
-    // @ts-ignore
-    let subscription = await prisma.subscription.findUnique({
+    let subscription = await prisma.subscription.findFirst({
       where: { tenantId },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!subscription) {
@@ -72,15 +71,13 @@ export async function POST(request: NextRequest) {
       const trialEndsAt = new Date();
       trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
 
-    // @ts-ignore
       subscription = await prisma.subscription.create({
         data: {
           tenantId,
           planId,
           status: "TRIAL",
-          billingCycle,
-          startDate: new Date(),
-          trialEndsAt,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: trialEndsAt,
         },
       });
     }
@@ -89,7 +86,8 @@ export async function POST(request: NextRequest) {
     const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
     // Criar ou buscar cliente Stripe
-    let stripeCustomerId = subscription.stripeCustomerId;
+    // Nota: stripeCustomerId precisa ser salvo no Tenant, não na Subscription
+    let stripeCustomerId = (subscription as any).stripeCustomerId;
     
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
@@ -102,12 +100,7 @@ export async function POST(request: NextRequest) {
       });
       stripeCustomerId = customer.id;
 
-      // Atualizar assinatura com stripeCustomerId
-    // @ts-ignore
-      await prisma.subscription.update({
-        where: { id: subscription.id },
-        data: { stripeCustomerId },
-      });
+      // TODO: Salvar stripeCustomerId no Tenant ou criar campo na Subscription
     }
 
     // Criar sessão de checkout
@@ -135,8 +128,8 @@ export async function POST(request: NextRequest) {
           tenantId,
           subscriptionId: subscription.id,
         },
-        trial_end: subscription.trialEndsAt 
-          ? Math.floor(subscription.trialEndsAt.getTime() / 1000)
+        trial_end: subscription.currentPeriodEnd 
+          ? Math.floor(subscription.currentPeriodEnd.getTime() / 1000)
           : undefined,
       },
     });

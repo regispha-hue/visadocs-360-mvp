@@ -119,15 +119,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar alerta para admin
-    // @ts-ignore
     await prisma.alerta.create({
       data: {
         tenantId,
-        tipo: "TREINAMENTO",
-        titulo: `Treinamentos automáticos gerados para ${inconsistencies.length} funcionários`,
-        descricao: `A Integração Universal Bridge detectou ${inconsistencies.length} funcionários no ERP sem cadastro no Visadocs. Foram criados automaticamente ${treinamentosCriados.length} treinamentos.`,
-        severidade: "MEDIA",
-        status: "PENDENTE",
+        type: "TREINAMENTO",
+        title: `Treinamentos automáticos gerados para ${inconsistencies.length} funcionários`,
+        message: `A Integração Universal Bridge detectou ${inconsistencies.length} funcionários no ERP sem cadastro no Visadocs. Foram criados automaticamente ${treinamentosCriados.length} treinamentos.`,
+        severity: "MEDIA",
       },
     });
 
