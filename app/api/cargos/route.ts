@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API Cargos - CRUD de Modelos de Cargo
  * GET /api/cargos - Listar
  * POST /api/cargos - Criar
@@ -12,11 +12,31 @@ import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
+type CargoModeloTemplate = {
+  kitIds?: string[];
+  funcaoPadrao?: string;
+  setorPadrao?: string;
+};
+
+function normalizeCargo(cargo: any) {
+  const template = (cargo.template ?? {}) as CargoModeloTemplate;
+
+  return {
+    ...cargo,
+    nome: cargo.name,
+    descricao: cargo.description,
+    kitIds: template.kitIds ?? [],
+    funcaoPadrao: template.funcaoPadrao ?? null,
+    setorPadrao: template.setorPadrao ?? null,
+    ativo: cargo.isActive,
+  };
+}
+
 // GET - Listar cargos
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
@@ -28,21 +48,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Tenant não encontrado" }, { status: 403 });
     }
 
-    // @ts-ignore
     const cargos = await prisma.cargoModelo.findMany({
       where: {
         tenantId,
-        ativo: true,
-      },
-      include: {
-        _count: {
-          select: { colaboradores: true },
-        },
+        isActive: true,
       },
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ cargos });
+    return NextResponse.json({ cargos: cargos.map(normalizeCargo) });
   } catch (error) {
     console.error("Erro ao buscar cargos:", error);
     return NextResponse.json(
@@ -56,7 +70,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
@@ -78,10 +92,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if cargo already exists
-    // @ts-ignore
     const existing = await prisma.cargoModelo.findFirst({
-      where: { tenantId, nome, ativo: true },
+      where: { tenantId, name: nome, isActive: true },
     });
 
     if (existing) {
@@ -91,23 +103,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // @ts-ignore
     const cargo = await prisma.cargoModelo.create({
       data: {
         tenantId,
-        nome,
-        descricao,
-        kitIds: kitIds || [],
-        funcaoPadrao,
-        setorPadrao,
-        ativo: true,
+        name: nome,
+        description: descricao,
+        template: {
+          kitIds: kitIds || [],
+          funcaoPadrao,
+          setorPadrao,
+        },
+        isActive: true,
       },
     });
 
-    // Audit log
     await createAuditLog({
-    // @ts-ignore
-      action: AUDIT_ACTIONS.CARGO_CREATED,
+      action: (AUDIT_ACTIONS as any).CARGO_CREATED ?? "CARGO_CREATED",
       entity: "CargoModelo",
       entityId: cargo.id,
       userId: user.id,
@@ -116,7 +127,7 @@ export async function POST(request: NextRequest) {
       details: { nome, kitIds },
     });
 
-    return NextResponse.json({ cargo }, { status: 201 });
+    return NextResponse.json({ cargo: normalizeCargo(cargo) }, { status: 201 });
   } catch (error) {
     console.error("Erro ao criar cargo:", error);
     return NextResponse.json(
@@ -125,3 +136,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

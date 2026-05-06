@@ -1,5 +1,5 @@
-// app/api/quiz/route.ts
-// API para geração e avaliação de quizzes para POPs
+﻿// app/api/quiz/route.ts
+// API para geraÃ§Ã£o e avaliaÃ§Ã£o de quizzes para POPs
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "NÃ£o autorizado" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     if (!popId && !quizId) {
       return NextResponse.json(
-        { error: "popId ou quizId é obrigatório" },
+        { error: "popId ou quizId Ã© obrigatÃ³rio" },
         { status: 400 }
       );
     }
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
       if (!quiz) {
         return NextResponse.json(
-          { error: "Quiz não encontrado" },
+          { error: "Quiz nÃ£o encontrado" },
           { status: 404 }
         );
       }
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ quiz });
     }
 
-    // Verificar se já existe quiz para este POP
+    // Verificar se jÃ¡ existe quiz para este POP
     let quiz = await prisma.quiz.findFirst({
       where: { popId: popId! },
       include: {
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Se não existe, gerar novo via IA
+    // Se nÃ£o existe, gerar novo via IA
     if (!quiz) {
       const pop = await prisma.pop.findUnique({
         where: { id: popId! },
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
       if (!pop) {
         return NextResponse.json(
-          { error: "POP não encontrado" },
+          { error: "POP nÃ£o encontrado" },
           { status: 404 }
         );
       }
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
         data: {
           popId: popId!,
           titulo: `Quiz - ${pop.titulo}`,
-          descricao: `Avaliação de conhecimento sobre ${pop.titulo}`,
+          descricao: `AvaliaÃ§Ã£o de conhecimento sobre ${pop.titulo}`,
           notaMinima: 70,
     // @ts-ignore
           tempoLimite: 30, // minutos
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+      return NextResponse.json({ error: "NÃ£o autorizado" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -142,14 +142,14 @@ export async function POST(request: NextRequest) {
 
     if (!quizId || !respostas || !tenantId) {
       return NextResponse.json(
-        { error: "quizId, respostas e tenantId são obrigatórios" },
+        { error: "quizId, respostas e tenantId sÃ£o obrigatÃ³rios" },
         { status: 400 }
       );
     }
 
     const userId = (session.user as any).id;
 
-    // Buscar quiz com questões e alternativas corretas
+    // Buscar quiz com questÃµes e alternativas corretas
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
       include: {
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
 
     if (!quiz) {
       return NextResponse.json(
-        { error: "Quiz não encontrado" },
+        { error: "Quiz nÃ£o encontrado" },
         { status: 404 }
       );
     }
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
     // Se aprovado, criar/gerar certificado
     let certificado = null;
     if (aprovado) {
-      // Buscar colaborador vinculado ao usuário
+      // Buscar colaborador vinculado ao usuÃ¡rio
       const colaborador = await prisma.colaborador.findFirst({
         where: { 
     // @ts-ignore
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (colaborador) {
-        // Registrar treinamento como concluído
+        // Registrar treinamento como concluÃ­do
         const treinamento = await prisma.treinamento.findFirst({
           where: {
             colaboradorId: colaborador.id,
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
 
           // Criar certificado
     // @ts-ignore
-          certificado = await prisma.certificado.create({
+          certificado = await (prisma.certificado as any).create({
             data: {
               treinamentoId: treinamento.id,
               colaboradorId: colaborador.id,
@@ -274,8 +274,8 @@ export async function POST(request: NextRequest) {
       tentativaId: tentativa.id,
       certificadoId: certificado?.id,
       message: aprovado 
-        ? "Parabéns! Você foi aprovado e seu certificado foi gerado."
-        : `Você não atingiu a nota mínima (${quiz.notaMinima}%). Estude mais e tente novamente.`,
+        ? "ParabÃ©ns! VocÃª foi aprovado e seu certificado foi gerado."
+        : `VocÃª nÃ£o atingiu a nota mÃ­nima (${quiz.notaMinima}%). Estude mais e tente novamente.`,
     });
 
   } catch (error: any) {
@@ -287,22 +287,22 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Função para gerar quiz via IA
+// FunÃ§Ã£o para gerar quiz via IA
 async function generateQuizWithAI(pop: any) {
-  const prompt = `Gere um quiz de 5 questões de múltipla escolha sobre o seguinte POP:
+  const prompt = `Gere um quiz de 5 questÃµes de mÃºltipla escolha sobre o seguinte POP:
 
-Título: ${pop.titulo}
+TÃ­tulo: ${pop.titulo}
 Objetivo: ${pop.objetivo}
-Descrição: ${pop.descricao}
+DescriÃ§Ã£o: ${pop.descricao}
 
 REGRAS:
-1. Questões devem focar em pontos CRÍTICOS de segurança
-2. Nível de dificuldade: INTERMEDIÁRIO
-3. Cada questão deve ter 4 alternativas (A, B, C, D)
-4. Apenas 1 alternativa correta por questão
+1. QuestÃµes devem focar em pontos CRÃTICOS de seguranÃ§a
+2. NÃ­vel de dificuldade: INTERMEDIÃRIO
+3. Cada questÃ£o deve ter 4 alternativas (A, B, C, D)
+4. Apenas 1 alternativa correta por questÃ£o
 5. Incluir justificativa breve para cada resposta correta
 
-FORMATO DE SAÍDA (JSON):
+FORMATO DE SAÃDA (JSON):
 {
   "questoes": [
     {
@@ -334,7 +334,7 @@ FORMATO DE SAÍDA (JSON):
     return quizData;
   } catch (error) {
     console.error("Erro ao gerar quiz via IA:", error);
-    // Retornar quiz padrão em caso de erro
+    // Retornar quiz padrÃ£o em caso de erro
     return {
       questoes: [
         {
@@ -343,9 +343,9 @@ FORMATO DE SAÍDA (JSON):
             { texto: "Padronizar o procedimento", correta: true },
             { texto: "Aumentar vendas", correta: false },
             { texto: "Reduzir custos", correta: false },
-            { texto: "Eliminar funcionários", correta: false },
+            { texto: "Eliminar funcionÃ¡rios", correta: false },
           ],
-          justificativa: "POPs servem para padronizar procedimentos garantindo qualidade e segurança.",
+          justificativa: "POPs servem para padronizar procedimentos garantindo qualidade e seguranÃ§a.",
         },
       ],
     };
@@ -355,3 +355,5 @@ FORMATO DE SAÍDA (JSON):
 function generateHash(): string {
   return "CERT-" + Date.now() + "-" + Math.random().toString(36).substring(2, 15);
 }
+
+

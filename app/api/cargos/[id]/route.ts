@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API Cargo Detail
  * PATCH /api/cargos/[id] - Atualizar
  * DELETE /api/cargos/[id] - Remover (soft delete)
@@ -12,6 +12,26 @@ import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
+type CargoModeloTemplate = {
+  kitIds?: string[];
+  funcaoPadrao?: string;
+  setorPadrao?: string;
+};
+
+function normalizeCargo(cargo: any) {
+  const template = (cargo.template ?? {}) as CargoModeloTemplate;
+
+  return {
+    ...cargo,
+    nome: cargo.name,
+    descricao: cargo.description,
+    kitIds: template.kitIds ?? [],
+    funcaoPadrao: template.funcaoPadrao ?? null,
+    setorPadrao: template.setorPadrao ?? null,
+    ativo: cargo.isActive,
+  };
+}
+
 // PATCH - Atualizar cargo
 export async function PATCH(
   request: NextRequest,
@@ -19,7 +39,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
@@ -35,8 +55,6 @@ export async function PATCH(
     const body = await request.json();
     const { nome, descricao, kitIds, funcaoPadrao, setorPadrao, ativo } = body;
 
-    // Check if cargo exists and belongs to tenant
-    // @ts-ignore
     const existing = await prisma.cargoModelo.findFirst({
       where: { id, tenantId },
     });
@@ -48,11 +66,9 @@ export async function PATCH(
       );
     }
 
-    // Check name uniqueness if changing name
-    if (nome && nome !== existing.nome) {
-    // @ts-ignore
+    if (nome && nome !== existing.name) {
       const nameExists = await prisma.cargoModelo.findFirst({
-        where: { tenantId, nome, ativo: true, id: { not: id } },
+        where: { tenantId, name: nome, isActive: true, id: { not: id } },
       });
 
       if (nameExists) {
@@ -63,32 +79,34 @@ export async function PATCH(
       }
     }
 
-    // @ts-ignore
+    const currentTemplate = (existing.template ?? {}) as CargoModeloTemplate;
+
     const cargo = await prisma.cargoModelo.update({
       where: { id },
       data: {
-        nome,
-        descricao,
-        kitIds,
-        funcaoPadrao,
-        setorPadrao,
-        ativo,
+        ...(nome !== undefined ? { name: nome } : {}),
+        ...(descricao !== undefined ? { description: descricao } : {}),
+        template: {
+          ...currentTemplate,
+          kitIds: kitIds ?? currentTemplate.kitIds ?? [],
+          funcaoPadrao: funcaoPadrao ?? currentTemplate.funcaoPadrao,
+          setorPadrao: setorPadrao ?? currentTemplate.setorPadrao,
+        },
+        ...(ativo !== undefined ? { isActive: ativo } : {}),
       },
     });
 
-    // Audit log
     await createAuditLog({
-    // @ts-ignore
-      action: AUDIT_ACTIONS.CARGO_UPDATED,
+      action: (AUDIT_ACTIONS as any).CARGO_UPDATED ?? "CARGO_UPDATED",
       entity: "CargoModelo",
       entityId: cargo.id,
       userId: user.id,
       userName: user.name,
       tenantId,
-      details: { nome, kitIds },
+      details: { nome: nome ?? existing.name, kitIds },
     });
 
-    return NextResponse.json({ cargo });
+    return NextResponse.json({ cargo: normalizeCargo(cargo) });
   } catch (error) {
     console.error("Erro ao atualizar cargo:", error);
     return NextResponse.json(
@@ -105,7 +123,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
@@ -119,15 +137,8 @@ export async function DELETE(
 
     const { id } = params;
 
-    // Check if cargo exists and belongs to tenant
-    // @ts-ignore
     const existing = await prisma.cargoModelo.findFirst({
       where: { id, tenantId },
-      include: {
-        _count: {
-          select: { colaboradores: true },
-        },
-      },
     });
 
     if (!existing) {
@@ -137,31 +148,19 @@ export async function DELETE(
       );
     }
 
-    // Check if cargo has associated colaboradores
-    if (existing._count.colaboradores > 0) {
-      return NextResponse.json(
-        { error: "Não é possível excluir cargo com colaboradores associados" },
-        { status: 400 }
-      );
-    }
-
-    // Soft delete
-    // @ts-ignore
     await prisma.cargoModelo.update({
       where: { id },
-      data: { ativo: false },
+      data: { isActive: false },
     });
 
-    // Audit log
     await createAuditLog({
-    // @ts-ignore
-      action: AUDIT_ACTIONS.CARGO_DELETED,
+      action: (AUDIT_ACTIONS as any).CARGO_DELETED ?? "CARGO_DELETED",
       entity: "CargoModelo",
       entityId: id,
       userId: user.id,
       userName: user.name,
       tenantId,
-      details: { nome: existing.nome },
+      details: { nome: existing.name },
     });
 
     return NextResponse.json({ success: true });

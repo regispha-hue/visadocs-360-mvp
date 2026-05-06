@@ -1,6 +1,6 @@
-// app/api/compliance/verify/[tenantId]/route.ts
-// API pública para verificação de compliance via QR Code
-// Acessada por fiscais/auditores ao escanear o QR no balcão da farmácia
+﻿// app/api/compliance/verify/[tenantId]/route.ts
+// API pÃºblica para verificaÃ§Ã£o de compliance via QR Code
+// Acessada por fiscais/auditores ao escanear o QR no balcÃ£o da farmÃ¡cia
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -27,21 +27,21 @@ export async function GET(
     // Validar token
     if (!token || !isValidComplianceTokenFormat(token)) {
       return NextResponse.json(
-        { error: "Token de acesso inválido ou ausente" },
+        { error: "Token de acesso invÃ¡lido ou ausente" },
         { status: 400 }
       );
     }
 
-    // Buscar tenant com validação de token
+    // Buscar tenant com validaÃ§Ã£o de token
     const tenant = await prisma.tenant.findFirst({
       where: {
         id: tenantId,
     // @ts-ignore
         complianceToken: token,
         complianceTokenExpiresAt: {
-          gt: new Date(), // Token não expirado
+          gt: new Date(), // Token nÃ£o expirado
         },
-        status: "ATIVO", // Farmácia ativa
+        status: "ATIVO", // FarmÃ¡cia ativa
       },
       include: {
         colaboradores: {
@@ -77,37 +77,35 @@ export async function GET(
 
     if (!tenant) {
       return NextResponse.json(
-        { error: "Acesso inválido ou expirado. QR Code pode ter sido regenerado ou a farmácia está inativa." },
+        { error: "Acesso invÃ¡lido ou expirado. QR Code pode ter sido regenerado ou a farmÃ¡cia estÃ¡ inativa." },
         { status: 403 }
       );
     }
 
-    // Registrar acesso de fiscalização (com anonimização LGPD)
+    // Registrar acesso de fiscalizaÃ§Ã£o (com anonimizaÃ§Ã£o LGPD)
     const clientIP = request.headers.get("x-forwarded-for") || request.ip;
     const userAgent = request.headers.get("user-agent");
     const browserInfo = extractBrowserInfo(userAgent);
     const hashedIP = hashIP(clientIP);
 
-    // @ts-ignore
     await prisma.securityLog.create({
       data: {
-        type: "COMPLIANCE_VERIFICATION",
+        action: "COMPLIANCE_VERIFICATION",
         severity: "LOW",
         tenantId,
-        contentId: tenantId,
-        details: JSON.stringify({
+        details: {
           action: "QR_CODE_SCAN",
           ipHash: hashedIP, // IP anonimizado para LGPD
           browser: browserInfo.browser,
           os: browserInfo.os,
           timestamp: new Date().toISOString(),
-        }),
+        },
         ip: hashedIP || "unknown", // IP anonimizado
-        userAgent: browserInfo.browser || "unknown", // Browser apenas, não full UA
+        userAgent: browserInfo.browser || "unknown", // Browser apenas, nÃ£o full UA
       },
     });
 
-    // Calcular estatísticas de compliance
+    // Calcular estatÃ­sticas de compliance
     const stats = await calculateComplianceStats(tenantId);
 
     // Formatar dados dos colaboradores
@@ -154,7 +152,7 @@ export async function GET(
       updatedAt: pop.updatedAt.toISOString(),
     }));
 
-    // Buscar última fiscalização registrada
+    // Buscar Ãºltima fiscalizaÃ§Ã£o registrada
     const ultimaFiscalizacao = await prisma.auditoriaFiscalizacao.findFirst({
       where: { tenantId },
       orderBy: { createdAt: "desc" },
@@ -197,10 +195,12 @@ export async function GET(
     return NextResponse.json(response);
 
   } catch (error: any) {
-    console.error("Erro na verificação de compliance:", error);
+    console.error("Erro na verificaÃ§Ã£o de compliance:", error);
     return NextResponse.json(
       { error: error.message || "Erro interno no servidor" },
       { status: 500 }
     );
   }
 }
+
+
