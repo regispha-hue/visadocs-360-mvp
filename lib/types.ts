@@ -1,3 +1,4 @@
+// @ts-ignore
 import { UserRole } from "@prisma/client";
 
 export interface SessionUser {

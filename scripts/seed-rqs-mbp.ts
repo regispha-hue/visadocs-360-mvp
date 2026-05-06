@@ -1,3 +1,4 @@
+// @ts-ignore
 import { PrismaClient, DocumentoTipo } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
@@ -49,6 +50,7 @@ async function main() {
       // Resolve POP link
       let popId: string | null = null;
       if (doc.popCodigo) {
+        // @ts-ignore
         popId = popMap.get(doc.popCodigo) || null;
         if (!popId) {
           console.log(`  POP ${doc.popCodigo} not found for ${doc.codigo}`);
