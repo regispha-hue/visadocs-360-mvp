@@ -1,12 +1,50 @@
+# dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# next.js
 .next/
-.build/
+out/
+
+# production
+build/
+dist/
+
+# misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
 .env
 .env.local
-.env.production
-*.log
-.DS_Store
-tsconfig.tsbuildinfo
-.aider*
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
 .vercel
-.env*.local
+
+# prisma
+prisma/generated/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Desktop.ini
+desktop.ini
+
+# temp/backup
+*.bak
+*.tmp
+build-output.tmp
+build.log
+build-fix-log.txt
