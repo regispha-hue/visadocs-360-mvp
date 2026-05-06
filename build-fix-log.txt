@@ -1,7 +1,0 @@
-[18:37:56] === INICIO DO FIX AUTOMATICO ===
-[18:37:56] 
-[18:37:56] --- Iteracao 1 ---
-[18:38:08] 
-[18:38:08] BUILD PASSOU! Total: 1 iteracoes
-[18:38:08] Commitando e deployando...
-[18:38:55] CONCLUIDO!
