@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +128,7 @@ export default function FiscalizacaoPage() {
       if (data.success) {
         setAcessoData(data.auditoria);
       } else {
-        alert("QR Code ou código inválido");
+        alert("QR Code ou cÃ³digo invÃ¡lido");
       }
     } catch (error) {
       console.error("Erro ao acessar auditoria:", error);
@@ -180,7 +180,7 @@ export default function FiscalizacaoPage() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <QrCode className="h-5 w-5" />
-          Botão de Pânico - Modo Fiscalização
+          BotÃ£o de PÃ¢nico - Modo FiscalizaÃ§Ã£o
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -209,7 +209,7 @@ export default function FiscalizacaoPage() {
               </div>
               
               <div className="text-sm text-gray-600">
-                <p className="font-semibold">Código de Acesso:</p>
+                <p className="font-semibold">CÃ³digo de Acesso:</p>
                 <p className="text-lg font-mono bg-gray-200 px-3 py-1 rounded">
                   {codigoAcesso}
                 </p>
@@ -263,31 +263,32 @@ export default function FiscalizacaoPage() {
 
     return (
       <div className="space-y-6">
-        {/* Cabeçalho da Auditoria */}
+        {/* CabeÃ§alho da Auditoria */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Modo Auditoria - Read-Only</span>
               <Badge variant="outline">
-                Fiscalização
+                FiscalizaÃ§Ã£o
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Farmácia</p>
+                <p className="text-sm text-gray-600">FarmÃ¡cia</p>
                 <p className="font-semibold">{acessoData.tenant.nome}</p>
                 <p className="text-sm">{acessoData.tenant.cnpj}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Responsável Técnico</p>
+                <p className="text-sm text-gray-600">ResponsÃ¡vel TÃ©cnico</p>
                 <p className="font-semibold">{acessoData.tenant.responsavel}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Período de Acesso</p>
+                <p className="text-sm text-gray-600">PerÃ­odo de Acesso</p>
                 <p className="font-semibold">
-                  {formatarData(acessoData.dataGeracao)} - {formatarData(acessoData.dataExpiracao)}
+                // @ts-ignore
+                  {formatarData(acessoData.dataGeracao?.toISOString() ?? "")} - {formatarData(acessoData.dataExpiracao?.toISOString() ?? "")}
                 </p>
               </div>
             </div>
@@ -327,9 +328,9 @@ export default function FiscalizacaoPage() {
                           <span className="font-medium">{pop.titulo}</span>
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
-                          <span>Versão: {pop.versao}</span> | 
+                          <span>VersÃ£o: {pop.versao}</span> | 
                           <span> Setor: {pop.setor}</span> |
-                          <span> Responsável: {pop.responsavel}</span>
+                          <span> ResponsÃ¡vel: {pop.responsavel}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -434,7 +435,7 @@ export default function FiscalizacaoPage() {
                         </Badge>
                         <p className="text-xs text-gray-600 mt-1">
                           {validade.diasParaVencer === 0 ? "Vence hoje" : 
-                           validade.diasParaVencer < 0 ? `Venceu há ${Math.abs(validade.diasParaVencer)} dias` :
+                           validade.diasParaVencer < 0 ? `Venceu hÃ¡ ${Math.abs(validade.diasParaVencer)} dias` :
                            `Vence em ${validade.diasParaVencer} dias`}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -453,7 +454,7 @@ export default function FiscalizacaoPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Eye className="h-5 w-5" />
-                  Histórico de Acessos
+                  HistÃ³rico de Acessos
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -486,8 +487,8 @@ export default function FiscalizacaoPage() {
     return (
       <div className="container mx-auto p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Auditoria Fiscalização</h1>
-          <p className="text-gray-600">Modo read-only para fiscalização</p>
+          <h1 className="text-2xl font-bold">Auditoria FiscalizaÃ§Ã£o</h1>
+          <p className="text-gray-600">Modo read-only para fiscalizaÃ§Ã£o</p>
         </div>
         
         {renderAuditoriaView()}
@@ -507,8 +508,8 @@ export default function FiscalizacaoPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Botão de Pânico - Fiscalização</h1>
-        <p className="text-gray-600">Modo auditoria para acesso rápido do fiscal</p>
+        <h1 className="text-2xl font-bold">BotÃ£o de PÃ¢nico - FiscalizaÃ§Ã£o</h1>
+        <p className="text-gray-600">Modo auditoria para acesso rÃ¡pido do fiscal</p>
       </div>
 
       {renderQRCodeCard()}
@@ -518,8 +519,8 @@ export default function FiscalizacaoPage() {
           <Alert>
             <Shield className="h-4 w-4" />
             <AlertDescription>
-              <strong>Como usar:</strong> Imprima este QR Code e coloque em local visível no balcão. 
-              O fiscal pode escanear ou digitar o código de acesso para visualizar todos os documentos 
+              <strong>Como usar:</strong> Imprima este QR Code e coloque em local visÃ­vel no balcÃ£o. 
+              O fiscal pode escanear ou digitar o cÃ³digo de acesso para visualizar todos os documentos 
               de forma organizada e profissional.
             </AlertDescription>
           </Alert>
@@ -528,3 +529,4 @@ export default function FiscalizacaoPage() {
     </div>
   );
 }
+

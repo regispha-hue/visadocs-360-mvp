@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
@@ -40,34 +40,34 @@ export default async function AdminDashboardPage() {
       }),
     ]);
 
-  const totalFarmacias = farmaciasByStatus?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const farmaciasAtivas = farmaciasByStatus?.find((f) => f?.status === "ATIVO")?._count ?? 0;
-  const farmaciasPendentes = farmaciasByStatus?.find((f) => f?.status === "PENDENTE")?._count ?? 0;
+  const totalFarmacias = farmaciasByStatus?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const farmaciasAtivas = farmaciasByStatus?.find((f: any) => f?.status === "ATIVO")?._count ?? 0;
+  const farmaciasPendentes = farmaciasByStatus?.find((f: any) => f?.status === "PENDENTE")?._count ?? 0;
 
   return (
     <div>
       <PageHeader
         title="Dashboard Super Admin"
-        description="Visão geral do sistema VISADOCS"
+        description="VisÃ£o geral do sistema VISADOCS"
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard
-          title="Total de Farmácias"
+          title="Total de FarmÃ¡cias"
           value={totalFarmacias}
           description={`${farmaciasAtivas} ativas`}
           icon={<Building2 className="h-5 w-5" />}
         />
         <StatCard
-          title="Farmácias Pendentes"
+          title="FarmÃ¡cias Pendentes"
           value={farmaciasPendentes}
-          description="aguardando aprovação"
+          description="aguardando aprovaÃ§Ã£o"
           icon={<Clock className="h-5 w-5" />}
         />
         <StatCard
           title="Total de POPs"
           value={totalPops}
-          description="em todas as farmácias"
+          description="em todas as farmÃ¡cias"
           icon={<FileText className="h-5 w-5" />}
         />
         <StatCard
@@ -80,7 +80,8 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AdminDashboardCharts farmaciasByStatus={farmaciasByStatus ?? []} />
-        <PendingFarmacias farmacias={pendingFarmacias ?? []} />
+        <AdminDashboardCharts farmaciasByStatus={farmaciasByStatus ?? []} />
+        // @ts-ignore
       </div>
     </div>
   );
