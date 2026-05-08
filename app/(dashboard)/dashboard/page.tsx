@@ -52,13 +52,13 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const totalPops = popsCount?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const popsAtivos = popsCount?.find((p) => p?.status === "ATIVO")?._count ?? 0;
-  const totalColaboradores = colaboradoresCount?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const colaboradoresAtivos = colaboradoresCount?.find((c) => c?.status === "ATIVO")?._count ?? 0;
-  const totalTreinamentos = treinamentosCount?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const treinamentosConcluidos = treinamentosCount?.find((t) => t?.status === "CONCLUIDO")?._count ?? 0;
-  const treinamentosPendentes = treinamentosCount?.find((t) => t?.status === "PENDENTE")?._count ?? 0;
+  const totalPops = popsCount?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const popsAtivos = popsCount?.find((p: any) => p?.status === "ATIVO")?._count ?? 0;
+  const totalColaboradores = colaboradoresCount?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const colaboradoresAtivos = colaboradoresCount?.find((c: any) => c?.status === "ATIVO")?._count ?? 0;
+  const totalTreinamentos = treinamentosCount?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const treinamentosConcluidos = treinamentosCount?.find((t: any) => t?.status === "CONCLUIDO")?._count ?? 0;
+  const treinamentosPendentes = treinamentosCount?.find((t: any) => t?.status === "PENDENTE")?._count ?? 0;
 
   // Get POPs by sector
   const popsBySector = await prisma.pop.groupBy({
