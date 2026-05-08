@@ -67,10 +67,10 @@ export default async function RelatoriosPage() {
     }),
   ]);
 
-  const totalPops = popsBySetor?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const totalColaboradores = colaboradoresByFuncao?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const totalTreinamentos = treinamentosByStatus?.reduce((acc, curr) => acc + (curr?._count ?? 0), 0) ?? 0;
-  const treinamentosConcluidos = treinamentosByStatus?.find((t) => t?.status === "CONCLUIDO")?._count ?? 0;
+  const totalPops = popsBySetor?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const totalColaboradores = colaboradoresByFuncao?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const totalTreinamentos = treinamentosByStatus?.reduce((acc: number, curr: any) => acc + (curr?._count ?? 0), 0) ?? 0;
+  const treinamentosConcluidos = treinamentosByStatus?.find((t: any) => t?.status === "CONCLUIDO")?._count ?? 0;
 
   return (
     <div>
