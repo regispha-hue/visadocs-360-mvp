@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
@@ -48,26 +48,26 @@ export default async function AdminDashboardPage() {
     <div>
       <PageHeader
         title="Dashboard Super Admin"
-        description="VisÃ£o geral do sistema VISADOCS"
+        description="Visão geral do sistema VISADOCS"
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard
-          title="Total de FarmÃ¡cias"
+          title="Total de Farmácias"
           value={totalFarmacias}
           description={`${farmaciasAtivas} ativas`}
           icon={<Building2 className="h-5 w-5" />}
         />
         <StatCard
-          title="FarmÃ¡cias Pendentes"
+          title="Farmácias Pendentes"
           value={farmaciasPendentes}
-          description="aguardando aprovaÃ§Ã£o"
+          description="aguardando aprovação"
           icon={<Clock className="h-5 w-5" />}
         />
         <StatCard
           title="Total de POPs"
           value={totalPops}
-          description="em todas as farmÃ¡cias"
+          description="em todas as farmácias"
           icon={<FileText className="h-5 w-5" />}
         />
         <StatCard
@@ -80,8 +80,7 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AdminDashboardCharts farmaciasByStatus={farmaciasByStatus ?? []} />
-        <AdminDashboardCharts farmaciasByStatus={farmaciasByStatus ?? []} />
-        // @ts-ignore
+        <PendingFarmacias farmacias={pendingFarmacias} />
       </div>
     </div>
   );
