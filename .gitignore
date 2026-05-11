@@ -8,3 +8,7 @@ node_modules/
 .DS_Store
 tsconfig.tsbuildinfo
 .aider*
+
+# Yarn local state
+.yarn/
+.pnp.*
