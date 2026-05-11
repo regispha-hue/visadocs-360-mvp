@@ -12,3 +12,6 @@ tsconfig.tsbuildinfo
 # Yarn local state
 .yarn/
 .pnp.*
+
+# Local audit artifacts
+.audit/
