@@ -54,16 +54,16 @@ export async function GET() {
     const totalColaboradores = colaboradores.length;
 
     // Build per-collaborator progress
-    const colaboradorProgress = colaboradores.map((colab) => {
-      const colabTreinamentos = treinamentos.filter((t) => t.colaboradorId === colab.id);
-      const uniquePopsTreinados = new Set(colabTreinamentos.map((t) => t.popId));
-      const concluidos = colabTreinamentos.filter((t) => t.status === "CONCLUIDO");
-      const uniquePopsConcluidosSet = new Set(concluidos.map((t) => t.popId));
+    const colaboradorProgress = colaboradores.map((colab: any) => {
+      const colabTreinamentos = treinamentos.filter((t: any) => t.colaboradorId === colab.id);
+      const uniquePopsTreinados = new Set(colabTreinamentos.map((t: any) => t.popId));
+      const concluidos = colabTreinamentos.filter((t: any) => t.status === "CONCLUIDO");
+      const uniquePopsConcluidosSet = new Set(concluidos.map((t: any) => t.popId));
 
-      const colabTentativas = tentativas.filter((t) => t.colaboradorId === colab.id);
-      const notasAprovadas = colabTentativas.filter((t) => t.aprovado).map((t) => t.nota);
+      const colabTentativas = tentativas.filter((t: any) => t.colaboradorId === colab.id);
+      const notasAprovadas = colabTentativas.filter((t: any) => t.aprovado).map((t: any) => t.nota);
       const mediaQuiz = notasAprovadas.length > 0
-        ? Math.round(notasAprovadas.reduce((a, b) => a + (b ?? 0), 0) / notasAprovadas.length)
+        ? Math.round(notasAprovadas.reduce((a: any, b: any) => a + (b ?? 0), 0) / notasAprovadas.length)
         : null;
 
       return {
@@ -79,15 +79,15 @@ export async function GET() {
     });
 
     // Build per-sector progress
-    const setores = [...new Set(pops.map((p) => p.setor))];
-    const setorProgress = setores.map((setor) => {
-      const setorPops = pops.filter((p) => p.setor === setor);
-      const setorPopIds = new Set(setorPops.map((p) => p.id));
-      const setorTreinamentos = treinamentos.filter((t) => setorPopIds.has(t.popId));
-      const concluidos = setorTreinamentos.filter((t) => t.status === "CONCLUIDO");
+    const setores = [...new Set(pops.map((p: any) => p.setor))];
+    const setorProgress = setores.map((setor: any) => {
+      const setorPops = pops.filter((p: any) => p.setor === setor);
+      const setorPopIds = new Set(setorPops.map((p: any) => p.id));
+      const setorTreinamentos = treinamentos.filter((t: any) => setorPopIds.has(t.popId));
+      const concluidos = setorTreinamentos.filter((t: any) => t.status === "CONCLUIDO");
 
       // Unique collaborators who completed training in this sector
-      const colabsConcluidos = new Set(concluidos.map((t) => t.colaboradorId));
+      const colabsConcluidos = new Set(concluidos.map((t: any) => t.colaboradorId));
 
       return {
         setor,
@@ -105,18 +105,18 @@ export async function GET() {
 
     // Overall stats
     const totalTreinamentos = treinamentos.length;
-    const totalConcluidos = treinamentos.filter((t) => t.status === "CONCLUIDO").length;
+    const totalConcluidos = treinamentos.filter((t: any) => t.status === "CONCLUIDO").length;
     const taxaConclusao = totalTreinamentos > 0
       ? Math.round((totalConcluidos / totalTreinamentos) * 100)
       : 0;
 
-    const notasAprovadas = tentativas.filter((t) => t.aprovado).map((t) => t.nota ?? 0);
+    const notasAprovadas = tentativas.filter((t: any) => t.aprovado).map((t: any) => t.nota ?? 0);
     const mediaGeralQuiz = notasAprovadas.length > 0
-      ? Math.round(notasAprovadas.reduce((a, b) => a + b, 0) / notasAprovadas.length)
+      ? Math.round(notasAprovadas.reduce((a: any, b: any) => a + b, 0) / notasAprovadas.length)
       : 0;
 
     // Collaborators fully trained (100% POPs concluídos)
-    const colabsCompletos = colaboradorProgress.filter((c) => c.percentual === 100).length;
+    const colabsCompletos = colaboradorProgress.filter((c: any) => c.percentual === 100).length;
 
     return NextResponse.json({
       resumo: {
@@ -128,8 +128,8 @@ export async function GET() {
         mediaGeralQuiz,
         colabsCompletos,
       },
-      colaboradores: colaboradorProgress.sort((a, b) => b.percentual - a.percentual),
-      setores: setorProgress.sort((a, b) => b.percentual - a.percentual),
+      colaboradores: colaboradorProgress.sort((a: any, b: any) => b.percentual - a.percentual),
+      setores: setorProgress.sort((a: any, b: any) => b.percentual - a.percentual),
     });
   } catch (error: any) {
     console.error("Error fetching progress:", error);

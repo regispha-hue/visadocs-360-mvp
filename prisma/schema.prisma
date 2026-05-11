@@ -1,4 +1,4 @@
-﻿generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -29,8 +29,13 @@ model Tenant {
   id               String   @id @default(cuid())
   nome             String
   cnpj             String?
+  responsavel      String?
+  email            String?
+  telefone         String?
+  endereco         String?
   status           String   @default("ATIVO")
   subscriptionStatus String @default("ATIVO")
+  trialEndsAt      DateTime?
   logoUrl          String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -39,6 +44,20 @@ model Tenant {
   colaboradores    Colaborador[]
   treinamentos     Treinamento[]
   auditLogs        AuditLog[]
+  auditoriasFiscalizacao AuditoriaFiscalizacao[]
+  quizzes          Quiz[]
+  documentos       Documento[]
+  fornecedores     Fornecedor[]
+  materiasPrimas   MateriaPrima[]
+  lotes            Lote[]
+  popMateriasPrimas PopMateriaPrima[]
+  riscos           Risco[]
+  naoConformidades NaoConformidade[]
+  auditorias       Auditoria[]
+  auditoriasRisco  AuditoriaRisco[]
+  normas           Norma[]
+  alertasNorma     AlertaNorma[]
+  verificacoesPratica VerificacaoPratica[]
 }
 
 model Pop {
@@ -47,10 +66,31 @@ model Pop {
   titulo    String
   setor     String?
   status    String   @default("ATIVO")
+  versao    String   @default("1.0")
+  validadeAnos Int   @default(2)
+  validadoEm DateTime?
+  validadoPor String?
+  implantadoEm DateTime?
+  implantadoPor String?
+  dataRevisao DateTime?
+  responsavel String?
+  objetivo   String?
+  descricao  String?
+  equipeEnvolvida String?
+  glossario  String?
+  literaturaConsultada String?
   conteudo  String?
+  arquivoUrl String?
+  arquivoNome String?
+  arquivoPublic Boolean @default(false)
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   treinamentos Treinamento[]
+  quizzes      Quiz[]
+  documentos   Documento[]
+  popMateriasPrimas PopMateriaPrima[]
+  riscos    Risco[]
+  naoConformidades NaoConformidade[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -59,12 +99,20 @@ model Colaborador {
   id        String   @id @default(cuid())
   nome      String
   email     String?
+  funcao    String?
+  setor     String?
+  cpf       String?
+  cpfHash   String?
+  cpfMasked String?
+  dataAdmissao DateTime?
   status    String   @default("ATIVO")
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   treinamentos Treinamento[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  tentativas     TentativaQuiz[]
+  verificacoesPratica VerificacaoPratica[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Treinamento {
@@ -73,11 +121,341 @@ model Treinamento {
   pop            Pop      @relation(fields: [popId], references: [id])
   colaboradorId  String
   colaborador    Colaborador @relation(fields: [colaboradorId], references: [id])
-  status         String   @default("PENDENTE")
+  dataTreinamento DateTime
+  duracao        Int?
+  instrutor      String?
+  observacoes    String?
+  notaQuiz       Int?
+  aprovadoQuiz   Boolean?
+  status         String
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  tentativas     TentativaQuiz[]
+  verificacoesPratica VerificacaoPratica[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Quiz {
+  id             String   @id @default(cuid())
+  titulo         String
+  descricao      String?
+  popId          String   @unique
+  pop            Pop      @relation(fields: [popId], references: [id])
+  notaMinima     Int      @default(70)
+  questoesData   Json?
+  ativo          Boolean  @default(true)
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  tentativas     TentativaQuiz[]
+  questoes       Questao[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Questao {
+  id        String   @id @default(cuid())
+  pergunta  String
+  ordem     Int
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  alternativas Alternativa[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Alternativa {
+  id        String   @id @default(cuid())
+  texto     String
+  correta   Boolean  @default(false)
+  ordem     Int
+  questaoId String
+  questao   Questao  @relation(fields: [questaoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TentativaQuiz {
+  id             String   @id @default(cuid())
+  quizId         String
+  quiz           Quiz     @relation(fields: [quizId], references: [id])
+  colaboradorId  String
+  colaborador    Colaborador @relation(fields: [colaboradorId], references: [id])
+  treinamentoId  String
+  treinamento    Treinamento @relation(fields: [treinamentoId], references: [id])
+  nota           Int?
+  aprovado       Boolean  @default(false)
+  codigoValidacao String?
+  completadoEm   DateTime?
+  acertos        Int?
+  totalQuestoes  Int?
+  respostasData  Json?
+  respostas      Resposta[]
+  createdAt      DateTime @default(now())
+}
+
+model Resposta {
+  id             String   @id @default(cuid())
+  tentativaQuizId String
+  tentativaQuiz   TentativaQuiz @relation(fields: [tentativaQuizId], references: [id])
+  questaoId       String
+  alternativaId   String?
+  correta         Boolean
+  createdAt       DateTime @default(now())
+}
+
+model Risco {
+  id        String   @id @default(cuid())
+  nivelRisco Int
+  descricao String?
+  setor     String?
+  categoria String?
+  probabilidade Int?
+  impacto   Int?
+  tipo      String?
+  severidade String?
+  planoAcao String?
+  responsavelPlano String?
+  prazoPlano DateTime?
+  criadoPor String?
+  criadoEm DateTime?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  popId     String?
+  pop       Pop?     @relation(fields: [popId], references: [id])
+  naoConformidades NaoConformidade[] @relation("RiscoNaoConformidades")
+  naoConformidadesRisco NaoConformidade[] @relation("RiscoNaoConformidadeRisco")
+  auditorias Auditoria[]
+  auditoriasRisco AuditoriaRisco[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NaoConformidade {
+  id        String   @id @default(cuid())
+  codigo    String
+  titulo    String?
+  descricao String?
+  setor     String?
+  tipo      String?
+  severidade String?
+  status    String
+  origem    String?
+  dataOcorrencia DateTime?
+  dataIdentificacao DateTime?
+  reportadoPor String?
+  riscoId   String?
+  risco     Risco?   @relation("RiscoNaoConformidadeRisco", fields: [riscoId], references: [id])
+  popId     String?
+  pop       Pop?     @relation(fields: [popId], references: [id])
+  causaRaiz String?
+  acoesCorretivas String?
+  prazoCorrecao DateTime?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  riscos    Risco[] @relation("RiscoNaoConformidades")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Auditoria {
+  id         String   @id @default(cuid())
+  status     String
+  dataInicio DateTime?
+  resultado  String?
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  riscos     Risco[]
+  auditoriasRisco AuditoriaRisco[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model AuditoriaRisco {
+  id         String   @id @default(cuid())
+  titulo     String
+  descricao  String?
+  tipo       String?
+  severidade String?
+  status     String
+  dataInicio DateTime?
+  dataFim    DateTime?
+  auditorId  String?
+  auditorLider String?
+  auditores  Json?
+  setores    Json?
+  pops       Json?
+  criterios  Json?
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  auditoria  Auditoria? @relation(fields: [auditoriaId], references: [id])
+  auditoriaId String?
+  risco      Risco?   @relation(fields: [riscoId], references: [id])
+  riscoId    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Norma {
+  id        String   @id @default(cuid())
+  codigo    String
+  numero    String?
+  titulo    String
+  descricao String?
+  tipo      String?
+  versao    String?
+  dataAtualizacao DateTime?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  alertas   AlertaNorma[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AlertaNorma {
+  id        String   @id @default(cuid())
+  tipo      String
+  severidade String?
+  prioridade Int?
+  descricao String?
+  status    String
+  dataAlerta DateTime?
+  normaId   String
+  norma     Norma    @relation(fields: [normaId], references: [id])
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificacaoPratica {
+  id        String   @id @default(cuid())
+  data      DateTime
+  dataAgendamento DateTime?
+  duracaoEstimada Int?
+  observacoes String?
+  status    String
+  nota      Int?
+  aprovado  Boolean?
+  supervisor String?
+  treinamentoId String
+  treinamento Treinamento @relation(fields: [treinamentoId], references: [id])
+  colaboradorId String
+  colaborador   Colaborador @relation(fields: [colaboradorId], references: [id])
+  popId     String?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Documento {
+  id        String   @id @default(cuid())
+  codigo    String
+  titulo    String
+  tipo      String
+  categoria String?
+  versao    String?
+  conteudo  String?
+  arquivoUrl String?
+  popId     String?
+  pop       Pop?     @relation(fields: [popId], references: [id])
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Fornecedor {
+  id        String   @id @default(cuid())
+  nome      String
+  cnpj      String?
+  contato   String?
+  email     String?
+  telefone  String?
+  endereco  String?
+  observacoes String?
+  status    String   @default("ATIVO")
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  materiasPrimas MateriaPrima[]
+  lotes     Lote[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MateriaPrima {
+  id           String   @id @default(cuid())
+  codigo       String
+  nome         String
+  descricao    String?
+  casNumber    String?
+  dci          String?
+  categoria    String?
+  unidadeMedida String?
+  estoqueMinimo Float?
+  especificacoes String?
+  certificadoUrl String?
+  certificadoNome String?
+  certificadoPublic Boolean @default(false)
+  status       String   @default("ATIVO")
+  fornecedorId String
+  fornecedor   Fornecedor @relation(fields: [fornecedorId], references: [id])
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  lotes        Lote[]
+  pops         PopMateriaPrima[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PopMateriaPrima {
+  id             String   @id @default(cuid())
+  popId          String
+  pop            Pop      @relation(fields: [popId], references: [id])
+  materiaPrimaId String
+  materiaPrima   MateriaPrima @relation(fields: [materiaPrimaId], references: [id])
+  quantidade     Float?
+  observacoes    String?
   tenantId       String
   tenant         Tenant   @relation(fields: [tenantId], references: [id])
   createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+}
+
+model Lote {
+  id            String   @id @default(cuid())
+  numeroLote    String
+  loteInterno   String?
+  dataFabricacao DateTime?
+  dataValidade DateTime?
+  dataRecebimento DateTime?
+  quantidade     Float?
+  quantidadeAtual Float?
+  precoUnitario Float?
+  notaFiscal    String?
+  certificadoUrl String?
+  certificadoNome String?
+  certificadoPublic Boolean @default(false)
+  laudoUrl      String?
+  laudoNome     String?
+  laudoPublic   Boolean @default(false)
+  analises      Json?
+  observacoes   String?
+  statusRisco   String?
+  validadeRisco DateTime?
+  classificacaoRisco String?
+  armazenamento  String?
+  condicoes      String?
+  localizacao    String?
+  status         String   @default("ATIVO")
+  materiaPrimaId String
+  materiaPrima  MateriaPrima @relation(fields: [materiaPrimaId], references: [id])
+  fornecedorId  String
+  fornecedor    Fornecedor @relation(fields: [fornecedorId], references: [id])
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model AuditLog {
@@ -91,4 +469,23 @@ model AuditLog {
   userName  String?
   details   Json?
   createdAt DateTime @default(now())
+}
+
+model AuditoriaFiscalizacao {
+  id             String   @id @default(cuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  status         String   @default("ATIVO")
+  dataGeracao    DateTime @default(now())
+  dataExpiracao  DateTime
+  qrCode         String?
+  codigoAcesso   String?
+  responsaveis   Json?
+  masterListPOPs Json?
+  certificados   Json?
+  cronogramaValidades Json?
+  acessos        Json?
+  anotacoes      Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

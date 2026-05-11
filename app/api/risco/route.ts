@@ -108,7 +108,7 @@ async function handleMatrizRisco(tenantId: string) {
     });
 
     // Calcular estatísticas para matriz
-    const matrizData = riscos.map(risco => ({
+    const matrizData = riscos.map((risco: any) => ({
       id: risco.id,
       descricao: risco.descricao,
       setor: risco.setor,
@@ -126,7 +126,7 @@ async function handleMatrizRisco(tenantId: string) {
     }));
 
     // Agrupar por tipo para análise
-    const porTipo = matrizData.reduce((acc, risco) => {
+    const porTipo = matrizData.reduce((acc: any, risco: any) => {
       if (!acc[risco.tipo]) {
         acc[risco.tipo] = {
           total: 0,
@@ -151,8 +151,8 @@ async function handleMatrizRisco(tenantId: string) {
       matriz: matrizData,
       estatisticas: {
         total: matrizData.length,
-        criticos: matrizData.filter(r => r.severidade === 'CRITICO').length,
-        mitigados: matrizData.filter(r => r.status === 'MITIGADO').length,
+        criticos: matrizData.filter((r: any) => r.severidade === 'CRITICO').length,
+        mitigados: matrizData.filter((r: any) => r.status === 'MITIGADO').length,
         porTipo
       }
     });

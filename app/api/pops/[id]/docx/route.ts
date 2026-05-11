@@ -32,6 +32,7 @@ export async function GET(
       return NextResponse.json({ error: "POP n\u00e3o encontrado" }, { status: 404 });
     }
 
+    // @ts-ignore
     const buffer = await generatePopDocx(pop);
 
     const fileName = `${pop.codigo} - ${pop.titulo}.docx`

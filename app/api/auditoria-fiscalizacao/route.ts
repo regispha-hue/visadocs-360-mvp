@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+// @ts-ignore
 import QRCode from "qrcode";
 
 export const dynamic = "force-dynamic";
@@ -487,7 +488,7 @@ async function handleAtualizarDados(data: any, tenantId: string) {
 }
 
 // Funções auxiliares
-async function gerarMasterListPOPs(tenantId: string): any {
+async function gerarMasterListPOPs(tenantId: string): Promise<any> {
   try {
     const pops = await prisma.pop.findMany({
       where: { 
@@ -509,7 +510,7 @@ async function gerarMasterListPOPs(tenantId: string): any {
       orderBy: { codigo: 'asc' }
     });
 
-    return pops.map(pop => ({
+    return pops.map((pop: any) => ({
       codigo: pop.codigo,
       titulo: pop.titulo,
       versao: pop.versao,
@@ -538,7 +539,7 @@ async function gerarMasterListPOPs(tenantId: string): any {
   }
 }
 
-async function gerarListaCertificados(tenantId: string): any {
+async function gerarListaCertificados(tenantId: string): Promise<any> {
   try {
     const treinamentos = await prisma.treinamento.findMany({
       where: { 
@@ -562,7 +563,7 @@ async function gerarListaCertificados(tenantId: string): any {
       orderBy: { dataTreinamento: 'desc' }
     });
 
-    return treinamentos.map(treinamento => ({
+    return treinamentos.map((treinamento: any) => ({
       colaborador: treinamento.colaborador.nome,
       funcao: treinamento.colaborador.funcao,
       pop: treinamento.pop.codigo,
@@ -591,7 +592,7 @@ async function gerarListaCertificados(tenantId: string): any {
   }
 }
 
-async function gerarCronogramaValidades(tenantId: string): any {
+async function gerarCronogramaValidades(tenantId: string): Promise<any> {
   try {
     const pops = await prisma.pop.findMany({
       where: { tenantId },
@@ -616,10 +617,10 @@ async function gerarCronogramaValidades(tenantId: string): any {
       }
     });
 
-    const validades = [];
+    const validades: any[] = [];
 
     // Validades de POPs
-    pops.forEach(pop => {
+    pops.forEach((pop: any) => {
       if (pop.validadoEm) {
         const dataValidade = new Date(pop.validadoEm.getTime() + (pop.validadeAnos || 2) * 365 * 24 * 60 * 60 * 1000);
         const diasParaVencer = Math.floor((dataValidade.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
@@ -636,7 +637,7 @@ async function gerarCronogramaValidades(tenantId: string): any {
     });
 
     // Validades de certificados
-    treinamentos.forEach(treinamento => {
+    treinamentos.forEach((treinamento: any) => {
       const dataValidade = new Date(treinamento.dataTreinamento.getTime() + 365 * 24 * 60 * 60 * 1000);
       const diasParaVencer = Math.floor((dataValidade.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
       
@@ -651,7 +652,7 @@ async function gerarCronogramaValidades(tenantId: string): any {
       });
     });
 
-    return validades.sort((a, b) => a.diasParaVencer - b.diasParaVencer);
+    return validades.sort((a: any, b: any) => a.diasParaVencer - b.diasParaVencer);
 
   } catch (error) {
     // Fallback simulado

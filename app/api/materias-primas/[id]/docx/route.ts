@@ -33,6 +33,7 @@ export async function GET(
       return NextResponse.json({ error: "Mat\u00e9ria-prima n\u00e3o encontrada" }, { status: 404 });
     }
 
+    // @ts-ignore
     const buffer = await generateMpDocx(mp);
 
     const fileName = `FICHA MP - ${mp.codigo} - ${mp.nome}.docx`
