@@ -55,6 +55,7 @@ export interface LLMRequest {
   context?: Record<string, any>;
   axioms?: string[];
   validate_output?: boolean;
+  strict_mode?: boolean;
   max_tokens?: number;
   temperature?: number;
 }
@@ -549,7 +550,7 @@ Validação: https://visadocs.com/verify/[CÓDIGO]
       return {
         status: 'error',
         connectivity: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         timestamp: new Date().toISOString()
       };
     }
@@ -563,3 +564,5 @@ export const nexoritiaClient = new NexoritiaClient(
 );
 
 export default NexoritiaClient;
+
+

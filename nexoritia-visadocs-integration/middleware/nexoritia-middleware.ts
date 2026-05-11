@@ -3,7 +3,8 @@
  * Middleware de validação governada para Next.js
  */
 
-import { NextRequest, NextApiResponse, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import type { NextApiResponse } from 'next';
 import { nexoritiaClient } from '../lib/nexoritia-client';
 
 // Configuração do middleware
@@ -102,7 +103,7 @@ function shouldBypassPath(pathname: string): boolean {
  * Rate limiting simples
  */
 async function checkRateLimit(req: NextRequest): Promise<boolean> {
-  const clientIp = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const now = Date.now();
   const windowStart = Math.floor(now / 60000) * 60000; // 1 minuto
 
@@ -225,7 +226,7 @@ async function validateBodyRequest(req: NextRequest, domain: string): Promise<{
         violations.push(...validation.violations);
       }
     } catch (error) {
-      violations.push(`Validation service error: ${error.message}`);
+      violations.push(`Validation service error: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -273,7 +274,7 @@ function validateGetRequest(req: NextRequest, domain: string): {
   }
 
   // Verificar XSS básico
-  const userAgent = headers['user-agent'] || '';
+  const userAgent = headers.get('user-agent') || '';
   if (containsXss(userAgent)) {
     violations.push('Potential XSS in User-Agent header');
   }
@@ -423,8 +424,8 @@ export function logValidation(req: NextRequest, result: any): void {
     timestamp: new Date().toISOString(),
     method: req.method,
     url: req.url,
-    userAgent: req.headers['user-agent'],
-    ip: req.ip || req.headers['x-forwarded-for'],
+    userAgent: req.headers.get('user-agent') || undefined,
+    ip: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined,
     valid: result.valid,
     violations: result.violations,
     action: result.action,
@@ -439,3 +440,8 @@ export function logValidation(req: NextRequest, result: any): void {
 }
 
 export default nexoritiaMiddleware;
+
+
+
+
+

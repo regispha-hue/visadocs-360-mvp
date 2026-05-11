@@ -47,9 +47,7 @@ export const FUNCOES_LABELS: Record<string, string> = {
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   SUPER_ADMIN: "Super Admin",
-  ADMIN_FARMACIA: "Admin Farmácia",
-  RT: "Responsável Técnico",
-  ANALISTA_CQ: "Analista CQ",
+  ADMIN: "Administrador",
   OPERADOR: "Operador",
 };
 
@@ -126,7 +124,7 @@ export const UNIDADES_MEDIDA = [
 // Role permissions
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   SUPER_ADMIN: ["*"],
-  ADMIN_FARMACIA: [
+  ADMIN: [
     "pops:read",
     "pops:create",
     "pops:update",
@@ -144,22 +142,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     "users:update",
     "reports:read",
   ],
-  RT: [
-    "pops:read",
-    "pops:create",
-    "pops:update",
-    "colaboradores:read",
-    "treinamentos:read",
-    "treinamentos:create",
-    "treinamentos:update",
-    "reports:read",
-  ],
-  ANALISTA_CQ: [
-    "pops:read",
-    "colaboradores:read",
-    "treinamentos:read",
-    "reports:read",
-  ],
   OPERADOR: [
     "pops:read",
     "treinamentos:read",
@@ -172,3 +154,5 @@ export function hasPermission(role: UserRole, permission: string): boolean {
   if (permissions.includes("*")) return true;
   return permissions.includes(permission);
 }
+
+

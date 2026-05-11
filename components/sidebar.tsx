@@ -70,13 +70,13 @@ const farmaciaNavItems: NavItem[] = [
     href: "/dashboard/progresso",
     label: "Progresso LMS",
     icon: BarChart3,
-    roles: ["ADMIN_FARMACIA", "RT", "ANALISTA_CQ"],
+    roles: ["ADMIN", "OPERADOR"],
   },
   {
     href: "/dashboard/relatorios",
     label: "Relatórios",
     icon: ClipboardList,
-    roles: ["ADMIN_FARMACIA", "RT", "ANALISTA_CQ"],
+    roles: ["ADMIN", "OPERADOR"],
   },
   {
     href: "/dashboard/assistente",
@@ -286,3 +286,4 @@ export function Sidebar() {
     </>
   );
 }
+

@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import fs from "fs";
 import path from "path";
@@ -25,3 +26,4 @@ try {
 }
 
 execSync("tsx --require dotenv/config scripts/seed.ts", { stdio: "inherit" });
+
