@@ -62,10 +62,10 @@ export async function POST(
     const respostasProcessadas: { questaoId: string; alternativaId: string; correta: boolean }[] = [];
 
     for (const resp of respostas) {
-      const questao = quiz.questoes.find((q) => q.id === resp.questaoId);
+      const questao = quiz.questoes.find((q: any) => q.id === resp.questaoId);
       if (!questao) continue;
 
-      const alternativa = questao.alternativas.find((a) => a.id === resp.alternativaId);
+      const alternativa = questao.alternativas.find((a: any) => a.id === resp.alternativaId);
       if (!alternativa) continue;
 
       const isCorrect = alternativa.correta;

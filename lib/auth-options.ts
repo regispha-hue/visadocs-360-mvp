@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          name: user.name,
+          name: user.name || user.email,
           role: user.role,
           tenantId: user.tenantId,
           tenantName: user.tenant?.nome || null,
@@ -87,3 +87,4 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+

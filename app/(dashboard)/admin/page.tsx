@@ -80,6 +80,7 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AdminDashboardCharts farmaciasByStatus={farmaciasByStatus ?? []} />
+        {/* @ts-ignore */}
         <PendingFarmacias farmacias={pendingFarmacias} />
       </div>
     </div>

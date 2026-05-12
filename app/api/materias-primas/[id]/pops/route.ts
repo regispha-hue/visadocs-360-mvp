@@ -60,6 +60,7 @@ export async function POST(
         materiaPrimaId: params.id,
         quantidade: quantidade ? parseFloat(quantidade) : null,
         observacoes: observacoes || null,
+        tenantId: user.tenantId,
       },
       include: {
         pop: { select: { id: true, codigo: true, titulo: true } },

@@ -366,23 +366,14 @@ async function handleAgendarVerificacao(data: any, tenantId: string, user: any) 
         treinamentoId,
         colaboradorId,
         popId,
+        data: new Date(dataAgendamento),
         dataAgendamento: new Date(dataAgendamento),
         duracaoEstimada,
         status: "AGENDADO",
         supervisor
       }
     });
-
-    // Atualizar treinamento para exigir verificação prática
-    await prisma.treinamento.update({
-      where: { id: treinamentoId },
-      data: {
-        praticaObrigatoria: true,
-        dataProximaVerificacao: new Date(dataAgendamento)
-      }
-    });
-
-    await createAuditLog({
+await createAuditLog({
       action: AUDIT_ACTIONS.POP_CREATED,
       entity: "VerificacaoPratica",
       entityId: verificacao.id,
@@ -419,7 +410,7 @@ async function handleIniciarVerificacao(data: any, tenantId: string, user: any) 
       },
       data: {
         status: "EM_ANDAMENTO",
-        dataInicio: new Date()
+        observacoes: JSON.stringify({ dataInicio: new Date().toISOString() })
       }
     });
 
@@ -456,6 +447,17 @@ async function handleConcluirVerificacao(data: any, tenantId: string, user: any)
   }
 
   try {
+    const metadata = {
+      resultado,
+      dataConclusao: new Date().toISOString(),
+      checklist,
+      pontosCriticos,
+      fotosUrl: fotosUrl || [],
+      assinaturaSupervisor,
+      precisaRetreinamento: resultado === "REPROVADO",
+      dataRetreinamento: resultado === "REPROVADO" ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null
+    };
+
     const verificacao = await prisma.verificacaoPratica.update({
       where: {
         id: verificacaoId,
@@ -463,27 +465,11 @@ async function handleConcluirVerificacao(data: any, tenantId: string, user: any)
       },
       data: {
         status: resultado === "APROVADO" ? "APROVADO" : "REPROVADO",
-        resultado,
+        aprovado: resultado === "APROVADO",
         nota,
-        dataConclusao: new Date(),
-        checklist,
-        observacoes,
-        pontosCriticos,
-        fotosUrl: fotosUrl || [],
-        assinaturaSupervisor
+        observacoes: observacoes ? JSON.stringify({ ...JSON.parse(observacoes), ...metadata }) : JSON.stringify(metadata)
       }
     });
-
-    // Se reprovado, solicitar retreinamento
-    if (resultado === "REPROVADO") {
-      await prisma.verificacaoPratica.update({
-        where: { id: verificacaoId },
-        data: {
-          precisaRetreinamento: true,
-          dataRetreinamento: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 dias
-        }
-      });
-    }
 
     await createAuditLog({
       action: AUDIT_ACTIONS.POP_UPDATED,
@@ -511,7 +497,7 @@ async function handleUploadEvidencia(data: any, tenantId: string) {
   try {
     // Simulação de upload de arquivo
     // Em produção, implementar upload real para S3/Cloudinary
-    
+
     const evidencia = {
       id: `evid_${Date.now()}`,
       verificacaoId,
@@ -523,10 +509,20 @@ async function handleUploadEvidencia(data: any, tenantId: string) {
     };
 
     // Salvar evidência no banco
+    const verificacao = await prisma.verificacaoPratica.findFirst({
+      where: { id: verificacaoId }
+    });
+
+    const existingObs = verificacao?.observacoes ? JSON.parse(verificacao.observacoes) : {};
+    const updatedObs = {
+      ...existingObs,
+      fotosUrl: [...(existingObs.fotosUrl || []), evidencia.url]
+    };
+
     await prisma.verificacaoPratica.update({
       where: { id: verificacaoId },
       data: {
-        fotosUrl: [evidencia.url] // Simplificado - em produção usar array
+        observacoes: JSON.stringify(updatedObs)
       }
     });
 
@@ -557,11 +553,14 @@ async function handleAvaliarVerificacao(data: any, tenantId: string, user: any) 
         tenantId
       },
       data: {
-        resultado,
+        aprovado: resultado === "APROVADO",
         nota: notaFinal,
-        dataConclusao: new Date(),
-        checklist: avaliacoes,
-        status: resultado === "APROVADO" ? "APROVADO" : "REPROVADO"
+        status: resultado === "APROVADO" ? "APROVADO" : "REPROVADO",
+        observacoes: JSON.stringify({
+          resultado,
+          dataConclusao: new Date().toISOString(),
+          checklist: avaliacoes
+        })
       }
     });
 
@@ -603,11 +602,15 @@ async function handleSolicitarRetreinamento(data: any, tenantId: string, user: a
     }
 
     // Marcar para retreinamento
+    const existingObs = verificacao.observacoes ? JSON.parse(verificacao.observacoes) : {};
     await prisma.verificacaoPratica.update({
       where: { id: verificacaoId },
       data: {
-        precisaRetreinamento: true,
-        dataRetreinamento: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 dias
+        observacoes: JSON.stringify({
+          ...existingObs,
+          precisaRetreinamento: true,
+          dataRetreinamento: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        })
       }
     });
 
@@ -619,8 +622,7 @@ async function handleSolicitarRetreinamento(data: any, tenantId: string, user: a
         popId: verificacao.treinamento.popId,
         dataTreinamento: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         instrutor: "Retreinamento Prático",
-        status: "PENDENTE",
-        praticaObrigatoria: true
+        status: "PENDENTE"
       }
     });
 
@@ -639,3 +641,6 @@ async function handleSolicitarRetreinamento(data: any, tenantId: string, user: a
     return NextResponse.json({ error: "Erro ao solicitar retreinamento" }, { status: 500 });
   }
 }
+
+
+

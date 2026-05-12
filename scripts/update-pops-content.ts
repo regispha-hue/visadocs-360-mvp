@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PrismaClient } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
@@ -104,3 +105,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

@@ -78,11 +78,11 @@ export async function GET(request: Request) {
           lotes: totalLotes,
           fornecedores: totalFornecedores,
         },
-        materiasPrimasPorStatus: mpsPorStatus.map((s) => ({
+        materiasPrimasPorStatus: mpsPorStatus.map((s: any) => ({
           status: s.status,
           quantidade: s._count.id,
         })),
-        lotesPorStatus: lotesPorStatus.map((s) => ({
+        lotesPorStatus: lotesPorStatus.map((s: any) => ({
           status: s.status,
           quantidade: s._count.id,
         })),
@@ -139,7 +139,7 @@ export async function GET(request: Request) {
 
         relatorio = {
           tipo: "fornecedores",
-          fornecedores: fornecedores.map((f) => ({
+          fornecedores: fornecedores.map((f: any) => ({
             id: f.id,
             nome: f.nome,
             cnpj: f.cnpj,
@@ -172,7 +172,7 @@ export async function GET(request: Request) {
       relatorio = {
         tipo: "vencimento",
         periodo: `${dias} dias`,
-        lotes: lotes.map((l) => ({
+        lotes: lotes.map((l: any) => ({
           id: l.id,
           numeroLote: l.numeroLote,
           materiaPrima: l.materiaPrima.nome,
@@ -202,8 +202,8 @@ export async function GET(request: Request) {
 
       relatorio = {
         tipo: "estoque",
-        materiasPrimas: materiasPrimas.map((mp) => {
-          const estoqueAtual = mp.lotes.reduce((acc, l) => acc + l.quantidadeAtual, 0);
+        materiasPrimas: materiasPrimas.map((mp: any) => {
+          const estoqueAtual = mp.lotes.reduce((acc: any, l: any) => acc + l.quantidadeAtual, 0);
           return {
             id: mp.id,
             codigo: mp.codigo,

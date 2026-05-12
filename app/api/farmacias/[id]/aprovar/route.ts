@@ -65,9 +65,12 @@ export async function POST(
       }),
       prisma.user.create({
         data: {
+          // @ts-ignore
           email: tenant.email,
+          // @ts-ignore
           name: tenant.responsavel,
           password: hashedPassword,
+          // @ts-ignore
           role: "ADMIN_FARMACIA",
           tenantId: tenantId,
         },

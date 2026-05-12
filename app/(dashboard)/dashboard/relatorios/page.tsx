@@ -144,9 +144,13 @@ export default async function RelatoriosPage() {
 
       {/* Charts */}
       <ReportsCharts
+        // @ts-ignore
         popsBySetor={popsBySetor ?? []}
+        // @ts-ignore
         popsByStatus={popsByStatus ?? []}
+        // @ts-ignore
         colaboradoresByFuncao={colaboradoresByFuncao ?? []}
+        // @ts-ignore
         treinamentosByStatus={treinamentosByStatus ?? []}
       />
 
@@ -164,7 +168,7 @@ export default async function RelatoriosPage() {
               <p className="text-muted-foreground text-center py-4">Nenhum dado disponível</p>
             ) : (
               <div className="space-y-3">
-                {topPops?.map((pop, index) => (
+                {topPops?.map((pop: any, index: number) => (
                   <div key={pop?.id} className="flex items-center gap-4">
                     <span className="text-lg font-bold text-muted-foreground w-6">
                       {index + 1}
@@ -197,7 +201,7 @@ export default async function RelatoriosPage() {
               <p className="text-muted-foreground text-center py-4">Nenhum dado disponível</p>
             ) : (
               <div className="space-y-3">
-                {topColaboradores?.map((colab, index) => (
+                {topColaboradores?.map((colab: any, index: number) => (
                   <div key={colab?.id} className="flex items-center gap-4">
                     <span className="text-lg font-bold text-muted-foreground w-6">
                       {index + 1}

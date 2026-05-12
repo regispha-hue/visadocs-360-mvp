@@ -195,7 +195,7 @@ export default function VerificacaoPraticaPage() {
   const handleAvaliacaoChange = (categoria: string, item: ChecklistItem, valor: any) => {
     const chave = `${categoria}_${item.id}`;
     
-    setAvaliacoes(prev => ({
+    setAvaliacoes((prev: any) => ({
       ...prev,
       [chave]: {
         ...item,

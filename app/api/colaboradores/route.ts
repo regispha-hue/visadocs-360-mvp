@@ -91,9 +91,11 @@ export async function POST(request: Request) {
     });
 
     for (const colab of existingColaboradores) {
-      const match = await bcrypt.compare(cleanCpf, colab.cpfHash);
-      if (match) {
-        return NextResponse.json({ error: "Já existe um colaborador com este CPF" }, { status: 400 });
+      if (colab.cpfHash) {
+        const match = await bcrypt.compare(cleanCpf, colab.cpfHash);
+        if (match) {
+          return NextResponse.json({ error: "Já existe um colaborador com este CPF" }, { status: 400 });
+        }
       }
     }
 

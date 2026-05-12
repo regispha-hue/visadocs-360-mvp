@@ -24,7 +24,7 @@ export async function GET(
         treinamentos: {
           include: {
             pop: { select: { id: true, codigo: true, titulo: true, setor: true } },
-            tentativasQuiz: {
+            tentativas: {
               where: { aprovado: true },
               select: { id: true, nota: true, aprovado: true, codigoValidacao: true, completadoEm: true },
               orderBy: { completadoEm: "desc" },
