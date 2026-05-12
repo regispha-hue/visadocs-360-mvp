@@ -15,3 +15,5 @@ tsconfig.tsbuildinfo
 
 # Local audit artifacts
 .audit/
+.vercel
+.env*.local
