@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { emailProvider } from "@/lib/email-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -92,6 +93,15 @@ export async function POST(
       const appUrl = process.env.NEXTAUTH_URL || "";
       const appName = "VISADOCS";
 
+      const recipientEmail = tenant.email;
+
+      if (!recipientEmail) {
+        console.warn("[EMAIL_PROVIDER:skip]", {
+          event: "farmacia_aprovada",
+          tenantId: tenant.id,
+          reason: "tenant_email_missing",
+        });
+      } else {
       const htmlBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(to right, #0D9488, #1E40AF); padding: 20px; text-align: center;">
@@ -102,7 +112,7 @@ export async function POST(
             <p>Olá ${tenant.responsavel},</p>
             <p>Temos o prazer de informar que sua farmácia <strong>${tenant.nome}</strong> foi aprovada no sistema VISADOCS.</p>
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0D9488;">
-              <p style="margin: 5px 0;"><strong>Email de acesso:</strong> ${tenant.email}</p>
+              <p style="margin: 5px 0;"><strong>Email de acesso:</strong> ${recipientEmail}</p>
               <p style="margin: 5px 0;"><strong>Senha temporária:</strong> ${tempPassword}</p>
             </div>
             <p style="color: #666;">Recomendamos que você altere sua senha após o primeiro acesso.</p>
@@ -114,21 +124,18 @@ export async function POST(
         </div>
       `;
 
-      await fetch("https://apps.abacus.ai/api/sendNotificationEmail", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          deployment_token: process.env.ABACUSAI_API_KEY,
-          app_id: process.env.WEB_APP_ID,
-          notification_id: process.env.NOTIF_ID_FARMCIA_APROVADA,
-          subject: `Sua farmácia foi aprovada - ${appName}`,
-          body: htmlBody,
-          is_html: true,
-          recipient_email: tenant.email,
-          sender_email: `noreply@${appUrl ? new URL(appUrl).hostname : "visadocs.com"}`,
-          sender_alias: appName,
-        }),
+      await emailProvider.send({
+        to: recipientEmail,
+        subject: `Sua farmácia foi aprovada - ${appName}`,
+        html: htmlBody,
+        from: `noreply@${appUrl ? new URL(appUrl).hostname : "visadocs.com"}`,
+        senderAlias: appName,
+        metadata: {
+          event: "farmacia_aprovada",
+          tenantId: tenant.id,
+        },
       });
+      }
     } catch (emailError) {
       console.error("Error sending email:", emailError);
       // Don't fail the approval if email fails
