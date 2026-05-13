@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import { generateCertificadoHtml } from "@/lib/certificado-template";
+import { generateCertificadoPdfBuffer } from "@/lib/certificado-pdf";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +48,7 @@ export async function GET(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    const htmlContent = generateCertificadoHtml({
+    const pdfBuffer = generateCertificadoPdfBuffer({
       colaboradorNome: tentativa.colaborador.nome,
       // @ts-ignore
       colaboradorFuncao: tentativa.colaborador.funcao,
@@ -72,72 +72,14 @@ export async function GET(
       // @ts-ignore
       responsavelTecnico: tentativa.treinamento.tenant.responsavel,
     });
+    const filename = `Certificado_${tentativa.quiz.pop.codigo}_${tentativa.colaborador.nome.replace(/\s+/g, "_")}.pdf`;
 
-    // Step 1: Create PDF generation request
-    const createResponse = await fetch("https://apps.abacus.ai/api/createConvertHtmlToPdfRequest", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deployment_token: process.env.ABACUSAI_API_KEY,
-        html_content: htmlContent,
-        pdf_options: {
-          format: "A4",
-          landscape: true,
-          print_background: true,
-          margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
-        },
-        base_url: process.env.NEXTAUTH_URL || "",
-      }),
+    return new NextResponse(pdfBuffer, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
     });
-
-    if (!createResponse.ok) {
-      console.error("PDF create request failed:", await createResponse.text());
-      return NextResponse.json({ error: "Erro ao gerar certificado" }, { status: 500 });
-    }
-
-    const { request_id } = await createResponse.json();
-    if (!request_id) {
-      return NextResponse.json({ error: "Erro ao iniciar gera\u00e7\u00e3o do PDF" }, { status: 500 });
-    }
-
-    // Step 2: Poll for status
-    const maxAttempts = 120;
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const statusResponse = await fetch("https://apps.abacus.ai/api/getConvertHtmlToPdfStatus", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ request_id, deployment_token: process.env.ABACUSAI_API_KEY }),
-      });
-
-      const statusResult = await statusResponse.json();
-      const status = statusResult?.status || "FAILED";
-      const result = statusResult?.result || null;
-
-      if (status === "SUCCESS") {
-        if (result && result.result) {
-          const pdfBuffer = Buffer.from(result.result, "base64");
-          const filename = `Certificado_${tentativa.quiz.pop.codigo}_${tentativa.colaborador.nome.replace(/\s+/g, "_")}.pdf`;
-          return new NextResponse(pdfBuffer, {
-            headers: {
-              "Content-Type": "application/pdf",
-              "Content-Disposition": `attachment; filename="${filename}"`,
-            },
-          });
-        }
-        return NextResponse.json({ error: "PDF gerado mas sem dados" }, { status: 500 });
-      } else if (status === "FAILED") {
-        console.error("PDF generation failed:", result?.error);
-        return NextResponse.json({ error: "Falha na gera\u00e7\u00e3o do certificado" }, { status: 500 });
-      }
-
-      attempts++;
-    }
-
-    return NextResponse.json({ error: "Tempo esgotado na gera\u00e7\u00e3o do certificado" }, { status: 500 });
   } catch (error: any) {
     console.error("Error generating certificate:", error);
     return NextResponse.json({ error: "Erro ao gerar certificado" }, { status: 500 });
