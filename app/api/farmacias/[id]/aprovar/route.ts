@@ -54,6 +54,34 @@ export async function POST(
       );
     }
 
+    const tenantEmail = tenant.email?.trim().toLowerCase() ?? "";
+    const tenantResponsavel = tenant.responsavel?.trim() ?? "";
+
+    if (!tenantEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tenantEmail)) {
+      return NextResponse.json(
+        { error: "Farmácia sem email válido para criação do usuário administrador" },
+        { status: 400 }
+      );
+    }
+
+    if (!tenantResponsavel || tenantResponsavel.length < 2) {
+      return NextResponse.json(
+        { error: "Farmácia sem responsável válido para criação do usuário administrador" },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: tenantEmail },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Já existe usuário cadastrado com o email desta farmácia" },
+        { status: 409 }
+      );
+    }
+
     // Generate password for admin user
     const tempPassword = generatePassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
@@ -66,13 +94,10 @@ export async function POST(
       }),
       prisma.user.create({
         data: {
-          // @ts-ignore
-          email: tenant.email,
-          // @ts-ignore
-          name: tenant.responsavel,
+          email: tenantEmail,
+          name: tenantResponsavel,
           password: hashedPassword,
-          // @ts-ignore
-          role: "ADMIN_FARMACIA",
+          role: "ADMIN",
           tenantId: tenantId,
         },
       }),
@@ -93,7 +118,7 @@ export async function POST(
       const appUrl = process.env.NEXTAUTH_URL || "";
       const appName = "VISADOCS";
 
-      const recipientEmail = tenant.email;
+      const recipientEmail = tenantEmail;
 
       if (!recipientEmail) {
         console.warn("[EMAIL_PROVIDER:skip]", {
