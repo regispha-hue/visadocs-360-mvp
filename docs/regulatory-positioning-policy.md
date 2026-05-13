@@ -1,148 +1,148 @@
-# PolÃ­tica de Posicionamento RegulatÃ³rio â€” VISADOCS 360 MVP
+# Política de Posicionamento Regulatório — VISADOCS 360 MVP
 
-VersÃ£o: 1.0
+Versão: 1.0
 Data: 2026-05-13
-Status: Aprovado para uso interno e orientaÃ§Ã£o de copy pÃºblica
-PrÃ³xima revisÃ£o: apÃ³s onboarding do primeiro cliente pagante ou alteraÃ§Ã£o relevante de escopo regulatÃ³rio
+Status: Aprovado para uso interno e orientação de copy pública
+Próxima revisão: após onboarding do primeiro cliente pagante ou alteração relevante de escopo regulatório
 
 ---
 
-## 1. PropÃ³sito
+## 1. Propósito
 
-Este documento define o posicionamento regulatÃ³rio oficial do VISADOCS 360 MVP, estabelecendo o que o produto Ã©, o que nÃ£o Ã©, quais expressÃµes podem ser usadas em comunicaÃ§Ã£o comercial e quais sÃ£o estritamente proibidas.
+Este documento define o posicionamento regulatório oficial do VISADOCS 360 MVP, estabelecendo o que o produto é, o que não é, quais expressões podem ser usadas em comunicação comercial e quais são estritamente proibidas.
 
-O objetivo Ã© evitar que o VISADOCS seja vendido, demonstrado ou interpretado como certificador de conformidade sanitÃ¡ria, substituto do ResponsÃ¡vel TÃ©cnico (RT), ferramenta de validaÃ§Ã£o regulatÃ³ria perante a Anvisa ou sistema capaz de garantir conformidade automÃ¡tica de estabelecimentos regulados.
+O objetivo é evitar que o VISADOCS seja vendido, demonstrado ou interpretado como certificador de conformidade sanitária, substituto do Responsável Técnico (RT), ferramenta de validação regulatória perante a Anvisa ou sistema capaz de garantir conformidade automática de estabelecimentos regulados.
 
-Este documento Ã© uma polÃ­tica interna de produto e comunicaÃ§Ã£o. NÃ£o substitui parecer jurÃ­dico, parecer sanitÃ¡rio, consultoria regulatÃ³ria farmacÃªutica ou julgamento profissional do RT.
-
----
-
-## 2. O que o VISADOCS Ã©
-
-VISADOCS 360 Ã© uma plataforma SaaS de apoio Ã  gestÃ£o documental, treinamentos internos e organizaÃ§Ã£o de evidÃªncias de qualidade para farmÃ¡cias de manipulaÃ§Ã£o e estabelecimentos regulados similares.
-
-A plataforma auxilia o ResponsÃ¡vel TÃ©cnico (RT) e a equipe de Garantia da Qualidade nas seguintes atividades:
-
-- OrganizaÃ§Ã£o, versionamento e rastreabilidade de Procedimentos Operacionais PadrÃ£o (POPs);
-- Registro de leitura, ciÃªncia e avaliaÃ§Ã£o de conhecimento por colaborador;
-- GeraÃ§Ã£o de Lista Mestra de documentos ativos;
-- EmissÃ£o de registros internos de treinamento, leitura e ciÃªncia;
-- OrganizaÃ§Ã£o de documentos relacionados, como registros da qualidade, anexos, modelos e documentos de apoio;
-- Apoio documental Ã  rotina de Garantia da Qualidade.
-
-O VISADOCS organiza informaÃ§Ãµes, versÃµes, registros e evidÃªncias. A avaliaÃ§Ã£o tÃ©cnica, a aprovaÃ§Ã£o final e a responsabilidade pela aplicaÃ§Ã£o dos documentos no estabelecimento permanecem com o RT da farmÃ¡cia.
+Este documento é uma política interna de produto e comunicação. Não substitui parecer jurídico, parecer sanitário, consultoria regulatória farmacêutica ou julgamento profissional do RT.
 
 ---
 
-## 3. O que o VISADOCS nÃ£o Ã©
+## 2. O que o VISADOCS é
+
+VISADOCS 360 é uma plataforma SaaS de apoio à gestão documental, treinamentos internos e organização de evidências de qualidade para farmácias de manipulação e estabelecimentos regulados similares.
+
+A plataforma auxilia o Responsável Técnico (RT) e a equipe de Garantia da Qualidade nas seguintes atividades:
+
+- Organização, versionamento e rastreabilidade de Procedimentos Operacionais Padrão (POPs);
+- Registro de leitura, ciência e avaliação de conhecimento por colaborador;
+- Geração de Lista Mestra de documentos ativos;
+- Emissão de registros internos de treinamento, leitura e ciência;
+- Organização de documentos relacionados, como registros da qualidade, anexos, modelos e documentos de apoio;
+- Apoio documental à rotina de Garantia da Qualidade.
+
+O VISADOCS organiza informações, versões, registros e evidências. A avaliação técnica, a aprovação final e a responsabilidade pela aplicação dos documentos no estabelecimento permanecem com o RT da farmácia.
+
+---
+
+## 3. O que o VISADOCS não é
 
 O VISADOCS nunca pode ser descrito, vendido, demonstrado ou interpretado como:
 
-| # | ProibiÃ§Ã£o | RazÃ£o regulatÃ³ria |
+| # | Proibição | Razão regulatória |
 |---|---|---|
-| 1 | Certificador de conformidade sanitÃ¡ria | A conformidade depende de avaliaÃ§Ã£o tÃ©cnica, documental, operacional e fÃ­sica do estabelecimento |
-| 2 | Substituto do ResponsÃ¡vel TÃ©cnico (RT) | O julgamento tÃ©cnico-profissional Ã© atribuiÃ§Ã£o humana e farmacÃªutica |
-| 3 | Ferramenta de validaÃ§Ã£o perante a Anvisa | O sistema nÃ£o Ã© aprovado, homologado ou validado pela Anvisa |
-| 4 | Emitidor de certificados com validade legal plena | Registros internos de treinamento nÃ£o sÃ£o tÃ­tulos de habilitaÃ§Ã£o profissional |
-| 5 | Consultor regulatÃ³rio autÃ´nomo | InterpretaÃ§Ã£o normativa exige responsabilidade tÃ©cnica e, quando necessÃ¡rio, parecer especializado |
-| 6 | Garantidor de ausÃªncia de infraÃ§Ã£o sanitÃ¡ria | A existÃªncia de POPs e registros nÃ£o garante conformidade prÃ¡tica do estabelecimento |
-| 7 | Auditor sanitÃ¡rio automatizado | O software nÃ£o inspeciona ambiente fÃ­sico, conduta operacional, equipamentos, calibraÃ§Ã£o ou execuÃ§Ã£o real de procedimentos |
-| 8 | Ferramenta de homologaÃ§Ã£o automÃ¡tica de POPs | POPs precisam ser revisados, adaptados e aprovados pelo RT |
+| 1 | Certificador de conformidade sanitária | A conformidade depende de avaliação técnica, documental, operacional e física do estabelecimento |
+| 2 | Substituto do Responsável Técnico (RT) | O julgamento técnico-profissional é atribuição humana e farmacêutica |
+| 3 | Ferramenta de validação perante a Anvisa | O sistema não é aprovado, homologado ou validado pela Anvisa |
+| 4 | Emitidor de certificados com validade legal plena | Registros internos de treinamento não são títulos de habilitação profissional |
+| 5 | Consultor regulatório autônomo | Interpretação normativa exige responsabilidade técnica e, quando necessário, parecer especializado |
+| 6 | Garantidor de ausência de infração sanitária | A existência de POPs e registros não garante conformidade prática do estabelecimento |
+| 7 | Auditor sanitário automatizado | O software não inspeciona ambiente físico, conduta operacional, equipamentos, calibração ou execução real de procedimentos |
+| 8 | Ferramenta de homologação automática de POPs | POPs precisam ser revisados, adaptados e aprovados pelo RT |
 
 ---
 
-## 4. Claims permitidos em copy pÃºblica
+## 4. Claims permitidos em copy pública
 
-As seguintes expressÃµes podem ser usadas em landing page, README, propostas comerciais e materiais de marketing, desde que mantido o contexto de ferramenta auxiliar:
+As seguintes expressões podem ser usadas em landing page, README, propostas comerciais e materiais de marketing, desde que mantido o contexto de ferramenta auxiliar:
 
-- "Organize seus POPs, treinamentos e evidÃªncias de qualidade"
-- "Plataforma auxiliar para gestÃ£o documental do ResponsÃ¡vel TÃ©cnico"
-- "Apoio Ã  rotina de Garantia da Qualidade"
-- "Registro de ciÃªncia e treinamento interno"
-- "GeraÃ§Ã£o de Lista Mestra dinÃ¢mica"
-- "Versionamento e controle de obsolescÃªncia de documentos"
-- "EvidÃªncia de leitura e avaliaÃ§Ã£o por colaborador"
-- "Modelos tÃ©cnicos de POPs editÃ¡veis, sujeitos Ã  revisÃ£o e aprovaÃ§Ã£o do RT"
-- "Ambiente multiusuÃ¡rio por estabelecimento"
-- "CentralizaÃ§Ã£o de documentos, versÃµes e registros internos"
-- "Apoio documental para farmÃ¡cias de manipulaÃ§Ã£o"
+- "Organize seus POPs, treinamentos e evidências de qualidade"
+- "Plataforma auxiliar para gestão documental do Responsável Técnico"
+- "Apoio à rotina de Garantia da Qualidade"
+- "Registro de ciência e treinamento interno"
+- "Geração de Lista Mestra dinâmica"
+- "Versionamento e controle de obsolescência de documentos"
+- "Evidência de leitura e avaliação por colaborador"
+- "Modelos técnicos de POPs editáveis, sujeitos à revisão e aprovação do RT"
+- "Ambiente multiusuário por estabelecimento"
+- "Centralização de documentos, versões e registros internos"
+- "Apoio documental para farmácias de manipulação"
 
 ---
 
-## 5. Claims proibidos em copy pÃºblica
+## 5. Claims proibidos em copy pública
 
-As seguintes expressÃµes sÃ£o proibidas em qualquer comunicaÃ§Ã£o pÃºblica, contratual, comercial ou institucional:
+As seguintes expressões são proibidas em qualquer comunicação pública, contratual, comercial ou institucional:
 
-| ExpressÃ£o proibida | Motivo |
+| Expressão proibida | Motivo |
 |---|---|
-| "Conformidade RDC ANVISA" | Pode implicar aprovaÃ§Ã£o institucional ou garantia de conformidade inexistente |
+| "Conformidade RDC ANVISA" | Pode implicar aprovação institucional ou garantia de conformidade inexistente |
 | "Garantia de conformidade" | Nenhum software garante conformidade de um estabelecimento |
-| "Aprovado pela Anvisa" | O sistema nÃ£o possui aprovaÃ§Ã£o institucional da Anvisa |
-| "Homologado pela Anvisa" | O sistema nÃ£o Ã© homologado pela Anvisa |
-| "Validade legal plena" | Documentos gerados pelo sistema nÃ£o possuem presunÃ§Ã£o jurÃ­dica automÃ¡tica |
-| "Certificado com validade legal" | Registros internos nÃ£o sÃ£o certificados de habilitaÃ§Ã£o profissional |
-| "CertificaÃ§Ã£o sanitÃ¡ria automÃ¡tica" | O sistema nÃ£o certifica conformidade sanitÃ¡ria |
-| "Zero alucinaÃ§Ãµes" | Tecnicamente indefensÃ¡vel em sistemas baseados em IA generativa |
-| "100% precisÃ£o" | Promessa absoluta incompatÃ­vel com sistemas probabilÃ­sticos e fluxos humanos |
-| "99,9% conformidade automÃ¡tica" | Conformidade nÃ£o Ã© mensurÃ¡vel por software isoladamente |
-| "Dados criptografados" | SÃ³ permitido se houver especificaÃ§Ã£o tÃ©cnica verificÃ¡vel de escopo, trÃ¢nsito, repouso e limites |
-| "Prova criptogrÃ¡fica com valor jurÃ­dico" | Hash ou timestamp nÃ£o substituem assinatura digital qualificada ou outros meios formais de identificaÃ§Ã£o |
-| "IA validada pela Anvisa" | A Anvisa nÃ£o valida este tipo de algoritmo para consultoria regulatÃ³ria |
-| "Substitui auditoria do RT" | O sistema nÃ£o substitui auditoria, inspeÃ§Ã£o ou responsabilidade tÃ©cnica |
-| "Substitui consultoria farmacÃªutica" | O sistema nÃ£o substitui atuaÃ§Ã£o profissional especializada |
+| "Aprovado pela Anvisa" | O sistema não possui aprovação institucional da Anvisa |
+| "Homologado pela Anvisa" | O sistema não é homologado pela Anvisa |
+| "Validade legal plena" | Documentos gerados pelo sistema não possuem presunção jurídica automática |
+| "Certificado com validade legal" | Registros internos não são certificados de habilitação profissional |
+| "Certificação sanitária automática" | O sistema não certifica conformidade sanitária |
+| "Zero alucinações" | Tecnicamente indefensável em sistemas baseados em IA generativa |
+| "100% precisão" | Promessa absoluta incompatível com sistemas probabilísticos e fluxos humanos |
+| "99,9% conformidade automática" | Conformidade não é mensurável por software isoladamente |
+| "Dados criptografados" | Só permitido se houver especificação técnica verificável de escopo, trânsito, repouso e limites |
+| "Prova criptográfica com valor jurídico" | Hash ou timestamp não substituem assinatura digital qualificada ou outros meios formais de identificação |
+| "IA validada pela Anvisa" | A Anvisa não valida este tipo de algoritmo para consultoria regulatória |
+| "Substitui auditoria do RT" | O sistema não substitui auditoria, inspeção ou responsabilidade técnica |
+| "Substitui consultoria farmacêutica" | O sistema não substitui atuação profissional especializada |
 | "POPs prontos e conformes" | Modelos precisam ser adaptados e aprovados pelo RT |
 
 ---
 
-## 6. Regras para InteligÃªncia Artificial / Chatbot
+## 6. Regras para Inteligência Artificial / Chatbot
 
-Se o mÃ³dulo de assistente virtual, VISA Assistente ou funcionalidade similar estiver ativo, ele deve operar estritamente como ferramenta auxiliar documental.
+Se o módulo de assistente virtual, VISA Assistente ou funcionalidade similar estiver ativo, ele deve operar estritamente como ferramenta auxiliar documental.
 
 ### 6.1 Permitido
 
 - Recuperar trechos de fontes normativas oficiais ou documentos internos cadastrados;
 - Localizar POPs, registros, anexos ou documentos internos dentro do sistema;
-- Resumir conteÃºdo jÃ¡ existente na base documental;
-- Indicar que determinada informaÃ§Ã£o requer validaÃ§Ã£o pelo RT;
-- Apresentar fonte, documento, trecho ou referÃªncia sempre que possÃ­vel;
-- Operar em modo fail-closed quando nÃ£o houver fonte suficiente.
+- Resumir conteúdo já existente na base documental;
+- Indicar que determinada informação requer validação pelo RT;
+- Apresentar fonte, documento, trecho ou referência sempre que possível;
+- Operar em modo fail-closed quando não houver fonte suficiente.
 
 ### 6.2 Proibido
 
-- Interpretar normas e concluir autonomamente sobre conformidade da farmÃ¡cia;
-- Recomendar conduta sanitÃ¡ria autÃ´noma;
+- Interpretar normas e concluir autonomamente sobre conformidade da farmácia;
+- Recomendar conduta sanitária autônoma;
 - Substituir o julgamento profissional do RT;
-- Emitir parecer tÃ©cnico ou jurÃ­dico;
-- Falar em nome da Anvisa, VigilÃ¢ncia SanitÃ¡ria ou qualquer Ã³rgÃ£o regulador;
+- Emitir parecer técnico ou jurídico;
+- Falar em nome da Anvisa, Vigilância Sanitária ou qualquer órgão regulador;
 - Gerar resposta sem fonte quando a pergunta exigir base normativa;
-- Prometer ausÃªncia de erro, ausÃªncia de alucinaÃ§Ã£o ou precisÃ£o absoluta.
+- Prometer ausência de erro, ausência de alucinação ou precisão absoluta.
 
-### 6.3 Disclaimer obrigatÃ³rio
+### 6.3 Disclaimer obrigatório
 
-Toda interaÃ§Ã£o com assistente virtual deve exibir, de forma visÃ­vel:
+Toda interação com assistente virtual deve exibir, de forma visível:
 
-> Esta resposta Ã© recuperada automaticamente de fontes normativas e/ou documentos internos cadastrados. A interpretaÃ§Ã£o, aplicaÃ§Ã£o e decisÃ£o de compliance sÃ£o de responsabilidade exclusiva do ResponsÃ¡vel TÃ©cnico da farmÃ¡cia. Este assistente nÃ£o substitui parecer jurÃ­dico, auditoria sanitÃ¡ria, inspeÃ§Ã£o da VigilÃ¢ncia SanitÃ¡ria ou consultoria farmacÃªutica.
+> Esta resposta é recuperada automaticamente de fontes normativas e/ou documentos internos cadastrados. A interpretação, aplicação e decisão de compliance são de responsabilidade exclusiva do Responsável Técnico da farmácia. Este assistente não substitui parecer jurídico, auditoria sanitária, inspeção da Vigilância Sanitária ou consultoria farmacêutica.
 
 ---
 
-## 7. Regras para POPs e documentos tÃ©cnicos
+## 7. Regras para POPs e documentos técnicos
 
 ### 7.1 Natureza dos modelos
 
-Os POPs disponibilizados como modelos na plataforma sÃ£o documentos-base tÃ©cnicos editÃ¡veis. Eles nÃ£o sÃ£o POPs prontos para uso imediato, nÃ£o certificam conformidade sanitÃ¡ria e nÃ£o substituem a adaptaÃ§Ã£o Ã  realidade operacional de cada farmÃ¡cia.
+Os POPs disponibilizados como modelos na plataforma são documentos-base técnicos editáveis. Eles não são POPs prontos para uso imediato, não certificam conformidade sanitária e não substituem a adaptação à realidade operacional de cada farmácia.
 
-### 7.2 AprovaÃ§Ã£o obrigatÃ³ria pelo RT
+### 7.2 Aprovação obrigatória pelo RT
 
-Todo POP modelo deve ser revisado, adaptado e aprovado pelo RT da farmÃ¡cia antes de entrar em vigor no estabelecimento.
+Todo POP modelo deve ser revisado, adaptado e aprovado pelo RT da farmácia antes de entrar em vigor no estabelecimento.
 
-O sistema pode registrar aprovaÃ§Ã£o, versÃ£o, histÃ³rico, data e responsÃ¡vel, mas nÃ£o valida tecnicamente o conteÃºdo por conta prÃ³pria.
+O sistema pode registrar aprovação, versão, histórico, data e responsável, mas não valida tecnicamente o conteúdo por conta própria.
 
-### 7.3 Versionamento e obsolescÃªncia
+### 7.3 Versionamento e obsolescência
 
-- Todo POP ativo deve ter cÃ³digo, tÃ­tulo, versÃ£o e data de liberaÃ§Ã£o;
-- VersÃµes obsoletas devem ser retiradas de uso operacional;
+- Todo POP ativo deve ter código, título, versão e data de liberação;
+- Versões obsoletas devem ser retiradas de uso operacional;
 - A Lista Mestra deve refletir somente documentos vigentes, aprovados e ativos;
-- Registros de treinamento devem permanecer vinculados Ã  versÃ£o exata do POP utilizada no momento do treinamento.
+- Registros de treinamento devem permanecer vinculados à versão exata do POP utilizada no momento do treinamento.
 
 ---
 
@@ -153,69 +153,69 @@ O sistema pode registrar aprovaÃ§Ã£o, versÃ£o, histÃ³rico, data e respon
 Os comprovantes gerados pelo sistema devem ser denominados preferencialmente:
 
 - "Registro de Treinamento"
-- "EvidÃªncia de CiÃªncia"
-- "Comprovante Interno de Leitura e AvaliaÃ§Ã£o"
-- "Registro Interno de CapacitaÃ§Ã£o"
+- "Evidência de Ciência"
+- "Comprovante Interno de Leitura e Avaliação"
+- "Registro Interno de Capacitação"
 
 ### 8.2 Terminologia proibida
 
-NÃ£o usar:
+Não usar:
 
-- "Certificado de HabilitaÃ§Ã£o"
+- "Certificado de Habilitação"
 - "Certificado com validade legal"
-- "CertificaÃ§Ã£o profissional"
-- "LicenÃ§a de operaÃ§Ã£o"
-- "AutorizaÃ§Ã£o sanitÃ¡ria"
-- "ComprovaÃ§Ã£o de competÃªncia plena"
+- "Certificação profissional"
+- "Licença de operação"
+- "Autorização sanitária"
+- "Comprovação de competência plena"
 
-### 8.3 ConteÃºdo mÃ­nimo
+### 8.3 Conteúdo mínimo
 
-Todo registro deve conter, quando aplicÃ¡vel:
+Todo registro deve conter, quando aplicável:
 
 - Nome do colaborador;
-- IdentificaÃ§Ã£o do estabelecimento;
-- Nome ou cÃ³digo do POP;
-- VersÃ£o exata do POP no momento do treinamento;
-- Data do treinamento, leitura ou avaliaÃ§Ã£o;
-- Resultado do quiz, se aplicÃ¡vel;
-- IdentificaÃ§Ã£o do responsÃ¡vel pelo treinamento ou RT;
+- Identificação do estabelecimento;
+- Nome ou código do POP;
+- Versão exata do POP no momento do treinamento;
+- Data do treinamento, leitura ou avaliação;
+- Resultado do quiz, se aplicável;
+- Identificação do responsável pelo treinamento ou RT;
 - Status do registro;
-- HistÃ³rico suficiente para auditoria interna.
+- Histórico suficiente para auditoria interna.
 
-O registro comprova evidÃªncia interna de ciÃªncia, leitura ou avaliaÃ§Ã£o. Ele nÃ£o habilita profissionalmente o colaborador de forma autÃ´noma e nÃ£o substitui responsabilidade tÃ©cnica.
+O registro comprova evidência interna de ciência, leitura ou avaliação. Ele não habilita profissionalmente o colaborador de forma autônoma e não substitui responsabilidade técnica.
 
 ---
 
-## 9. Regras para Nexoritia / Allux / governanÃ§a de IA interna
+## 9. Regras para Nexoritia / Allux / governança de IA interna
 
-Se motores internos de governanÃ§a de IA, como Nexoritia OS, Allux, PromptGuard ou similares, forem utilizados, eles devem operar exclusivamente como mecanismos internos de apoio Ã  governanÃ§a tÃ©cnica.
+Se motores internos de governança de IA, como Nexoritia OS, Allux, PromptGuard ou similares, forem utilizados, eles devem operar exclusivamente como mecanismos internos de apoio à governança técnica.
 
 ### 9.1 Usos permitidos
 
 - Controle de prompts;
 - Bloqueio de claims proibidos;
-- Fail-closed semÃ¢ntico quando nÃ£o houver fonte;
-- Logs de auditoria de interaÃ§Ãµes com IA;
-- RevisÃ£o de copy antes de publicaÃ§Ã£o;
-- ValidaÃ§Ã£o sintÃ¡tica ou citacional de respostas;
-- PolÃ­ticas internas de output.
+- Fail-closed semântico quando não houver fonte;
+- Logs de auditoria de interações com IA;
+- Revisão de copy antes de publicação;
+- Validação sintática ou citacional de respostas;
+- Políticas internas de output.
 
 ### 9.2 Usos proibidos
 
 Esses motores nunca devem ser apresentados como:
 
-- Fundamento de conformidade regulatÃ³ria;
+- Fundamento de conformidade regulatória;
 - Prova legal plena;
 - Substituto de assinatura digital;
 - Substituto do RT;
-- Validador automÃ¡tico de RDC;
-- Garantia de zero alucinaÃ§Ãµes;
-- Certificador sanitÃ¡rio;
-- Argumento comercial de aprovaÃ§Ã£o pela Anvisa.
+- Validador automático de RDC;
+- Garantia de zero alucinações;
+- Certificador sanitário;
+- Argumento comercial de aprovação pela Anvisa.
 
 ### 9.3 Regra de invisibilidade comercial
 
-Nexoritia, Allux, PromptGuard ou qualquer motor proprietÃ¡rio de governanÃ§a de IA nÃ£o devem aparecer em landing page, README pÃºblico, contrato, proposta comercial ou argumento de venda como base de conformidade regulatÃ³ria.
+Nexoritia, Allux, PromptGuard ou qualquer motor proprietário de governança de IA não devem aparecer em landing page, README público, contrato, proposta comercial ou argumento de venda como base de conformidade regulatória.
 
 ---
 
@@ -223,94 +223,94 @@ Nexoritia, Allux, PromptGuard ou qualquer motor proprietÃ¡rio de governanÃ§a
 
 | Papel | Responsabilidade |
 |---|---|
-| Product Owner | Garantir que toda copy pÃºblica seja revisada contra esta polÃ­tica antes de publicaÃ§Ã£o |
-| Desenvolvimento | Implementar mecanismos tÃ©cnicos compatÃ­veis com esta polÃ­tica |
-| ResponsÃ¡vel TÃ©cnico da farmÃ¡cia | Revisar, adaptar, aprovar e aplicar documentos tÃ©cnicos no estabelecimento |
-| VISADOCS | Manter esta polÃ­tica atualizada e disponÃ­vel no repositÃ³rio |
-| UsuÃ¡rio administrador do tenant | Gerenciar usuÃ¡rios, documentos, treinamentos e permissÃµes internas |
-| Colaborador treinado | Registrar ciÃªncia, leitura ou avaliaÃ§Ã£o conforme fluxo interno definido pela farmÃ¡cia |
+| Product Owner | Garantir que toda copy pública seja revisada contra esta política antes de publicação |
+| Desenvolvimento | Implementar mecanismos técnicos compatíveis com esta política |
+| Responsável Técnico da farmácia | Revisar, adaptar, aprovar e aplicar documentos técnicos no estabelecimento |
+| VISADOCS | Manter esta política atualizada e disponível no repositório |
+| Usuário administrador do tenant | Gerenciar usuários, documentos, treinamentos e permissões internas |
+| Colaborador treinado | Registrar ciência, leitura ou avaliação conforme fluxo interno definido pela farmácia |
 
 ---
 
-## 11. RevisÃ£o e versionamento
+## 11. Revisão e versionamento
 
-- Esta polÃ­tica Ã© versionada no repositÃ³rio em `docs/regulatory-positioning-policy.md`;
-- AlteraÃ§Ãµes devem passar por controle de versÃ£o;
-- RevisÃ£o obrigatÃ³ria antes de qualquer alteraÃ§Ã£o relevante de copy pÃºblica;
-- RevisÃ£o obrigatÃ³ria antes do onboarding do primeiro cliente pagante;
-- RevisÃ£o obrigatÃ³ria antes de adicionar novos setores regulados;
-- RevisÃ£o obrigatÃ³ria antes de ativar funcionalidades de IA, geraÃ§Ã£o sob demanda de POPs, assinatura eletrÃ´nica ou emissÃ£o pÃºblica de registros.
-
----
-
-## 12. ReferÃªncias normativas e limites
-
-Esta polÃ­tica considera, como referÃªncias gerais:
-
-- Lei 5.991/1973 â€” controle sanitÃ¡rio de drogas, medicamentos, insumos farmacÃªuticos e correlatos;
-- RDC 67/2007 â€” Boas PrÃ¡ticas de ManipulaÃ§Ã£o de PreparaÃ§Ãµes Magistrais e Oficinais em farmÃ¡cias;
-- Lei 8.078/1990 â€” CÃ³digo de Defesa do Consumidor;
-- Lei 13.709/2018 â€” Lei Geral de ProteÃ§Ã£o de Dados Pessoais;
-- MP 2.200-2/2001 â€” Infraestrutura de Chaves PÃºblicas Brasileira.
-
-Este documento nÃ£o substitui parecer jurÃ­dico, parecer sanitÃ¡rio, consultoria LGPD ou validaÃ§Ã£o profissional farmacÃªutica.
+- Esta política é versionada no repositório em `docs/regulatory-positioning-policy.md`;
+- Alterações devem passar por controle de versão;
+- Revisão obrigatória antes de qualquer alteração relevante de copy pública;
+- Revisão obrigatória antes do onboarding do primeiro cliente pagante;
+- Revisão obrigatória antes de adicionar novos setores regulados;
+- Revisão obrigatória antes de ativar funcionalidades de IA, geração sob demanda de POPs, assinatura eletrônica ou emissão pública de registros.
 
 ---
 
-## 13. Acervo de POPs e ciclo dinÃ¢mico
+## 12. Referências normativas e limites
+
+Esta política considera, como referências gerais:
+
+- Lei 5.991/1973 — controle sanitário de drogas, medicamentos, insumos farmacêuticos e correlatos;
+- RDC 67/2007 — Boas Práticas de Manipulação de Preparações Magistrais e Oficinais em farmácias;
+- Lei 8.078/1990 — Código de Defesa do Consumidor;
+- Lei 13.709/2018 — Lei Geral de Proteção de Dados Pessoais;
+- MP 2.200-2/2001 — Infraestrutura de Chaves Públicas Brasileira.
+
+Este documento não substitui parecer jurídico, parecer sanitário, consultoria LGPD ou validação profissional farmacêutica.
+
+---
+
+## 13. Acervo de POPs e ciclo dinâmico
 
 ### 13.1 Natureza dos modelos
 
-Os POPs disponÃ­veis na biblioteca do VISADOCS sÃ£o modelos tÃ©cnicos-base fornecidos como parte do acesso Ã  plataforma. Eles nÃ£o sÃ£o produtos acabados, documentos prontos para uso imediato ou comprovaÃ§Ã£o automÃ¡tica de conformidade sanitÃ¡ria.
+Os POPs disponíveis na biblioteca do VISADOCS são modelos técnicos-base fornecidos como parte do acesso à plataforma. Eles não são produtos acabados, documentos prontos para uso imediato ou comprovação automática de conformidade sanitária.
 
 ### 13.2 Acervo do tenant
 
-Os kits de POPs devem ser incorporados ao VISADOCS como acervo tÃ©cnico e biblioteca do tenant, nÃ£o como marketplace de POPs.
+Os kits de POPs devem ser incorporados ao VISADOCS como acervo técnico e biblioteca do tenant, não como marketplace de POPs.
 
-A biblioteca serve como base documental e base RAG para apoiar a criaÃ§Ã£o, adaptaÃ§Ã£o e revisÃ£o de novos POPs sob demanda pelo prÃ³prio SaaS, sempre mediante atuaÃ§Ã£o, validaÃ§Ã£o e aprovaÃ§Ã£o do ResponsÃ¡vel TÃ©cnico da farmÃ¡cia.
+A biblioteca serve como base documental e base RAG para apoiar a criação, adaptação e revisão de novos POPs sob demanda pelo próprio SaaS, sempre mediante atuação, validação e aprovação do Responsável Técnico da farmácia.
 
-### 13.3 Fluxo obrigatÃ³rio
+### 13.3 Fluxo obrigatório
 
-1. O modelo tÃ©cnico-base Ã© disponibilizado na biblioteca ou acervo do tenant.
-2. O RT edita, adapta e revisa o conteÃºdo conforme a realidade operacional da farmÃ¡cia.
+1. O modelo técnico-base é disponibilizado na biblioteca ou acervo do tenant.
+2. O RT edita, adapta e revisa o conteúdo conforme a realidade operacional da farmácia.
 3. O RT aprova explicitamente o POP na plataforma.
 4. O POP aprovado entra na Lista Mestra do tenant.
 5. O POP aprovado entra na esteira de treinamento interno.
-6. Todo treinamento Ã© vinculado Ã  versÃ£o exata do POP aprovado.
-7. Registros de ciÃªncia, leitura ou avaliaÃ§Ã£o sÃ£o gerados como evidÃªncias internas, nÃ£o como certificados de habilitaÃ§Ã£o profissional.
+6. Todo treinamento é vinculado à versão exata do POP aprovado.
+7. Registros de ciência, leitura ou avaliação são gerados como evidências internas, não como certificados de habilitação profissional.
 
 ### 13.4 Responsabilidade
 
-A plataforma organiza, versiona e estrutura modelos tÃ©cnicos e evidÃªncias documentais.
+A plataforma organiza, versiona e estrutura modelos técnicos e evidências documentais.
 
-O RT da farmÃ¡cia Ã© responsÃ¡vel pela revisÃ£o, adaptaÃ§Ã£o, aprovaÃ§Ã£o, aplicaÃ§Ã£o e manutenÃ§Ã£o dos POPs no estabelecimento.
+O RT da farmácia é responsável pela revisão, adaptação, aprovação, aplicação e manutenção dos POPs no estabelecimento.
 
-A plataforma nÃ£o substitui julgamento profissional, auditoria sanitÃ¡ria, inspeÃ§Ã£o da VigilÃ¢ncia SanitÃ¡ria ou parecer jurÃ­dico-regulatÃ³rio.
+A plataforma não substitui julgamento profissional, auditoria sanitária, inspeção da Vigilância Sanitária ou parecer jurídico-regulatório.
 
 ### 13.5 POPs gerados sob demanda
 
-POPs gerados sob demanda pelo SaaS devem ser tratados como rascunhos tÃ©cnicos assistidos.
+POPs gerados sob demanda pelo SaaS devem ser tratados como rascunhos técnicos assistidos.
 
-Nenhum POP gerado sob demanda pode ser marcado como ativo sem revisÃ£o e aprovaÃ§Ã£o explÃ­cita do RT.
+Nenhum POP gerado sob demanda pode ser marcado como ativo sem revisão e aprovação explícita do RT.
 
-ApÃ³s aprovaÃ§Ã£o, o POP gerado deve seguir o mesmo ciclo dos demais documentos: versionamento, Lista Mestra, treinamento interno e registro de ciÃªncia.
+Após aprovação, o POP gerado deve seguir o mesmo ciclo dos demais documentos: versionamento, Lista Mestra, treinamento interno e registro de ciência.
 
-### 13.6 OrganizaÃ§Ã£o do acervo
+### 13.6 Organização do acervo
 
-Os kits de POPs devem ser organizados em estrutura lÃ³gica, rastreÃ¡vel e operacionalmente eficaz, preferencialmente por:
+Os kits de POPs devem ser organizados em estrutura lógica, rastreável e operacionalmente eficaz, preferencialmente por:
 
-- Ãrea ou setor;
+- Área ou setor;
 - Tipo documental;
-- CÃ³digo do POP;
+- Código do POP;
 - Status;
-- VersÃ£o;
+- Versão;
 - Aplicabilidade;
-- RelaÃ§Ã£o com treinamentos;
-- RelaÃ§Ã£o com registros de qualidade;
-- RelaÃ§Ã£o com anexos, formulÃ¡rios e documentos complementares.
+- Relação com treinamentos;
+- Relação com registros de qualidade;
+- Relação com anexos, formulários e documentos complementares.
 
-A organizaÃ§Ã£o do acervo deve facilitar uso por RAG, busca interna, clonagem para tenant, adaptaÃ§Ã£o pelo RT e rastreabilidade posterior.
+A organização do acervo deve facilitar uso por RAG, busca interna, clonagem para tenant, adaptação pelo RT e rastreabilidade posterior.
 
 ---
 
-Fim da polÃ­tica.
+Fim da política.
