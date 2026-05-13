@@ -3,11 +3,11 @@
 ## Sobre
 
 VISADOCS é um SaaS B2B multi-tenant para farmácias de manipulação, focado em:
-- **Gestão de POPs** (Procedimentos Operacionais Padrão) conforme RDC 67/2007
-- **Treinamentos e Compliance** com rastreabilidade completa
-- **Quizzes e Certificação** com microcertificados PDF
+- **Gestão de POPs** (Procedimentos Operacionais Padrão)
+- **Treinamentos internos** com rastreabilidade
+- **Quizzes e registros internos de treinamento** em PDF
 - **Gestão de Matérias-Primas, Lotes e Fornecedores**
-- **VISA Assistente** (Chatbot IA para legislação farmacêutica)
+- **VISA Assistente** (assistente documental para apoio à consulta interna)
 
 ## Tech Stack
 
@@ -17,7 +17,7 @@ VISADOCS é um SaaS B2B multi-tenant para farmácias de manipulação, focado em
 - **UI:** Tailwind CSS + Shadcn/Radix UI
 - **Charts:** Recharts
 - **Storage:** AWS S3
-- **PDF:** HTML2PDF API (Abacus.AI)
+- **PDF:** geração de documentos em revisão para independência de fornecedor
 - **DOCX:** docx library
 
 ## Módulos
@@ -29,7 +29,7 @@ VISADOCS é um SaaS B2B multi-tenant para farmácias de manipulação, focado em
 | Biblioteca | Visualização em pastas/accordion |
 | Treinamentos | Registro e acompanhamento |
 | Quizzes | Avaliações vinculadas a POPs |
-| Certificados | Microcertificados PDF com QR Code |
+| Registros de treinamento | Registros internos em PDF com QR Code |
 | Colaboradores | Gestão com "Pasta Pessoal" |
 | Documentos | 74 documentos (RQs, MBP, Anexos) |
 | Progresso LMS | Analytics por setor e colaborador |
@@ -72,7 +72,16 @@ yarn dev
 
 ## Deploy
 
-Hospedado em [visadocs.abacusai.app](https://visadocs.abacusai.app)
+Deploy atual em revisão de portabilidade, conforme política interna de independência de fornecedores.
+
+
+## Posicionamento regulatório
+
+O VISADOCS 360 é uma ferramenta auxiliar para gestão documental, treinamentos internos e organização de evidências de qualidade.
+
+A plataforma não certifica conformidade sanitária, não representa aprovação institucional da Anvisa e não substitui a revisão, adaptação e aprovação do Responsável Técnico.
+
+Diretriz interna aplicável: `docs/regulatory-positioning-policy.md`.
 
 ## Licença
 
