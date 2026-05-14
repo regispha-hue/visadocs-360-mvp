@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
     const normalizedTelefone = typeof telefone === "string" ? telefone.trim() : "";
     const normalizedEndereco = typeof endereco === "string" ? endereco.trim() : "";
+    const enderecoForDb = JSON.stringify(normalizedEndereco);
 
     // Validate required fields
     if (!normalizedNome || !normalizedCnpj || !normalizedResponsavel || !normalizedEmail || !normalizedTelefone || !normalizedEndereco) {
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
         responsavel: normalizedResponsavel,
         email: normalizedEmail,
         telefone: normalizedTelefone,
-        endereco: normalizedEndereco,
+        endereco: enderecoForDb,
         status: "PENDENTE",
         subscriptionStatus: "TRIAL",
         trialEndsAt,
