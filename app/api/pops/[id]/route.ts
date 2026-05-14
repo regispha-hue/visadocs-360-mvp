@@ -71,7 +71,7 @@ export async function PATCH(
     const user = session.user as any;
 
     // Check permissions
-    if (!["SUPER_ADMIN", "ADMIN_FARMACIA", "RT"].includes(user.role)) {
+    if (!["SUPER_ADMIN", "ADMIN", "RT"].includes(user.role)) {
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
@@ -143,7 +143,7 @@ export async function DELETE(
     const user = session.user as any;
 
     // Check permissions
-    if (!["SUPER_ADMIN", "ADMIN_FARMACIA"].includes(user.role)) {
+    if (!["SUPER_ADMIN", "ADMIN"].includes(user.role)) {
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 

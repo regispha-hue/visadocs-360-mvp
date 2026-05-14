@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
     const user = session.user as any;
-    if (!["SUPER_ADMIN", "ADMIN_FARMACIA", "RT"].includes(user.role)) {
+    if (!["SUPER_ADMIN", "ADMIN", "RT"].includes(user.role)) {
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 

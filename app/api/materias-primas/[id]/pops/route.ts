@@ -19,7 +19,7 @@ export async function POST(
 
     const user = session.user as any;
 
-    if (!["SUPER_ADMIN", "ADMIN_FARMACIA", "RT", "ANALISTA_CQ"].includes(user.role)) {
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "ANALISTA_CQ"].includes(user.role)) {
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
@@ -97,7 +97,7 @@ export async function DELETE(
 
     const user = session.user as any;
 
-    if (!["SUPER_ADMIN", "ADMIN_FARMACIA", "RT", "ANALISTA_CQ"].includes(user.role)) {
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "ANALISTA_CQ"].includes(user.role)) {
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
