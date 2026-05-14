@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     const user = session.user as any;
 
     // Check permissions
-    if (!["SUPER_ADMIN", "ADMIN_FARMACIA", "RT", "OPERADOR"].includes(user.role)) {
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "OPERADOR"].includes(user.role)) {
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 

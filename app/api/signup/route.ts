@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     // Validate role
-    const validRoles = ["SUPER_ADMIN", "ADMIN_FARMACIA", "RT", "ANALISTA_CQ", "OPERADOR"];
+    const validRoles = ["SUPER_ADMIN", "ADMIN", "OPERADOR"];
     const userRole = validRoles.includes(role) ? role : "OPERADOR";
 
     // Hash password
