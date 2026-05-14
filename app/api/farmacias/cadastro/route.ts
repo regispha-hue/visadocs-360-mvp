@@ -10,18 +10,31 @@ export async function POST(request: Request) {
 
     const { nome, cnpj, responsavel, email, telefone, endereco } = data;
 
+    const normalizedNome = typeof nome === "string" ? nome.trim() : "";
+    const normalizedCnpj = typeof cnpj === "string" ? cnpj.trim() : "";
+    const normalizedResponsavel = typeof responsavel === "string" ? responsavel.trim() : "";
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const normalizedTelefone = typeof telefone === "string" ? telefone.trim() : "";
+    const normalizedEndereco = typeof endereco === "string" ? endereco.trim() : "";
+
     // Validate required fields
-    if (!nome || !cnpj || !responsavel || !email || !telefone || !endereco) {
+    if (!normalizedNome || !normalizedCnpj || !normalizedResponsavel || !normalizedEmail || !normalizedTelefone || !normalizedEndereco) {
       return NextResponse.json(
         { error: "Todos os campos são obrigatórios" },
         { status: 400 }
       );
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return NextResponse.json(
+        { error: "Email inválido" },
+        { status: 400 }
+      );
+    }
+
     // Check if CNPJ already exists
-    const existingTenant = await prisma.tenant.findUnique({
-      // @ts-ignore
-      where: { cnpj },
+    const existingTenant = await prisma.tenant.findFirst({
+      where: { cnpj: normalizedCnpj },
     });
 
     if (existingTenant) {
@@ -32,9 +45,8 @@ export async function POST(request: Request) {
     }
 
     // Check if email already exists
-    const existingEmail = await prisma.tenant.findUnique({
-      // @ts-ignore
-      where: { email },
+    const existingEmail = await prisma.tenant.findFirst({
+      where: { email: normalizedEmail },
     });
 
     if (existingEmail) {
@@ -51,12 +63,12 @@ export async function POST(request: Request) {
     // Create tenant with PENDENTE status
     const tenant = await prisma.tenant.create({
       data: {
-        nome,
-        cnpj,
-        responsavel,
-        email,
-        telefone,
-        endereco,
+        nome: normalizedNome,
+        cnpj: normalizedCnpj,
+        responsavel: normalizedResponsavel,
+        email: normalizedEmail,
+        telefone: normalizedTelefone,
+        endereco: normalizedEndereco,
         status: "PENDENTE",
         subscriptionStatus: "TRIAL",
         trialEndsAt,
@@ -68,7 +80,7 @@ export async function POST(request: Request) {
       action: AUDIT_ACTIONS.TENANT_CREATED,
       entity: "Tenant",
       entityId: tenant.id,
-      details: { nome, cnpj, email },
+      details: { nome: normalizedNome, cnpj: normalizedCnpj, email: normalizedEmail },
     });
 
     return NextResponse.json({
