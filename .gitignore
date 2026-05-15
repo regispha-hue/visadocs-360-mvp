@@ -17,3 +17,5 @@ tsconfig.tsbuildinfo
 .audit/
 .vercel
 .env*.local
+
+supabase/.temp/
