@@ -73,6 +73,17 @@ export async function POST(request: Request) {
 
     const tenantId = user.tenantId;
 
+    console.info("[C9C_H4_QUIZ_NOTA_DIAG:before_create]", {
+      runtimeCommit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
+      rawNotaMinima: notaMinima,
+      rawNotaMinimaType: typeof notaMinima,
+      parsedNotaMinima,
+      notaMinimaNormalizada,
+      dataNotaMinima: notaMinimaNormalizada,
+      tenantId,
+      popId,
+    });
+
     // Check POP exists and belongs to tenant
     const pop = await prisma.pop.findFirst({ where: { id: popId, tenantId } });
     if (!pop) {
@@ -124,6 +135,15 @@ export async function POST(request: Request) {
         },
         pop: { select: { codigo: true, titulo: true } },
       },
+    });
+
+    console.info("[C9C_H4_QUIZ_NOTA_DIAG:after_create]", {
+      runtimeCommit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local",
+      quizId: quiz.id,
+      savedNotaMinima: quiz.notaMinima,
+      expectedNotaMinima: notaMinimaNormalizada,
+      tenantId,
+      popId,
     });
 
     await createAuditLog({
