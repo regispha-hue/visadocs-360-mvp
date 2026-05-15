@@ -59,7 +59,7 @@ export function formatCPF(cpf: string): string {
 export function maskCPF(cpf: string): string {
   const cleaned = cpf.replace(/[^\d]/g, "");
   if (cleaned.length !== 11) return "***.***.***-**";
-  return `${cleaned.slice(0, 3)}.***.**$-${cleaned.slice(-2)}`;
+  return `${cleaned.slice(0, 3)}.***.***-${cleaned.slice(-2)}`;
 }
 
 // Zod schemas

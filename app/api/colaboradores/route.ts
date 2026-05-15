@@ -8,6 +8,13 @@ import { maskCPF } from "@/lib/validations";
 
 export const dynamic = "force-dynamic";
 
+
+function serializeColaborador(colaborador: any) {
+  const { cpf, cpfHash, ...safeColaborador } = colaborador;
+  return safeColaborador;
+}
+
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -44,7 +51,7 @@ export async function GET(request: Request) {
       orderBy: { nome: "asc" },
     });
 
-    return NextResponse.json({ colaboradores });
+    return NextResponse.json({ colaboradores: colaboradores.map(serializeColaborador) });
   } catch (error: any) {
     console.error("Error fetching colaboradores:", error);
     return NextResponse.json({ error: "Erro ao buscar colaboradores" }, { status: 500 });
@@ -122,7 +129,7 @@ export async function POST(request: Request) {
       details: { nome, funcao, setor },
     });
 
-    return NextResponse.json({ success: true, colaborador });
+    return NextResponse.json({ success: true, colaborador: serializeColaborador(colaborador) });
   } catch (error: any) {
     console.error("Error creating colaborador:", error);
     return NextResponse.json({ error: "Erro ao criar colaborador" }, { status: 500 });
