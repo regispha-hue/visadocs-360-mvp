@@ -65,6 +65,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "POP, título e pelo menos uma questão são obrigatórios" }, { status: 400 });
     }
 
+    const parsedNotaMinima = Number(notaMinima);
+    const notaMinimaNormalizada =
+      Number.isFinite(parsedNotaMinima) && parsedNotaMinima > 0
+        ? Math.trunc(parsedNotaMinima)
+        : 70;
+
     const tenantId = user.tenantId;
 
     // Check POP exists and belongs to tenant
@@ -95,7 +101,7 @@ export async function POST(request: Request) {
         popId,
         titulo,
         descricao: descricao || null,
-        notaMinima: notaMinima || 70,
+        notaMinima: notaMinimaNormalizada,
         tenantId,
         questoes: {
           create: questoes.map((q: any, idx: number) => ({
