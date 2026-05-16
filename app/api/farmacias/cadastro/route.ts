@@ -148,23 +148,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: any) {
-    console.error("[CADASTRO_500_DIAG]", {
-      name: error instanceof Error ? error.name : undefined,
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      code:
-        typeof error === "object" && error !== null && "code" in error
-          ? (error as { code?: unknown }).code
-          : undefined,
-      meta:
-        typeof error === "object" && error !== null && "meta" in error
-          ? (error as { meta?: unknown }).meta
-          : undefined,
-      cause:
-        typeof error === "object" && error !== null && "cause" in error
-          ? (error as { cause?: unknown }).cause
-          : undefined,
-    });
     return NextResponse.json(
       { error: "Erro ao realizar cadastro" },
       { status: 500 }
