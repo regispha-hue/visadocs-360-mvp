@@ -31,6 +31,29 @@ function normalizeEndereco(value: unknown): NormalizedEndereco {
   return "";
 }
 
+function enderecoToString(value: NormalizedEndereco): string {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  const cep = value.cep ? `CEP ${value.cep}` : "";
+  const cidadeUf =
+    value.cidade && value.estado
+      ? `${value.cidade}/${value.estado}`
+      : value.cidade || value.estado || "";
+
+  return [
+    [value.logradouro, value.numero].filter(Boolean).join(", "),
+    value.complemento,
+    value.bairro,
+    cidadeUf,
+    cep,
+  ]
+    .filter(Boolean)
+    .join(" - ")
+    .trim();
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
@@ -47,7 +70,7 @@ export async function POST(request: Request) {
       typeof normalizedEndereco === "string"
         ? normalizedEndereco.length > 0
         : Object.keys(normalizedEndereco).length > 0;
-    const enderecoForDb = JSON.stringify(normalizedEndereco);
+    const enderecoForDb = enderecoToString(normalizedEndereco);
 
     // Validate required fields
     if (!normalizedNome || !normalizedCnpj || !normalizedResponsavel || !normalizedEmail || !normalizedTelefone || !hasEndereco) {
