@@ -4,6 +4,33 @@ import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
+type NormalizedEndereco = string | Record<string, string>;
+
+function normalizeEndereco(value: unknown): NormalizedEndereco {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([key, raw]) => {
+        const normalized =
+          typeof raw === "string"
+            ? raw.trim()
+            : raw === null || raw === undefined
+              ? ""
+              : String(raw).trim();
+
+        return [key, normalized] as const;
+      })
+      .filter(([, normalized]) => normalized.length > 0);
+
+    return Object.fromEntries(entries);
+  }
+
+  return "";
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
@@ -15,11 +42,15 @@ export async function POST(request: Request) {
     const normalizedResponsavel = typeof responsavel === "string" ? responsavel.trim() : "";
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
     const normalizedTelefone = typeof telefone === "string" ? telefone.trim() : "";
-    const normalizedEndereco = typeof endereco === "string" ? endereco.trim() : "";
+    const normalizedEndereco = normalizeEndereco(endereco);
+    const hasEndereco =
+      typeof normalizedEndereco === "string"
+        ? normalizedEndereco.length > 0
+        : Object.keys(normalizedEndereco).length > 0;
     const enderecoForDb = JSON.stringify(normalizedEndereco);
 
     // Validate required fields
-    if (!normalizedNome || !normalizedCnpj || !normalizedResponsavel || !normalizedEmail || !normalizedTelefone || !normalizedEndereco) {
+    if (!normalizedNome || !normalizedCnpj || !normalizedResponsavel || !normalizedEmail || !normalizedTelefone || !hasEndereco) {
       return NextResponse.json(
         { error: "Todos os campos são obrigatórios" },
         { status: 400 }
