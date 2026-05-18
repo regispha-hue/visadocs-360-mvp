@@ -22,6 +22,9 @@ interface Treinamento {
   notaQuiz?: number;
   aprovadoQuiz?: boolean;
   status: string;
+  approvedPopVersionId?: string;
+  popVersaoSnapshot?: string;
+  approvedPopVersion?: { version: string; status: string };
   pop: { id: string; codigo: string; titulo: string };
   colaborador: { id: string; nome: string; funcao: string };
 }
@@ -119,6 +122,9 @@ export default function TreinamentosPage() {
           <p className="text-sm text-muted-foreground truncate max-w-[200px]">
             {item?.pop?.titulo ?? "N/A"}
           </p>
+          <p className="text-xs text-muted-foreground">
+            Versão usada: {item?.approvedPopVersion?.version || item?.popVersaoSnapshot || "N/A"}
+          </p>
         </div>
       ),
     },
@@ -212,6 +218,7 @@ export default function TreinamentosPage() {
               size="icon"
               onClick={() => handleDownloadCertificado(item.id)}
               title="Baixar Microcertificado"
+              aria-label="Baixar registro interno de treinamento"
               disabled={downloadingCertId === item.id}
             >
               {downloadingCertId === item.id ? (
@@ -238,7 +245,7 @@ export default function TreinamentosPage() {
     <div>
       <PageHeader
         title="Treinamentos"
-        description="Registre e acompanhe os treinamentos da equipe"
+        description="Registre treinamentos internos vinculados à versão aprovada exata do POP"
       >
         <Button onClick={() => { setEditingTreinamento(null); setDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />

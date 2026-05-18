@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { generateCertificadoPdfBuffer } from "@/lib/certificado-pdf";
+import { AUDIT_ACTIONS, createDocumentLifecycleEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export async function GET(
         treinamento: {
           include: {
             tenant: { select: { nome: true, cnpj: true, responsavel: true } },
+            approvedPopVersion: true,
           },
         },
       },
@@ -54,6 +56,7 @@ export async function GET(
       colaboradorFuncao: tentativa.colaborador.funcao,
       popCodigo: tentativa.quiz.pop.codigo,
       popTitulo: tentativa.quiz.pop.titulo,
+      popVersao: tentativa.treinamento.approvedPopVersion?.version || tentativa.treinamento.popVersaoSnapshot || undefined,
       // @ts-ignore
       popSetor: tentativa.quiz.pop.setor,
       // @ts-ignore
@@ -71,6 +74,24 @@ export async function GET(
       tenantCnpj: tentativa.treinamento.tenant.cnpj,
       // @ts-ignore
       responsavelTecnico: tentativa.treinamento.tenant.responsavel,
+    });
+
+    await createDocumentLifecycleEvent({
+      tenantId: tentativa.treinamento.tenantId,
+      entityType: "Treinamento",
+      entityId: tentativa.treinamentoId,
+      relatedEntityType: "TentativaQuiz",
+      relatedEntityId: tentativa.id,
+      action: AUDIT_ACTIONS.EVIDENCE_CREATED,
+      statusTo: tentativa.treinamento.status,
+      version: tentativa.treinamento.approvedPopVersion?.version || tentativa.treinamento.popVersaoSnapshot || undefined,
+      userId: user.id,
+      userName: user.name,
+      metadata: {
+        colaborador: tentativa.colaborador.nome,
+        popCodigo: tentativa.quiz.pop.codigo,
+        approvedPopVersionId: tentativa.treinamento.approvedPopVersionId,
+      },
     });
     const filename = `Certificado_${tentativa.quiz.pop.codigo}_${tentativa.colaborador.nome.replace(/\s+/g, "_")}.pdf`;
 

@@ -90,7 +90,33 @@ export const popSchema = z.object({
   responsavel: z.string().min(1, "Responsável é obrigatório"),
   objetivo: z.string().min(10, "Objetivo deve ter pelo menos 10 caracteres"),
   descricao: z.string().min(10, "Descrição deve ter pelo menos 10 caracteres"),
-  status: z.enum(["RASCUNHO", "ATIVO", "ARQUIVADO"]).optional(),
+  status: z.enum(["RASCUNHO", "EM_REVISAO", "REJEITADO", "ATIVO", "ARQUIVADO"]).optional(),
+});
+
+export const documentLibraryItemSchema = z.object({
+  type: z.enum(["POP", "RQ", "MANUAL", "TREINAMENTO", "EVIDENCIA", "REFERENCIA"]),
+  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  code: z.string().optional().or(z.literal("")),
+  category: z.string().optional().or(z.literal("")),
+  status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]).optional(),
+  version: z.string().optional().or(z.literal("")),
+  content: z.string().optional().or(z.literal("")),
+  source: z.string().optional().or(z.literal("")),
+  sourcePopId: z.string().optional().or(z.literal("")),
+});
+
+export const assistedPopDraftSchema = z.object({
+  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  code: z.string().min(1, "Código é obrigatório"),
+  sourceIds: z.array(z.string().min(1)).min(1, "Selecione ao menos uma fonte"),
+  objective: z.string().optional().or(z.literal("")),
+  notes: z.string().optional().or(z.literal("")),
+});
+
+export const rtApprovalSchema = z.object({
+  decision: z.enum(["APPROVED", "REJECTED", "CHANGES_REQUESTED"]),
+  comment: z.string().optional().or(z.literal("")),
+  version: z.string().min(1, "Versão é obrigatória").optional(),
 });
 
 export const colaboradorSchema = z.object({
@@ -104,6 +130,7 @@ export const colaboradorSchema = z.object({
 
 export const treinamentoSchema = z.object({
   popId: z.string().min(1, "POP é obrigatório"),
+  approvedPopVersionId: z.string().optional(),
   colaboradorId: z.string().min(1, "Colaborador é obrigatório"),
   dataTreinamento: z.string().min(1, "Data do treinamento é obrigatória"),
   instrutor: z.string().min(1, "Instrutor é obrigatório"),

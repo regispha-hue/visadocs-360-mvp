@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { createAuditLog, AUDIT_ACTIONS, createDocumentLifecycleEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +87,14 @@ export async function PATCH(
     }
 
     const data = await request.json();
+    const approvalOnlyStatuses = ["APROVADO", "VIGENTE", "OBSOLETO"];
+
+    if (data.status && approvalOnlyStatuses.includes(data.status)) {
+      return NextResponse.json(
+        { error: "Status de aprovação/vigência exige fluxo dedicado do Responsável Técnico" },
+        { status: 403 }
+      );
+    }
 
     const updatedPop = await prisma.pop.update({
       where: { id: params.id },
@@ -121,6 +129,21 @@ export async function PATCH(
       tenantId: pop.tenantId,
       details: { codigo: pop.codigo, changes: Object.keys(data) },
     });
+
+    if (data.status && data.status !== pop.status) {
+      await createDocumentLifecycleEvent({
+        tenantId: pop.tenantId,
+        entityType: "Pop",
+        entityId: pop.id,
+        action: "STATUS_CHANGED",
+        statusFrom: pop.status,
+        statusTo: data.status,
+        version: updatedPop.versao,
+        userId: user.id,
+        userName: user.name,
+        metadata: { codigo: pop.codigo },
+      });
+    }
 
     return NextResponse.json({ success: true, pop: updatedPop });
   } catch (error: any) {

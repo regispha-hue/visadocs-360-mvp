@@ -7,6 +7,7 @@ interface CertificadoData {
   popCodigo: string;
   popTitulo: string;
   popSetor: string;
+  popVersao?: string;
   nota: number;
   acertos: number;
   totalQuestoes: number;
@@ -313,21 +314,21 @@ export function generateCertificadoHtml(data: CertificadoData): string {
     <div class="content">
       <div class="header">
         <div class="brand">VISADOCS</div>
-        <div class="title">Microcertificado</div>
+        <div class="title">Registro interno</div>
         <div class="subtitle">Procedimento Operacional Padr\u00e3o</div>
       </div>
 
       <div class="divider"></div>
 
       <div class="body">
-        <div class="certifies">Certifica que</div>
+        <div class="certifies">Registra que</div>
         <div class="name">${escapeHtml(data.colaboradorNome)}</div>
         <div class="role">${escapeHtml(data.colaboradorFuncao)} \u2014 ${escapeHtml(data.tenantNome)}</div>
 
         <div class="description">
           Concluiu com \u00eaxito a avalia\u00e7\u00e3o referente ao<br/>
           <span class="pop-highlight">${escapeHtml(data.popCodigo)} - ${escapeHtml(data.popTitulo)}</span><br/>
-          Setor: ${escapeHtml(data.popSetor)}
+          Setor: ${escapeHtml(data.popSetor)} | Versão POP: ${escapeHtml(data.popVersao || "não informada")}
         </div>
 
         <div style="display: flex; justify-content: center;">

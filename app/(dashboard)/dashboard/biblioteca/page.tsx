@@ -17,6 +17,7 @@ import {
   FileText,
   ChevronRight,
   Library,
+  Wand2,
 } from "lucide-react";
 import { SETORES } from "@/lib/types";
 import { format } from "date-fns";
@@ -32,6 +33,16 @@ interface Pop {
   status: string;
   dataRevisao: string;
   responsavel: string;
+}
+
+interface LibraryItem {
+  id: string;
+  type: string;
+  title: string;
+  code?: string;
+  category?: string;
+  status: string;
+  version?: string;
 }
 
 const FOLDER_ICONS: Record<string, string> = {
@@ -51,10 +62,12 @@ const FOLDER_ICONS: Record<string, string> = {
 
 export default function BibliotecaPopsPage() {
   const [pops, setPops] = useState<Pop[]>([]);
+  const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPops();
@@ -62,9 +75,14 @@ export default function BibliotecaPopsPage() {
 
   async function fetchPops() {
     try {
-      const res = await fetch("/api/pops?status=ATIVO");
-      const data = await res.json();
+      const [popsRes, libraryRes] = await Promise.all([
+        fetch("/api/pops?status=VIGENTE"),
+        fetch("/api/document-library?status=ACTIVE"),
+      ]);
+      const data = await popsRes.json();
+      const libraryData = await libraryRes.json();
       setPops(data.pops || []);
+      setLibraryItems(libraryData.items || []);
     } catch {
       toast.error("Erro ao carregar POPs");
     } finally {
@@ -131,6 +149,29 @@ export default function BibliotecaPopsPage() {
     }
   }
 
+  async function handleGenerateDraft(item: LibraryItem) {
+    setGeneratingId(item.id);
+    try {
+      const res = await fetch("/api/pops/assisted-drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Minuta - ${item.title}`,
+          code: `MIN-${Date.now()}`,
+          sourceIds: [item.id],
+          objective: "Gerar minuta auxiliar para revisão do Responsável Técnico.",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Erro ao gerar minuta");
+      toast.success("Minuta assistida criada para revisão do RT");
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao gerar minuta assistida");
+    } finally {
+      setGeneratingId(null);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -139,15 +180,18 @@ export default function BibliotecaPopsPage() {
     );
   }
 
-  const totalFolders = Object.keys(grouped).length;
   const totalPops = filteredPops.length;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Biblioteca de POPs"
-        description={`${totalPops} procedimentos organizados em ${totalFolders} pastas`}
+        title="Biblioteca documental"
+        description={`${libraryItems.length} itens de acervo e ${totalPops} POPs vigentes para consulta interna`}
       />
+
+      <div className="rounded-lg border bg-amber-50 p-3 text-sm text-amber-900">
+        Geração assistida cria apenas minuta auxiliar. Uso operacional depende de revisão e aprovação do Responsável Técnico.
+      </div>
 
       {/* Search and controls */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -171,6 +215,27 @@ export default function BibliotecaPopsPage() {
       </div>
 
       {/* Folders */}
+      {libraryItems.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-700">Acervo documental</h3>
+          {libraryItems.slice(0, 12).map((item) => (
+            <div key={item.id} className="flex items-center gap-3 border rounded-lg bg-white px-4 py-3">
+              <Library className="h-4 w-4 text-teal-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{item.code ? `${item.code} - ` : ""}{item.title}</p>
+                <p className="text-xs text-gray-500">
+                  {item.type} · {item.category || "sem categoria"} · {item.version || "sem versão"}
+                </p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
+                <Wand2 className="h-4 w-4 mr-1" />
+                Minuta
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {Object.keys(grouped).length === 0 ? (
         <Card className="p-8 text-center text-gray-500">
           <Library className="h-12 w-12 mx-auto mb-3 text-gray-300" />

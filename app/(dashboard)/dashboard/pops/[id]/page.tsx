@@ -20,6 +20,7 @@ import {
   Plus,
   Edit,
   CheckCircle,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -61,6 +62,11 @@ interface Pop {
 
 const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondary"; label: string }> = {
   RASCUNHO: { variant: "secondary", label: "Rascunho" },
+  EM_REVISAO: { variant: "warning", label: "Em revisão pelo RT" },
+  REJEITADO: { variant: "warning", label: "Rejeitado pelo RT" },
+  APROVADO: { variant: "success", label: "Aprovado pelo RT" },
+  VIGENTE: { variant: "success", label: "Vigente para uso interno" },
+  OBSOLETO: { variant: "secondary", label: "Obsoleto" },
   ATIVO: { variant: "success", label: "Ativo" },
   ARQUIVADO: { variant: "warning", label: "Arquivado" },
 };
@@ -70,18 +76,27 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
   const [pop, setPop] = useState<Pop | null>(null);
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<any>(null);
+  const [history, setHistory] = useState<any>(null);
+  const [currentRole, setCurrentRole] = useState<string | null>(null);
+  const [deciding, setDeciding] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [popRes, quizRes] = await Promise.all([
+        const [popRes, quizRes, historyRes, sessionRes] = await Promise.all([
           fetch(`/api/pops/${params.id}`),
           fetch(`/api/quizzes/by-pop/${params.id}`),
+          fetch(`/api/pops/${params.id}/history`),
+          fetch("/api/auth/session"),
         ]);
         const popData = await popRes.json();
         const quizData = await quizRes.json();
+        const historyData = await historyRes.json();
+        const sessionData = await sessionRes.json();
         if (popData?.pop) setPop(popData.pop);
         if (quizData?.quiz) setQuiz(quizData.quiz);
+        if (historyData) setHistory(historyData);
+        setCurrentRole(sessionData?.user?.role || null);
       } catch (error) {
         toast.error("Erro ao carregar POP");
       } finally {
@@ -104,6 +119,30 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       toast.error("Erro ao baixar arquivo");
+    }
+  };
+
+  const handleRtDecision = async (decision: "APPROVED" | "REJECTED" | "CHANGES_REQUESTED") => {
+    if (!pop) return;
+    setDeciding(true);
+    try {
+      const res = await fetch(`/api/pops/${pop.id}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          decision,
+          version: pop.versao || "1.0",
+          comment: "Decisão registrada pela tela de revisão do RT.",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Erro ao registrar decisão");
+      setPop(data.pop);
+      toast.success("Decisão do RT registrada");
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao registrar decisão");
+    } finally {
+      setDeciding(false);
     }
   };
 
@@ -205,6 +244,12 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
                 <p className="whitespace-pre-wrap">{pop.descricao}</p>
               </div>
             </div>
+
+            {["RASCUNHO", "EM_REVISAO", "REJEITADO"].includes(pop.status) && (
+              <div className="p-3 rounded-lg border bg-amber-50 text-sm text-amber-900">
+                Este POP permanece como minuta ou artefato auxiliar até revisão e aprovação do Responsável Técnico.
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -258,6 +303,55 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
           </CardContent>
         </Card>
       </div>
+
+      {currentRole === "RT" && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-teal-600" />
+              Revisão do Responsável Técnico
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button disabled={deciding} onClick={() => handleRtDecision("APPROVED")}>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Aprovar versão
+            </Button>
+            <Button variant="outline" disabled={deciding} onClick={() => handleRtDecision("CHANGES_REQUESTED")}>
+              Solicitar ajustes
+            </Button>
+            <Button variant="destructive" disabled={deciding} onClick={() => handleRtDecision("REJECTED")}>
+              <XCircle className="h-4 w-4 mr-2" />
+              Rejeitar
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Histórico documental</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {(history?.events || []).slice(0, 8).map((event: any) => (
+            <div key={event.id} className="flex items-start justify-between gap-4 border-b pb-2 text-sm">
+              <div>
+                <p className="font-medium">{event.action}</p>
+                <p className="text-muted-foreground">
+                  {event.statusFrom || "início"} → {event.statusTo || "registro"} · versão {event.version || "N/A"}
+                </p>
+              </div>
+              <div className="text-right text-muted-foreground">
+                <p>{event.userName || "Sistema"}</p>
+                <p>{format(new Date(event.occurredAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
+              </div>
+            </div>
+          ))}
+          {(!history?.events || history.events.length === 0) && (
+            <p className="text-sm text-muted-foreground">Nenhum evento documental registrado ainda.</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quiz */}
       <Card className="mt-6">

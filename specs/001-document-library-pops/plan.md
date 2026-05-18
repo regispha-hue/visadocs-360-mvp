@@ -110,17 +110,23 @@ app/
 │               └── treinamento-form-dialog.tsx
 └── api/
     ├── document-library/
+    │   ├── route.ts
+    │   └── [id]/history/route.ts
     ├── pops/
     │   ├── route.ts
+    │   ├── assisted-drafts/route.ts
+    │   ├── assisted-drafts/[id]/history/route.ts
     │   ├── [id]/route.ts
     │   ├── [id]/history/route.ts
     │   ├── [id]/approve/route.ts
     │   └── rag/route.ts
     └── treinamentos/
-        └── route.ts
+        ├── route.ts
+        └── [id]/history/route.ts
 
 lib/
 ├── audit.ts
+├── auth-guards.ts
 ├── auth-options.ts
 ├── db.ts
 ├── types.ts
@@ -133,8 +139,10 @@ prisma/
 
 **Structure Decision**: Use the existing web application layout. Add only the API
 routes, dashboard components, Prisma models and shared constants needed for the
-documentary library and POP lifecycle. Keep RAG/generation integration behind
-server routes and do not expose source prompts or provider internals to the UI.
+documentary library and POP lifecycle. Use `lib/auth-guards.ts` as the canonical
+home for authorization/role/tenant guards; keep `lib/auth-options.ts` limited to
+NextAuth configuration. Keep RAG/generation integration behind server routes and
+do not expose source prompts or provider internals to the UI.
 
 ## Complexity Tracking
 

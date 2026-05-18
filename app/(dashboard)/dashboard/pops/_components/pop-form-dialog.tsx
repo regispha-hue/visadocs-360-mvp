@@ -77,7 +77,7 @@ export function PopFormDialog({ open, onOpenChange, pop, onSuccess }: PopFormDia
       implantadoPor: "",
       implantadoEm: "",
       validadeAnos: 2,
-      status: "RASCUNHO",
+      status: isEditing ? pop?.status || "RASCUNHO" : "RASCUNHO",
     },
   });
 
@@ -296,10 +296,13 @@ export function PopFormDialog({ open, onOpenChange, pop, onSuccess }: PopFormDia
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="RASCUNHO">Rascunho</SelectItem>
-                  <SelectItem value="ATIVO">Ativo</SelectItem>
+                  <SelectItem value="EM_REVISAO">Em revisão pelo RT</SelectItem>
                   <SelectItem value="ARQUIVADO">Arquivado</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Aprovação, vigência e obsolescência são registradas apenas pelo fluxo do Responsável Técnico.
+              </p>
             </div>
           </div>
 

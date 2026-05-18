@@ -1,4 +1,5 @@
-import { UserRole } from "@prisma/client";
+export type KnownUserRole = "SUPER_ADMIN" | "ADMIN" | "RT" | "OPERADOR";
+export type UserRole = KnownUserRole | string;
 
 export interface SessionUser {
   id: string;
@@ -48,6 +49,7 @@ export const FUNCOES_LABELS: Record<string, string> = {
 export const ROLE_LABELS: Record<UserRole, string> = {
   SUPER_ADMIN: "Super Admin",
   ADMIN: "Administrador",
+  RT: "Responsável Técnico",
   OPERADOR: "Operador",
 };
 
@@ -67,9 +69,36 @@ export const STATUS_SUBSCRIPTION_LABELS: Record<string, string> = {
 
 export const STATUS_POP_LABELS: Record<string, string> = {
   RASCUNHO: "Rascunho",
+  EM_REVISAO: "Em revisão pelo RT",
+  REJEITADO: "Rejeitado pelo RT",
+  APROVADO: "Aprovado pelo RT",
+  VIGENTE: "Vigente para uso interno",
+  OBSOLETO: "Obsoleto",
   ATIVO: "Ativo",
   ARQUIVADO: "Arquivado",
 };
+
+export const DOCUMENT_STATUSES = {
+  DRAFT: "RASCUNHO",
+  IN_REVIEW: "EM_REVISAO",
+  REJECTED: "REJEITADO",
+  APPROVED: "APROVADO",
+  CURRENT: "VIGENTE",
+  OBSOLETE: "OBSOLETO",
+  ARCHIVED: "ARQUIVADO",
+} as const;
+
+export const LIBRARY_ITEM_TYPES = {
+  POP: "POP",
+  RQ: "RQ",
+  MANUAL: "MANUAL",
+  TRAINING: "TREINAMENTO",
+  EVIDENCE: "EVIDENCIA",
+  REFERENCE: "REFERENCIA",
+} as const;
+
+export const REGULATORY_NOTICE_COPY =
+  "Artefatos assistidos permanecem como minuta ou registro operacional auxiliar ate revisao e aprovacao do Responsavel Tecnico.";
 
 export const STATUS_COLABORADOR_LABELS: Record<string, string> = {
   ATIVO: "Ativo",
@@ -140,6 +169,18 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     "users:read",
     "users:create",
     "users:update",
+    "reports:read",
+  ],
+  RT: [
+    "pops:read",
+    "pops:create",
+    "pops:update",
+    "pops:approve",
+    "document-library:read",
+    "document-library:create",
+    "document-library:update",
+    "treinamentos:read",
+    "treinamentos:create",
     "reports:read",
   ],
   OPERADOR: [

@@ -203,8 +203,9 @@ data/hora, status e versão.
 - **Training Evidence Record**: Internal operational record of ciência, leitura,
   avaliação or completion; includes collaborator, POP version, tenant, date/time,
   result/status and responsible party.
-- **Audit History Entry**: Immutable event describing creation, generation,
-  status change, approval, obsolescence, training linkage or export.
+- **DocumentLifecycleEvent**: Canonical lifecycle event entity describing
+  creation, generation, status change, approval, obsolescence, training linkage
+  or export. "Audit history entry" may be used only as a presentation label.
 
 ### Regulatory, Tenant, and Audit Context *(mandatory when applicable)*
 

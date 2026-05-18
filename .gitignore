@@ -1,11 +1,19 @@
 node_modules/
 .next/
 .build/
+dist/
+build/
+coverage/
 .env
 .env.local
 .env.production
 *.log
 .DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
 tsconfig.tsbuildinfo
 .aider*
 
