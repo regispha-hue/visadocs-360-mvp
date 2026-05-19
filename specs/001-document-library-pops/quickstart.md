@@ -168,8 +168,10 @@ Results:
 
 ### Manual Verification Pending
 
-- T024 remains open: US1 has technical evidence, but no timed/manual acceptance result.
-- T031 remains open: RT/non-RT gate has technical evidence, but no manual role test result.
+- T024 completed on 2026-05-19 against disposable local PostgreSQL
+  `visadocs_t024_t031_disposable` on `localhost:55433`.
+- T031 completed on 2026-05-19 against disposable local PostgreSQL
+  `visadocs_t024_t031_disposable` on `localhost:55433`.
 - T038 remains open: training linkage has technical evidence, but no manual US3 acceptance result.
 - T045 has technical coverage: the POP history UI shows internal trainings tied
   to obsolete approved versions and their relationship to the current approved
@@ -179,6 +181,35 @@ Results:
 - T047 and T048 remain open: complete lifecycle reconstruction is pending manual acceptance.
 - SC-001 timed manual check remains pending: authorized user must locate a library item, start assisted draft generation, record total time and confirm completion in up to 5 minutes.
 - Full manual acceptance remains pending: library -> draft -> RT decision -> approved version -> training -> evidence -> history.
+
+### Functional Acceptance Evidence - T024/T031 - 2026-05-19
+
+- Environment: disposable Docker PostgreSQL only,
+  `postgresql://postgres:****@localhost:55433/visadocs_t024_t031_disposable`.
+  Neon and `DATABASE_URL` from `.env.local`/`.env.production.local` were not
+  used; those files were not modified. `prisma db push` and deploy were not
+  used.
+- Migrations applied before the test:
+  `20260512_baseline_current_schema`, `20260518_document_library_pops` and
+  `20260519180327_document_library_pops`.
+- Seeded test users in the disposable tenant:
+  `ADMIN` (`admin-t024-t031@example.com`), `OPERADOR`
+  (`operador-t024-t031@example.com`) and `RT` (`rt-t024-t031@example.com`).
+- T024 result: authorized `ADMIN` created and located active library sources;
+  a source with useful technical content generated an assisted POP draft and POP
+  in `RASCUNHO`; a placeholder/insufficient source returned HTTP `422` with
+  `Selecione ao menos uma fonte documental com conteúdo técnico suficiente para gerar a minuta.`
+- T031 result: `OPERADOR` approval attempt returned HTTP `403` with
+  `Apenas Responsável Técnico pode decidir aprovação documental`; `RT` approval
+  returned HTTP `200`, created `ApprovedPopVersion` status `CURRENT` and moved
+  the POP to `VIGENTE`; `RT` rejection returned HTTP `200` without approved
+  version.
+- Lifecycle evidence: `DocumentLifecycleEvent` recorded `GENERATED`,
+  `APPROVED` and `REJECTED` events with tenant, document, version, user and
+  timestamp; `RTApprovalEvent` recorded both `APPROVED` and `REJECTED`
+  decisions under user `RT Aceite`.
+- Remaining manual acceptance: T038, T046, T047, T048, T053 and T054 remain
+  open; the feature is still not complete and not ready for deploy.
 
 ### Post-Implementation Remediation - 2026-05-18
 

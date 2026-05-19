@@ -181,7 +181,7 @@ baseline is resolved as documented.
   - Critério de aceite: Drafts/minutas são visualmente distintos de aprovados/vigentes.
   - Comando de verificação: `rg -n "RASCUNHO|REVISAO|APROV|VIGENTE|minuta|status" "app/(dashboard)/dashboard/pops/page.tsx" lib/types.ts`
 
-- [ ] T024 Verificar US1 antes de seguir para aprovação
+- [X] T024 Verificar US1 antes de seguir para aprovação
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Registrar aceitação de browse/search tenant-safe e criação de minuta.
   - Critério de aceite: Checklist US1 documenta tenant isolation, fail-closed e copy prudente.
@@ -228,7 +228,7 @@ baseline is resolved as documented.
   - Critério de aceite: Form não envia status aprovado/vigente fora do fluxo dedicado.
   - Comando de verificação: `rg -n "status|APROV|VIGENTE|ATIVO|RT|approve" "app/(dashboard)/dashboard/pops/_components/pop-form-dialog.tsx"`
 
-- [ ] T031 Verificar US2 antes de treinamento
+- [X] T031 Verificar US2 antes de treinamento
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Registrar testes manuais de non-RT denial, aprovação RT, versão e auditoria.
   - Critério de aceite: Quickstart registra evidência de que gate RT está funcional antes de vínculo com treinamentos.
