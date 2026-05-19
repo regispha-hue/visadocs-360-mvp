@@ -321,11 +321,11 @@ baseline is resolved as documented.
   - Critério de aceite: Revisor consegue reconstruir lifecycle sem intervenção técnica.
   - Comando de verificação: `rg -n "histórico|timeline|versão|aprov|treinamento|evento|createdAt" "app/(dashboard)/dashboard/pops/[id]/page.tsx"`
 
-- [ ] T045 Mostrar treinamentos afetados por nova versão
+- [X] T045 Mostrar treinamentos afetados por nova versão
   - Arquivos prováveis: `app/(dashboard)/dashboard/pops/[id]/page.tsx`, `app/api/pops/[id]/history/route.ts`
   - Objetivo: Indicar treinamentos ligados a versões antigas quando nova versão é aprovada.
   - Critério de aceite: Treinamentos antigos continuam vinculados à versão original e ficam visíveis como afetados/históricos.
-  - Status atual: API retorna treinamentos por versão; UI de afetados permanece pendente.
+  - Status atual: Cobertura técnica aplicada; UI do histórico do POP exibe treinamentos vinculados a versões obsoletas e relação com a versão vigente quando disponível. Aceite manual completo permanece em T047/T048/T054.
   - Comando de verificação: `rg -n "affected|afetad|treinamentos|approvedPopVersionId|obsolete|versão" "app/(dashboard)/dashboard/pops/[id]/page.tsx" "app/api/pops/[id]/history/route.ts"`
 
 - [ ] T046 Integrar histórico documental com logs administrativos

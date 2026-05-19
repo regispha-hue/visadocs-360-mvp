@@ -156,7 +156,10 @@ Results:
 - T024 remains open: US1 has technical evidence, but no timed/manual acceptance result.
 - T031 remains open: RT/non-RT gate has technical evidence, but no manual role test result.
 - T038 remains open: training linkage has technical evidence, but no manual US3 acceptance result.
-- T045 remains open: API returns training/version data, but UI does not yet show affected trainings after a new version.
+- T045 has technical coverage: the POP history UI shows internal trainings tied
+  to obsolete approved versions and their relationship to the current approved
+  version when available. Manual end-to-end acceptance remains pending in
+  T047/T048/T054.
 - T046 remains open: admin logs count document events, but do not expose navigable document history.
 - T047 and T048 remain open: complete lifecycle reconstruction is pending manual acceptance.
 - SC-001 timed manual check remains pending: authorized user must locate a library item, start assisted draft generation, record total time and confirm completion in up to 5 minutes.
@@ -171,7 +174,10 @@ Results:
 - A7 addressed in a small follow-up patch: assisted generation now requires at
   least one selected source with 300 useful normalized characters and blocks
   empty/title-only/placeholder-like content before creating a draft.
-- A5, A6, A8 and A9 remain non-blocking follow-up items for a later remediation block.
+- A5 addressed in a small follow-up patch: POP history now exposes trainings
+  affected by obsolete approved versions as internal historical records without
+  adding new operational actions.
+- A6, A8 and A9 remain non-blocking follow-up items for a later remediation block.
 
 ### Files Modified
 

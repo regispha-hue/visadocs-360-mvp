@@ -60,6 +60,39 @@ interface Pop {
   documentos?: Documento[];
 }
 
+interface HistoryVersion {
+  id: string;
+  version: string;
+  status: string;
+  approvedAt?: string;
+  obsoleteAt?: string | null;
+}
+
+interface HistoryTraining {
+  id: string;
+  status: string;
+  dataTreinamento?: string | null;
+  approvedPopVersionId?: string | null;
+  popVersaoSnapshot?: string | null;
+  colaborador?: { id: string; nome: string } | null;
+}
+
+interface HistoryEvent {
+  id: string;
+  action: string;
+  statusFrom?: string | null;
+  statusTo?: string | null;
+  version?: string | null;
+  userName?: string | null;
+  occurredAt: string;
+}
+
+interface PopHistory {
+  versions?: HistoryVersion[];
+  events?: HistoryEvent[];
+  trainings?: HistoryTraining[];
+}
+
 const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondary"; label: string }> = {
   RASCUNHO: { variant: "secondary", label: "Rascunho" },
   EM_REVISAO: { variant: "warning", label: "Em revisão pelo RT" },
@@ -76,7 +109,7 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
   const [pop, setPop] = useState<Pop | null>(null);
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<any>(null);
-  const [history, setHistory] = useState<any>(null);
+  const [history, setHistory] = useState<PopHistory | null>(null);
   const [currentRole, setCurrentRole] = useState<string | null>(null);
   const [deciding, setDeciding] = useState(false);
 
@@ -167,6 +200,16 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
   }
 
   const statusBadge = STATUS_BADGES[pop.status] ?? { variant: "secondary", label: pop.status };
+  const historyVersions = history?.versions ?? [];
+  const historyTrainings = history?.trainings ?? [];
+  const currentApprovedVersion = historyVersions.find((version) => version.status === "CURRENT") ?? historyVersions[0];
+  const affectedTrainingGroups = historyVersions
+    .filter((version) => version.status === "OBSOLETE")
+    .map((version) => ({
+      version,
+      trainings: historyTrainings.filter((training) => training.approvedPopVersionId === version.id),
+    }))
+    .filter((group) => group.trainings.length > 0);
 
   const treinamentoColumns = [
     {
@@ -333,7 +376,7 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
           <CardTitle>Histórico documental</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {(history?.events || []).slice(0, 8).map((event: any) => (
+          {(history?.events || []).slice(0, 8).map((event) => (
             <div key={event.id} className="flex items-start justify-between gap-4 border-b pb-2 text-sm">
               <div>
                 <p className="font-medium">{event.action}</p>
@@ -349,6 +392,60 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
           ))}
           {(!history?.events || history.events.length === 0) && (
             <p className="text-sm text-muted-foreground">Nenhum evento documental registrado ainda.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-teal-600" />
+            Treinamentos afetados por versão
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {affectedTrainingGroups.map(({ version, trainings }) => (
+            <div key={version.id} className="rounded-lg border p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-medium">Versão {version.version}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Obsoleta{version.obsoleteAt ? ` em ${format(new Date(version.obsoleteAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}` : ""}
+                    {currentApprovedVersion?.id && currentApprovedVersion.id !== version.id
+                      ? ` · substituída pela versão ${currentApprovedVersion.version}`
+                      : ""}
+                  </p>
+                </div>
+                <Badge variant="secondary">Registro interno histórico</Badge>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {trainings.map((training) => (
+                  <div key={training.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/50 p-3 text-sm">
+                    <div>
+                      <p className="font-medium">{training.colaborador?.nome || "Colaborador não informado"}</p>
+                      <p className="text-muted-foreground">
+                        Treinamento vinculado à versão {training.popVersaoSnapshot || version.version}
+                      </p>
+                    </div>
+                    <div className="text-right text-muted-foreground">
+                      <p>{training.status === "CONCLUIDO" ? "Concluído" : "Pendente"}</p>
+                      <p>
+                        {training.dataTreinamento
+                          ? format(new Date(training.dataTreinamento), "dd/MM/yyyy", { locale: ptBR })
+                          : "Data não informada"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {affectedTrainingGroups.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nenhum treinamento interno vinculado a versões obsoletas deste POP.
+            </p>
           )}
         </CardContent>
       </Card>
