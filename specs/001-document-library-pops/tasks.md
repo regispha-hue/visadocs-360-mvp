@@ -92,12 +92,13 @@ baseline is resolved as documented.
   - Critério de aceite: Consultas de biblioteca, histórico, aprovação e treinamento têm índices compatíveis com tenant isolation.
   - Comando de verificação: `rg -n "@@index|@@unique|tenantId|status|popId|draftId|approvedPopVersionId" prisma/schema.prisma`
 
-- [ ] T011 Gerar migration local sem usar produção
+- [X] T011 Gerar migration local sem usar produção
   - Arquivos prováveis: `prisma/migrations/`, `prisma/schema.prisma`
   - Objetivo: Criar migration SQL revisável para modelos e papel RT após validar baseline, e executar `migrate dev` somente em banco local descartável confirmado.
   - Critério de aceite: Migration criada em `prisma/migrations/` com SQL revisável; `prisma db push` não foi usado; execução de `yarn prisma migrate dev --name document_library_pops` registrada quando houver DB local descartável.
-  - Status atual: SQL criado e revisado; `migrate dev` pendente por ausência de DB local descartável confirmado.
-  - Comando de verificação pendente: `yarn prisma migrate dev --name document_library_pops`
+  - Status atual: Concluído em 2026-05-19 contra Postgres Docker local descartável `localhost:55432/visadocs_t011_disposable`; Neon, `.env.local` e `.env.production.local` não foram usados.
+  - Evidência: `yarn prisma migrate dev --name document_library_pops` aplicou `20260512_baseline_current_schema`, `20260518_document_library_pops` e `20260519180327_document_library_pops`; `prisma db push` não foi usado.
+  - Comando de verificação executado: `$env:DATABASE_URL='postgresql://postgres:postgres@localhost:55432/visadocs_t011_disposable'; yarn prisma migrate dev --name document_library_pops`
 
 - [X] T012 Validar Prisma client após migration
   - Arquivos prováveis: `prisma/schema.prisma`, `node_modules/.prisma/`

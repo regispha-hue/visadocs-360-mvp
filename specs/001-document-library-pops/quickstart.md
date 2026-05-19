@@ -124,10 +124,24 @@ yarn prisma migrate dev --name document_library_pops
 ### Migration Evidence
 
 - Migration created: `prisma/migrations/20260518_document_library_pops/migration.sql`.
+- Reconciliation migration created after disposable local validation:
+  `prisma/migrations/20260519180327_document_library_pops/migration.sql`.
+  It drops the legacy `UserRole` enum with `IF EXISTS` after `User.role` is
+  TEXT-safe and normalizes the generated `DocumentLifecycleEvent` related-entity
+  index name.
 - Migration adds RT role handling, library items, assisted drafts, draft sources, approved POP versions, RT approval events, document lifecycle events and optional training snapshot/version fields.
 - RT strategy corrected after post-implementation audit: `User.role` is now TEXT-safe to match documented production hotfixes; the migration no longer depends on the PostgreSQL enum type existing.
 - `prisma db push` was not used.
-- `yarn prisma migrate dev --name document_library_pops` was not executed because no disposable local database was confirmed in this run. The SQL migration is present for local review and must not be deployed to production until the baseline in `docs/prisma-baseline-plan.md` is resolved.
+- T011 local validation executed on 2026-05-19 against disposable Docker
+  PostgreSQL only:
+  `postgresql://postgres:****@localhost:55432/visadocs_t011_disposable`.
+- The disposable database was recreated from zero tables before the final run.
+  `yarn prisma migrate dev --name document_library_pops` applied
+  `20260512_baseline_current_schema`, `20260518_document_library_pops` and
+  `20260519180327_document_library_pops`, then reported the database in sync
+  with `prisma/schema.prisma`.
+- Neon, `.env.local`, `.env.production.local`, production, preview and tenant
+  real databases were not used or touched.
 - Rollback/mitigation: new tables can be dropped and optional `Treinamento` columns removed in reverse migration for local rollback; production rollback must follow backup and baseline rules.
 
 ### Verification Commands
@@ -145,6 +159,8 @@ Results:
 
 - `yarn prisma format`: passed after allowing Prisma binary access.
 - `yarn prisma generate`: passed after allowing Prisma binary access.
+- T011 `yarn prisma migrate dev --name document_library_pops`: passed against
+  disposable Docker PostgreSQL on `localhost:55432`.
 - `yarn lint`: passed with existing warnings.
 - `yarn tsc --noEmit`: passed.
 - Forbidden-claims scan returned only policy-document references in `docs/`, not new product claims.
@@ -152,7 +168,6 @@ Results:
 
 ### Manual Verification Pending
 
-- T011 remains open: migration SQL exists, but `yarn prisma migrate dev --name document_library_pops` still needs a confirmed disposable local database.
 - T024 remains open: US1 has technical evidence, but no timed/manual acceptance result.
 - T031 remains open: RT/non-RT gate has technical evidence, but no manual role test result.
 - T038 remains open: training linkage has technical evidence, but no manual US3 acceptance result.
