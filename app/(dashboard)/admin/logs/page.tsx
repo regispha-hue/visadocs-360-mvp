@@ -28,13 +28,21 @@ export default async function LogsPage() {
     },
   });
 
+  const documentEvents = await prisma.documentLifecycleEvent.findMany({
+    orderBy: { occurredAt: "desc" },
+    take: 50,
+    include: {
+      tenant: { select: { nome: true } },
+    },
+  });
+
   return (
     <div>
       <PageHeader
         title="Logs de Auditoria"
-        description="Histórico de ações críticas no sistema"
+        description={`Histórico administrativo e ${documentEvents.length} eventos documentais recentes`}
       />
-      <LogsTable logs={logs ?? []} />
+      <LogsTable logs={logs ?? []} documentEvents={documentEvents ?? []} />
     </div>
   );
 }

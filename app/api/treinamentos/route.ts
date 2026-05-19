@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { createAuditLog, AUDIT_ACTIONS, createDocumentLifecycleEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +52,14 @@ export async function GET(request: Request) {
         aprovadoQuiz: true,
         status: true,
         tenantId: true,
+        approvedPopVersionId: true,
+        popCodigoSnapshot: true,
+        popTituloSnapshot: true,
+        popVersaoSnapshot: true,
         createdAt: true,
         updatedAt: true,
         pop: { select: { id: true, codigo: true, titulo: true, setor: true } },
+        approvedPopVersion: { select: { id: true, code: true, title: true, version: true, status: true, approvedAt: true } },
         colaborador: { select: { id: true, nome: true, funcao: true } },
       },
     });
@@ -86,14 +91,18 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { popId, colaboradorId, dataTreinamento, instrutor, duracao, observacoes, status: treinamentoStatus } = data;
+    const { popId, approvedPopVersionId, colaboradorId, dataTreinamento, instrutor, duracao, observacoes, status: treinamentoStatus } = data;
 
     // Validate required fields
     if (!popId || !colaboradorId || !dataTreinamento || !instrutor) {
       return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
     }
 
-    const tenantId = data.tenantId || user.tenantId;
+    const tenantId = user.role === "SUPER_ADMIN" ? data.tenantId : user.tenantId;
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "Tenant não especificado" }, { status: 400 });
+    }
 
     // Verify POP belongs to tenant
     const pop = await prisma.pop.findFirst({
@@ -102,6 +111,22 @@ export async function POST(request: Request) {
 
     if (!pop) {
       return NextResponse.json({ error: "POP não encontrado" }, { status: 404 });
+    }
+
+    const approvedVersion = approvedPopVersionId
+      ? await prisma.approvedPopVersion.findFirst({
+          where: { id: approvedPopVersionId, popId, tenantId, status: "CURRENT" },
+        })
+      : await prisma.approvedPopVersion.findFirst({
+          where: { popId, tenantId, status: "CURRENT" },
+          orderBy: { approvedAt: "desc" },
+        });
+
+    if (!approvedVersion || !["APROVADO", "VIGENTE", "ATIVO"].includes(pop.status)) {
+      return NextResponse.json(
+        { error: "Treinamento exige POP com versão aprovada vigente pelo Responsável Técnico" },
+        { status: 422 }
+      );
     }
 
     // Verify Colaborador belongs to tenant
@@ -116,6 +141,10 @@ export async function POST(request: Request) {
     const treinamento = await prisma.treinamento.create({
       data: {
         popId,
+        approvedPopVersionId: approvedVersion.id,
+        popCodigoSnapshot: approvedVersion.code,
+        popTituloSnapshot: approvedVersion.title,
+        popVersaoSnapshot: approvedVersion.version,
         colaboradorId,
         dataTreinamento: new Date(dataTreinamento),
         instrutor,
@@ -139,8 +168,29 @@ export async function POST(request: Request) {
       tenantId,
       details: {
         pop: treinamento.pop?.codigo,
+        approvedPopVersionId: approvedVersion.id,
+        approvedPopVersion: approvedVersion.version,
         colaborador: treinamento.colaborador?.nome,
         instrutor,
+      },
+    });
+
+    await createDocumentLifecycleEvent({
+      tenantId,
+      entityType: "Treinamento",
+      entityId: treinamento.id,
+      relatedEntityType: "ApprovedPopVersion",
+      relatedEntityId: approvedVersion.id,
+      action: "LINKED_TO_TRAINING",
+      statusTo: treinamento.status,
+      version: approvedVersion.version,
+      userId: user.id,
+      userName: user.name,
+      metadata: {
+        popId,
+        colaboradorId,
+        colaborador: treinamento.colaborador?.nome,
+        dataTreinamento,
       },
     });
 

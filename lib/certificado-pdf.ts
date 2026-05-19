@@ -4,6 +4,7 @@ interface CertificadoPdfData {
   popCodigo: string;
   popTitulo: string;
   popSetor: string;
+  popVersao?: string;
   nota: number;
   totalQuestoes: number;
   completadoEm: Date | string;
@@ -47,7 +48,7 @@ export function generateCertificadoPdfBuffer(data: CertificadoPdfData): Buffer {
 
   textCenter(lines, "concluiu a avaliacao interna vinculada ao POP:", 252, 15, "F1", 0.12, 0.12, 0.16);
   textCenter(lines, `${data.popCodigo} - ${data.popTitulo}`, 282, 18, "F2", 0.05, 0.45, 0.43);
-  textCenter(lines, `Setor: ${data.popSetor}`, 310, 13, "F1", 0.30, 0.36, 0.42);
+  textCenter(lines, `Setor: ${data.popSetor} | Versao POP: ${data.popVersao || "nao informada"}`, 310, 13, "F1", 0.30, 0.36, 0.42);
 
   // Result box
   roundedBox(lines, 220, 345, 400, 72);
@@ -72,7 +73,7 @@ export function generateCertificadoPdfBuffer(data: CertificadoPdfData): Buffer {
   textRight(lines, data.codigoValidacao, 770, 518, 11, "F2", 0.10, 0.10, 0.18);
   textRight(lines, `${dataFormatada} as ${horaFormatada}`, 770, 536, 9, "F1", 0.42, 0.45, 0.50);
 
-  textCenter(lines, "Documento interno para registro de treinamento. Nao substitui avaliacao do Responsavel Tecnico.", 568, 8, "F1", 0.45, 0.45, 0.48);
+  textCenter(lines, "Registro operacional interno. Nao substitui revisao do Responsavel Tecnico nem representa certificacao sanitaria.", 568, 8, "F1", 0.45, 0.45, 0.48);
 
   return buildPdf(lines.join("\n"));
 }

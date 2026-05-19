@@ -20,6 +20,7 @@ import {
   Plus,
   Edit,
   CheckCircle,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -59,8 +60,46 @@ interface Pop {
   documentos?: Documento[];
 }
 
+interface HistoryVersion {
+  id: string;
+  version: string;
+  status: string;
+  approvedAt?: string;
+  obsoleteAt?: string | null;
+}
+
+interface HistoryTraining {
+  id: string;
+  status: string;
+  dataTreinamento?: string | null;
+  approvedPopVersionId?: string | null;
+  popVersaoSnapshot?: string | null;
+  colaborador?: { id: string; nome: string } | null;
+}
+
+interface HistoryEvent {
+  id: string;
+  action: string;
+  statusFrom?: string | null;
+  statusTo?: string | null;
+  version?: string | null;
+  userName?: string | null;
+  occurredAt: string;
+}
+
+interface PopHistory {
+  versions?: HistoryVersion[];
+  events?: HistoryEvent[];
+  trainings?: HistoryTraining[];
+}
+
 const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondary"; label: string }> = {
   RASCUNHO: { variant: "secondary", label: "Rascunho" },
+  EM_REVISAO: { variant: "warning", label: "Em revisão pelo RT" },
+  REJEITADO: { variant: "warning", label: "Rejeitado pelo RT" },
+  APROVADO: { variant: "success", label: "Aprovado pelo RT" },
+  VIGENTE: { variant: "success", label: "Vigente para uso interno" },
+  OBSOLETO: { variant: "secondary", label: "Obsoleto" },
   ATIVO: { variant: "success", label: "Ativo" },
   ARQUIVADO: { variant: "warning", label: "Arquivado" },
 };
@@ -70,18 +109,27 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
   const [pop, setPop] = useState<Pop | null>(null);
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<any>(null);
+  const [history, setHistory] = useState<PopHistory | null>(null);
+  const [currentRole, setCurrentRole] = useState<string | null>(null);
+  const [deciding, setDeciding] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [popRes, quizRes] = await Promise.all([
+        const [popRes, quizRes, historyRes, sessionRes] = await Promise.all([
           fetch(`/api/pops/${params.id}`),
           fetch(`/api/quizzes/by-pop/${params.id}`),
+          fetch(`/api/pops/${params.id}/history`),
+          fetch("/api/auth/session"),
         ]);
         const popData = await popRes.json();
         const quizData = await quizRes.json();
+        const historyData = await historyRes.json();
+        const sessionData = await sessionRes.json();
         if (popData?.pop) setPop(popData.pop);
         if (quizData?.quiz) setQuiz(quizData.quiz);
+        if (historyData) setHistory(historyData);
+        setCurrentRole(sessionData?.user?.role || null);
       } catch (error) {
         toast.error("Erro ao carregar POP");
       } finally {
@@ -107,6 +155,30 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const handleRtDecision = async (decision: "APPROVED" | "REJECTED" | "CHANGES_REQUESTED") => {
+    if (!pop) return;
+    setDeciding(true);
+    try {
+      const res = await fetch(`/api/pops/${pop.id}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          decision,
+          version: pop.versao || "1.0",
+          comment: "Decisão registrada pela tela de revisão do RT.",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Erro ao registrar decisão");
+      setPop(data.pop);
+      toast.success("Decisão do RT registrada");
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao registrar decisão");
+    } finally {
+      setDeciding(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -128,6 +200,16 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
   }
 
   const statusBadge = STATUS_BADGES[pop.status] ?? { variant: "secondary", label: pop.status };
+  const historyVersions = history?.versions ?? [];
+  const historyTrainings = history?.trainings ?? [];
+  const currentApprovedVersion = historyVersions.find((version) => version.status === "CURRENT") ?? historyVersions[0];
+  const affectedTrainingGroups = historyVersions
+    .filter((version) => version.status === "OBSOLETE")
+    .map((version) => ({
+      version,
+      trainings: historyTrainings.filter((training) => training.approvedPopVersionId === version.id),
+    }))
+    .filter((group) => group.trainings.length > 0);
 
   const treinamentoColumns = [
     {
@@ -205,6 +287,12 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
                 <p className="whitespace-pre-wrap">{pop.descricao}</p>
               </div>
             </div>
+
+            {["RASCUNHO", "EM_REVISAO", "REJEITADO"].includes(pop.status) && (
+              <div className="p-3 rounded-lg border bg-amber-50 text-sm text-amber-900">
+                Este POP permanece como minuta ou artefato auxiliar até revisão e aprovação do Responsável Técnico.
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -258,6 +346,109 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
           </CardContent>
         </Card>
       </div>
+
+      {currentRole === "RT" && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-teal-600" />
+              Revisão do Responsável Técnico
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button disabled={deciding} onClick={() => handleRtDecision("APPROVED")}>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Aprovar versão
+            </Button>
+            <Button variant="outline" disabled={deciding} onClick={() => handleRtDecision("CHANGES_REQUESTED")}>
+              Solicitar ajustes
+            </Button>
+            <Button variant="destructive" disabled={deciding} onClick={() => handleRtDecision("REJECTED")}>
+              <XCircle className="h-4 w-4 mr-2" />
+              Rejeitar
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Histórico documental</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {(history?.events || []).slice(0, 8).map((event) => (
+            <div key={event.id} className="flex items-start justify-between gap-4 border-b pb-2 text-sm">
+              <div>
+                <p className="font-medium">{event.action}</p>
+                <p className="text-muted-foreground">
+                  {event.statusFrom || "início"} → {event.statusTo || "registro"} · versão {event.version || "N/A"}
+                </p>
+              </div>
+              <div className="text-right text-muted-foreground">
+                <p>{event.userName || "Sistema"}</p>
+                <p>{format(new Date(event.occurredAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
+              </div>
+            </div>
+          ))}
+          {(!history?.events || history.events.length === 0) && (
+            <p className="text-sm text-muted-foreground">Nenhum evento documental registrado ainda.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-teal-600" />
+            Treinamentos afetados por versão
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {affectedTrainingGroups.map(({ version, trainings }) => (
+            <div key={version.id} className="rounded-lg border p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-medium">Versão {version.version}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Obsoleta{version.obsoleteAt ? ` em ${format(new Date(version.obsoleteAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}` : ""}
+                    {currentApprovedVersion?.id && currentApprovedVersion.id !== version.id
+                      ? ` · substituída pela versão ${currentApprovedVersion.version}`
+                      : ""}
+                  </p>
+                </div>
+                <Badge variant="secondary">Registro interno histórico</Badge>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {trainings.map((training) => (
+                  <div key={training.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/50 p-3 text-sm">
+                    <div>
+                      <p className="font-medium">{training.colaborador?.nome || "Colaborador não informado"}</p>
+                      <p className="text-muted-foreground">
+                        Treinamento vinculado à versão {training.popVersaoSnapshot || version.version}
+                      </p>
+                    </div>
+                    <div className="text-right text-muted-foreground">
+                      <p>{training.status === "CONCLUIDO" ? "Concluído" : "Pendente"}</p>
+                      <p>
+                        {training.dataTreinamento
+                          ? format(new Date(training.dataTreinamento), "dd/MM/yyyy", { locale: ptBR })
+                          : "Data não informada"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {affectedTrainingGroups.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nenhum treinamento interno vinculado a versões obsoletas deste POP.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quiz */}
       <Card className="mt-6">

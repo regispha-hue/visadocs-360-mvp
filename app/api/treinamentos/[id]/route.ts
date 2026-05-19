@@ -23,6 +23,7 @@ export async function GET(
       include: {
         pop: true,
         colaborador: true,
+        approvedPopVersion: true,
       },
     });
 
@@ -75,6 +76,13 @@ export async function PATCH(
     }
 
     const data = await request.json();
+
+    if (data.approvedPopVersionId && data.approvedPopVersionId !== treinamento.approvedPopVersionId) {
+      return NextResponse.json(
+        { error: "Troca de versão aprovada exige novo treinamento ou fluxo documentado" },
+        { status: 403 }
+      );
+    }
 
     const updatedTreinamento = await prisma.treinamento.update({
       where: { id: params.id },

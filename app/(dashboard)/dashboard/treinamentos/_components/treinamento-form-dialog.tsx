@@ -72,7 +72,7 @@ export function TreinamentoFormDialog({ open, onOpenChange, treinamento, onSucce
     const fetchData = async () => {
       try {
         const [popsRes, colabRes] = await Promise.all([
-          fetch("/api/pops?status=ATIVO"),
+          fetch("/api/pops?status=VIGENTE"),
           fetch("/api/colaboradores?status=ATIVO"),
         ]);
         const popsData = await popsRes.json();
@@ -166,6 +166,9 @@ export function TreinamentoFormDialog({ open, onOpenChange, treinamento, onSucce
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Somente POP com versão aprovada vigente pelo RT pode gerar treinamento operacional.
+            </p>
             {errors.popId && (
               <p className="text-sm text-red-500 mt-1">{errors.popId.message}</p>
             )}

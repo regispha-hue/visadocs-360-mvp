@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { generateCertificadoPdfBuffer } from "@/lib/certificado-pdf";
+import { AUDIT_ACTIONS, createDocumentLifecycleEvent } from "@/lib/audit";
+import { getCurrentUser, unauthorized } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +11,8 @@ export async function GET(
   { params }: { params: { tentativaId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "N\u00e3o autorizado" }, { status: 401 });
-    }
-    const user = session.user as any;
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
 
     // Fetch tentativa with all related data
     const tentativa = await prisma.tentativaQuiz.findUnique({
@@ -30,6 +27,7 @@ export async function GET(
         treinamento: {
           include: {
             tenant: { select: { nome: true, cnpj: true, responsavel: true } },
+            approvedPopVersion: true,
           },
         },
       },
@@ -54,6 +52,7 @@ export async function GET(
       colaboradorFuncao: tentativa.colaborador.funcao,
       popCodigo: tentativa.quiz.pop.codigo,
       popTitulo: tentativa.quiz.pop.titulo,
+      popVersao: tentativa.treinamento.approvedPopVersion?.version || tentativa.treinamento.popVersaoSnapshot || undefined,
       // @ts-ignore
       popSetor: tentativa.quiz.pop.setor,
       // @ts-ignore
@@ -71,6 +70,24 @@ export async function GET(
       tenantCnpj: tentativa.treinamento.tenant.cnpj,
       // @ts-ignore
       responsavelTecnico: tentativa.treinamento.tenant.responsavel,
+    });
+
+    await createDocumentLifecycleEvent({
+      tenantId: tentativa.treinamento.tenantId,
+      entityType: "Treinamento",
+      entityId: tentativa.treinamentoId,
+      relatedEntityType: "TentativaQuiz",
+      relatedEntityId: tentativa.id,
+      action: AUDIT_ACTIONS.EVIDENCE_CREATED,
+      statusTo: tentativa.treinamento.status,
+      version: tentativa.treinamento.approvedPopVersion?.version || tentativa.treinamento.popVersaoSnapshot || undefined,
+      userId: user.id,
+      userName: user.name || undefined,
+      metadata: {
+        colaborador: tentativa.colaborador.nome,
+        popCodigo: tentativa.quiz.pop.codigo,
+        approvedPopVersionId: tentativa.treinamento.approvedPopVersionId,
+      },
     });
     const filename = `Certificado_${tentativa.quiz.pop.codigo}_${tentativa.colaborador.nome.replace(/\s+/g, "_")}.pdf`;
 

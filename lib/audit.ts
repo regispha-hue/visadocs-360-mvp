@@ -10,6 +10,21 @@ interface AuditLogData {
   details?: Record<string, any>;
 }
 
+interface DocumentLifecycleEventData {
+  tenantId: string;
+  entityType: string;
+  entityId: string;
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+  action: string;
+  statusFrom?: string;
+  statusTo?: string;
+  version?: string;
+  userId?: string;
+  userName?: string;
+  metadata?: Record<string, any>;
+}
+
 export async function createAuditLog(data: AuditLogData) {
   try {
     await prisma.auditLog.create({
@@ -28,6 +43,29 @@ export async function createAuditLog(data: AuditLogData) {
   }
 }
 
+export async function createDocumentLifecycleEvent(data: DocumentLifecycleEventData) {
+  try {
+    await prisma.documentLifecycleEvent.create({
+      data: {
+        tenantId: data.tenantId,
+        entityType: data.entityType,
+        entityId: data.entityId,
+        relatedEntityType: data.relatedEntityType,
+        relatedEntityId: data.relatedEntityId,
+        action: data.action,
+        statusFrom: data.statusFrom,
+        statusTo: data.statusTo,
+        version: data.version,
+        userId: data.userId,
+        userName: data.userName,
+        metadata: data.metadata as any,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating document lifecycle event:", error);
+  }
+}
+
 export const AUDIT_ACTIONS = {
   TENANT_CREATED: "TENANT_CREATED",
   TENANT_APPROVED: "TENANT_APPROVED",
@@ -39,11 +77,22 @@ export const AUDIT_ACTIONS = {
   POP_UPDATED: "POP_UPDATED",
   POP_ARCHIVED: "POP_ARCHIVED",
   POP_ACTIVATED: "POP_ACTIVATED",
+  POP_DRAFT_GENERATED: "POP_DRAFT_GENERATED",
+  POP_SUBMITTED_FOR_REVIEW: "POP_SUBMITTED_FOR_REVIEW",
+  POP_RT_APPROVED: "POP_RT_APPROVED",
+  POP_RT_REJECTED: "POP_RT_REJECTED",
+  POP_CHANGES_REQUESTED: "POP_CHANGES_REQUESTED",
+  POP_VERSION_CREATED: "POP_VERSION_CREATED",
   COLABORADOR_CREATED: "COLABORADOR_CREATED",
   COLABORADOR_UPDATED: "COLABORADOR_UPDATED",
   TREINAMENTO_CREATED: "TREINAMENTO_CREATED",
   TREINAMENTO_UPDATED: "TREINAMENTO_UPDATED",
   TREINAMENTO_COMPLETED: "TREINAMENTO_COMPLETED",
+  TREINAMENTO_LINKED_TO_VERSION: "TREINAMENTO_LINKED_TO_VERSION",
+  EVIDENCE_CREATED: "EVIDENCE_CREATED",
+  LIBRARY_ITEM_CREATED: "LIBRARY_ITEM_CREATED",
+  LIBRARY_ITEM_UPDATED: "LIBRARY_ITEM_UPDATED",
+  LIBRARY_ITEM_STATUS_CHANGED: "LIBRARY_ITEM_STATUS_CHANGED",
   USER_LOGIN: "USER_LOGIN",
   USER_CREATED: "USER_CREATED",
   USER_UPDATED: "USER_UPDATED",

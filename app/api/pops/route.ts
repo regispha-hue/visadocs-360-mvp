@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { createAuditLog, AUDIT_ACTIONS, createDocumentLifecycleEvent } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +82,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
     }
 
-    const tenantId = data.tenantId || user.tenantId;
+    const tenantId = user.role === "SUPER_ADMIN" ? data.tenantId : user.tenantId;
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "Tenant não especificado" }, { status: 400 });
+    }
 
     // Check if code already exists for this tenant
     const existingPop = await prisma.pop.findFirst({
@@ -113,7 +117,7 @@ export async function POST(request: Request) {
         arquivoUrl: arquivoUrl || null,
         arquivoNome: arquivoNome || null,
         arquivoPublic: arquivoPublic || false,
-        status: popStatus || "RASCUNHO",
+        status: ["APROVADO", "VIGENTE", "OBSOLETO"].includes(popStatus) ? "RASCUNHO" : popStatus || "RASCUNHO",
         tenantId,
       },
     });
@@ -126,6 +130,18 @@ export async function POST(request: Request) {
       userName: user.name,
       tenantId,
       details: { codigo, titulo, setor },
+    });
+
+    await createDocumentLifecycleEvent({
+      tenantId,
+      entityType: "Pop",
+      entityId: pop.id,
+      action: "POP_CREATED",
+      statusTo: pop.status,
+      version: pop.versao,
+      userId: user.id,
+      userName: user.name,
+      metadata: { codigo, titulo, setor },
     });
 
     return NextResponse.json({ success: true, pop });

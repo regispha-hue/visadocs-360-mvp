@@ -33,6 +33,11 @@ interface Pop {
 
 const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondary"; label: string }> = {
   RASCUNHO: { variant: "secondary", label: "Rascunho" },
+  EM_REVISAO: { variant: "warning", label: "Em revisão pelo RT" },
+  REJEITADO: { variant: "warning", label: "Rejeitado pelo RT" },
+  APROVADO: { variant: "success", label: "Aprovado pelo RT" },
+  VIGENTE: { variant: "success", label: "Vigente para uso interno" },
+  OBSOLETO: { variant: "secondary", label: "Obsoleto" },
   ATIVO: { variant: "success", label: "Ativo" },
   ARQUIVADO: { variant: "warning", label: "Arquivado" },
 };
@@ -184,7 +189,7 @@ export default function PopsPage() {
     <div>
       <PageHeader
         title="POPs"
-        description="Gerencie os Procedimentos Operacionais Padrão"
+        description="Gerencie minutas, versões aprovadas pelo RT e registros operacionais de POP"
       >
         <Button onClick={() => { setEditingPop(null); setDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />
@@ -212,6 +217,11 @@ export default function PopsPage() {
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="RASCUNHO">Rascunho</SelectItem>
+            <SelectItem value="EM_REVISAO">Em revisão pelo RT</SelectItem>
+            <SelectItem value="REJEITADO">Rejeitado pelo RT</SelectItem>
+            <SelectItem value="APROVADO">Aprovado pelo RT</SelectItem>
+            <SelectItem value="VIGENTE">Vigente</SelectItem>
+            <SelectItem value="OBSOLETO">Obsoleto</SelectItem>
             <SelectItem value="ATIVO">Ativo</SelectItem>
             <SelectItem value="ARQUIVADO">Arquivado</SelectItem>
           </SelectContent>
