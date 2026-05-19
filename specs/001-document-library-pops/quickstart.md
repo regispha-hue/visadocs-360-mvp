@@ -294,6 +294,29 @@ Results:
 - Remaining manual acceptance: T053 and T054 remain open; the feature is still
   not complete and not ready for deploy.
 
+### Timed Acceptance Evidence - T053 - 2026-05-19
+
+- Environment: disposable Docker PostgreSQL only,
+  `postgresql://postgres:****@localhost:55436/visadocs_t053_disposable`.
+  Neon and `DATABASE_URL` from `.env.local`/`.env.production.local` were not
+  used; those files were not modified. `prisma db push` and deploy were not
+  used.
+- Migrations applied before the test:
+  `20260512_baseline_current_schema`, `20260518_document_library_pops` and
+  `20260519180327_document_library_pops`.
+- User/papel: `admin-t053@example.com` with role `ADMIN`.
+- Scenario: authenticated user accessed the document library API, located source
+  `Fonte T053 Util Cronometrada`, selected it as useful source, and generated an
+  assisted POP draft.
+- Result: HTTP `200`; generated POP status `RASCUNHO`; generated draft status
+  `RASCUNHO`.
+- Total measured time: `0.49` seconds (`486` ms), below the SC-001 acceptance
+  threshold of 5 minutes.
+- Note: an earlier dry run used an invalid seeded source with missing content and
+  correctly returned HTTP `422`; it was not counted as acceptance evidence.
+- Remaining manual acceptance: T054 remains open; the feature is still not
+  complete and not ready for deploy.
+
 ### Post-Implementation Remediation - 2026-05-18
 
 - A1 addressed: T011 was reopened because local `migrate dev` was not executed.

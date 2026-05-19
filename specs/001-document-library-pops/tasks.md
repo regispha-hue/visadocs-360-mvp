@@ -378,7 +378,7 @@ baseline is resolved as documented.
   - Critério de aceite: Nenhuma rota retorna segredos, prompts brutos ou dados cross-tenant.
   - Comando de verificação: `rg -n "process\\.env|secret|token|prompt|raw|provider|console\\.log|tenantId" app/api/document-library app/api/pops`
 
-- [ ] T053 Executar verificação manual cronometrada para SC-001
+- [X] T053 Executar verificação manual cronometrada para SC-001
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Com usuário autorizado, localizar item da biblioteca, iniciar minuta assistida e registrar tempo total do fluxo.
   - Critério de aceite: Fluxo concluído em até 5 minutos e resultado registrado no quickstart/checklist de evidência da feature.
