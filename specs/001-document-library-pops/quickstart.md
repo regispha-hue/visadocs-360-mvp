@@ -177,7 +177,10 @@ Results:
 - A5 addressed in a small follow-up patch: POP history now exposes trainings
   affected by obsolete approved versions as internal historical records without
   adding new operational actions.
-- A6, A8 and A9 remain non-blocking follow-up items for a later remediation block.
+- A6.1 addressed in a minimal follow-up patch: the certificate/evidence route
+  now uses `lib/auth-guards.ts` for session retrieval while preserving the
+  existing tenant-safe access check and response payload.
+- A6 broader standardization, A8 and A9 remain non-blocking follow-up items for a later remediation block.
 
 ### Files Modified
 
