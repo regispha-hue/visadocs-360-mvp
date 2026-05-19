@@ -20,6 +20,22 @@ interface Log {
 
 interface LogsTableProps {
   logs: Log[];
+  documentEvents: DocumentEvent[];
+}
+
+interface DocumentEvent {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  statusFrom: string | null;
+  statusTo: string | null;
+  version: string | null;
+  userName: string | null;
+  tenant: { nome: string } | null;
+  occurredAt: Date;
 }
 
 const ACTION_COLORS: Record<string, string> = {
@@ -52,8 +68,9 @@ const ACTION_LABELS: Record<string, string> = {
   USER_CREATED: "Usuário Criado",
 };
 
-export function LogsTable({ logs }: LogsTableProps) {
+export function LogsTable({ logs, documentEvents }: LogsTableProps) {
   const safeLogs = logs ?? [];
+  const safeDocumentEvents = documentEvents ?? [];
 
   const columns = [
     {
@@ -94,13 +111,69 @@ export function LogsTable({ logs }: LogsTableProps) {
   ];
 
   return (
-    <DataTable
-      data={safeLogs}
-      columns={columns}
-      searchKey="action"
-      searchPlaceholder="Buscar por ação..."
-      emptyMessage="Nenhum log encontrado"
-      pageSize={20}
-    />
+    <div className="space-y-8">
+      <DataTable
+        data={safeLogs}
+        columns={columns}
+        searchKey="action"
+        searchPlaceholder="Buscar por ação..."
+        emptyMessage="Nenhum log encontrado"
+        pageSize={20}
+      />
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">Eventos documentais recentes</h2>
+        <DataTable
+          data={safeDocumentEvents}
+          columns={[
+            {
+              key: "occurredAt",
+              header: "Data/Hora",
+              render: (item: DocumentEvent) =>
+                item?.occurredAt ? format(new Date(item.occurredAt), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "N/A",
+            },
+            {
+              key: "action",
+              header: "Ação",
+              render: (item: DocumentEvent) => <Badge variant="secondary">{item?.action ?? "N/A"}</Badge>,
+            },
+            {
+              key: "entityType",
+              header: "Entidade",
+              render: (item: DocumentEvent) => (
+                <span className="text-sm">
+                  {item?.entityType ?? "N/A"}
+                  {item?.entityId ? ` (${item.entityId.slice(0, 8)}...)` : ""}
+                </span>
+              ),
+            },
+            {
+              key: "statusTo",
+              header: "Status/Versão",
+              render: (item: DocumentEvent) => (
+                <span className="text-sm">
+                  {item?.statusFrom || "início"} → {item?.statusTo || "registro"}
+                  {item?.version ? ` · v${item.version}` : ""}
+                </span>
+              ),
+            },
+            {
+              key: "userName",
+              header: "Usuário",
+              render: (item: DocumentEvent) => item?.userName ?? "Sistema",
+            },
+            {
+              key: "tenant",
+              header: "Farmácia",
+              render: (item: DocumentEvent) => item?.tenant?.nome ?? "-",
+            },
+          ]}
+          searchKey="action"
+          searchPlaceholder="Buscar por evento documental..."
+          emptyMessage="Nenhum evento documental encontrado"
+          pageSize={20}
+        />
+      </div>
+    </div>
   );
 }

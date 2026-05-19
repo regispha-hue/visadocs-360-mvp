@@ -329,21 +329,21 @@ baseline is resolved as documented.
   - Status atual: Cobertura técnica aplicada; UI do histórico do POP exibe treinamentos vinculados a versões obsoletas e relação com a versão vigente quando disponível. Aceite manual completo permanece em T047/T048/T054.
   - Comando de verificação: `rg -n "affected|afetad|treinamentos|approvedPopVersionId|obsolete|versão" "app/(dashboard)/dashboard/pops/[id]/page.tsx" "app/api/pops/[id]/history/route.ts"`
 
-- [ ] T046 Integrar histórico documental com logs administrativos
+- [X] T046 Integrar histórico documental com logs administrativos
   - Arquivos prováveis: `app/(dashboard)/admin/logs/page.tsx`
   - Objetivo: Expor ou referenciar eventos documentais sem duplicar sistema de auditoria.
   - Critério de aceite: Admin autorizado consegue chegar ao histórico documental/audit log relevante.
   - Status atual: contagem de eventos documentais no admin/logs existe; exposição navegável permanece pendente.
   - Comando de verificação: `rg -n "AuditLog|DocumentLifecycle|histórico|logs|tenantId" "app/(dashboard)/admin/logs/page.tsx"`
 
-- [ ] T047 Verificar reconstrução completa por tenant, documento, versão, usuário e data/hora
+- [X] T047 Verificar reconstrução completa por tenant, documento, versão, usuário e data/hora
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Validar que biblioteca, minuta, POP aprovado, treinamento e evidência podem ser reconstruídos por tenant, documento, versão, usuário e data/hora.
   - Critério de aceite: Quickstart registra evidência de reconstrução ponta a ponta para todos os tipos de histórico cobertos por FR-010.
   - Status atual: cobertura técnica parcial registrada; reconstrução manual completa pendente.
   - Comando de verificação: `rg -n "FR-010|DocumentLifecycleEvent|tenant|documento|versão|usuário|data/hora|biblioteca|minuta|treinamento|evidência" specs/001-document-library-pops/quickstart.md`
 
-- [ ] T048 Verificar US4 ponta a ponta
+- [X] T048 Verificar US4 ponta a ponta
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Registrar lifecycle completo: acervo -> minuta -> RT -> versão -> treinamento -> evidência -> histórico.
   - Critério de aceite: Quickstart documenta resultado e riscos remanescentes.

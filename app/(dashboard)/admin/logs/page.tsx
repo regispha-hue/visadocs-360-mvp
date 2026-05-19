@@ -42,7 +42,7 @@ export default async function LogsPage() {
         title="Logs de Auditoria"
         description={`Histórico administrativo e ${documentEvents.length} eventos documentais recentes`}
       />
-      <LogsTable logs={logs ?? []} />
+      <LogsTable logs={logs ?? []} documentEvents={documentEvents ?? []} />
     </div>
   );
 }

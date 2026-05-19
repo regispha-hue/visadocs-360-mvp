@@ -178,8 +178,15 @@ Results:
   to obsolete approved versions and their relationship to the current approved
   version when available. Manual end-to-end acceptance remains pending in
   T047/T048/T054.
-- T046 remains open: admin logs count document events, but do not expose navigable document history.
-- T047 and T048 remain open: complete lifecycle reconstruction is pending manual acceptance.
+- T046 completed on 2026-05-19 after a small admin logs exposure patch and
+  validation against disposable local PostgreSQL
+  `visadocs_t046_t048_disposable` on `localhost:55435`.
+- T047 completed on 2026-05-19 with complete lifecycle reconstruction against
+  disposable local PostgreSQL `visadocs_t046_t048_disposable` on
+  `localhost:55435`.
+- T048 completed on 2026-05-19 with tenant-safety and auditability checks
+  against disposable local PostgreSQL `visadocs_t046_t048_disposable` on
+  `localhost:55435`.
 - SC-001 timed manual check remains pending: authorized user must locate a library item, start assisted draft generation, record total time and confirm completion in up to 5 minutes.
 - Full manual acceptance remains pending: library -> draft -> RT decision -> approved version -> training -> evidence -> history.
 
@@ -242,6 +249,50 @@ Results:
   `TentativaQuiz`, preserving tenant, version, user and timestamp.
 - Remaining manual acceptance: T046, T047, T048, T053 and T054 remain open; the
   feature is still not complete and not ready for deploy.
+
+### Functional Acceptance Evidence - T046/T047/T048 - 2026-05-19
+
+- Environment: disposable Docker PostgreSQL only,
+  `postgresql://postgres:****@localhost:55435/visadocs_t046_t048_disposable`.
+  Neon and `DATABASE_URL` from `.env.local`/`.env.production.local` were not
+  used; those files were not modified. `prisma db push` and deploy were not
+  used.
+- Migrations applied before the test:
+  `20260512_baseline_current_schema`, `20260518_document_library_pops` and
+  `20260519180327_document_library_pops`.
+- T046 patch: `admin/logs` already queried recent `DocumentLifecycleEvent`
+  records but did not render them. The logs page now passes those records to the
+  client table and renders an `Eventos documentais recentes` section with
+  action, entity, status/version, user, tenant and timestamp.
+- T046 result: `SUPER_ADMIN` loaded `/admin/logs` with HTTP `200`, and the page
+  contained the `Eventos documentais recentes` section. The page still keeps the
+  existing `AuditLog` table.
+- T047 cycle reconstructed successfully:
+  library item `LIBRARY_ITEM_CREATED` -> assisted draft `GENERATED` with POP
+  `RASCUNHO` -> RT approval `APPROVED` v1.0 -> `ApprovedPopVersion CURRENT` ->
+  training `LINKED_TO_TRAINING` on v1.0 -> certificate/evidence
+  `EVIDENCE_CREATED` -> RT approval v2.0 -> prior v1.0
+  `VERSION_OBSOLETED`.
+- POP history route returned HTTP `200` with versions `2.0:CURRENT` and
+  `1.0:OBSOLETE`, two approval events, lifecycle events, and the training tied
+  to v1.0.
+- Library history route returned HTTP `200` with the library lifecycle event and
+  the derived draft relation.
+- Training history route returned HTTP `200` with `LINKED_TO_TRAINING` and
+  `EVIDENCE_CREATED`.
+- Audit evidence: `AuditLog` recorded `LIBRARY_ITEM_CREATED`,
+  `POP_DRAFT_GENERATED`, two `POP_RT_APPROVED` entries and
+  `TREINAMENTO_CREATED`; `DocumentLifecycleEvent` preserved tenant, entity,
+  related entity, action, user, version and timestamp for each reconstructed
+  step.
+- T048 tenant safety: a user from a second tenant received HTTP `404` when
+  requesting the first tenant's library history, POP history and training
+  history.
+- Regulatory/sensitive checks: generated evidence remained an internal record,
+  and no secret, token, environment variable or cross-tenant data was exposed by
+  the validated history routes.
+- Remaining manual acceptance: T053 and T054 remain open; the feature is still
+  not complete and not ready for deploy.
 
 ### Post-Implementation Remediation - 2026-05-18
 
