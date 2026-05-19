@@ -384,7 +384,7 @@ baseline is resolved as documented.
   - Critério de aceite: Fluxo concluído em até 5 minutos e resultado registrado no quickstart/checklist de evidência da feature.
   - Comando de verificação: `rg -n "SC-001|5 minutos|cronometrad|tempo total|usuário autorizado|localizar item|minuta assistida" specs/001-document-library-pops/quickstart.md specs/001-document-library-pops/checklists/requirements.md`
 
-- [ ] T054 Executar aceitação manual completa
+- [X] T054 Executar aceitação manual completa
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Validar fluxo com usuários/roles apropriados: biblioteca, minuta, RT, aprovação, treinamento, evidência e histórico.
   - Critério de aceite: Todos os passos manuais relevantes estão marcados com resultado e data.
