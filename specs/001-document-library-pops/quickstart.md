@@ -172,7 +172,8 @@ Results:
   `visadocs_t024_t031_disposable` on `localhost:55433`.
 - T031 completed on 2026-05-19 against disposable local PostgreSQL
   `visadocs_t024_t031_disposable` on `localhost:55433`.
-- T038 remains open: training linkage has technical evidence, but no manual US3 acceptance result.
+- T038 completed on 2026-05-19 against disposable local PostgreSQL
+  `visadocs_t038_disposable` on `localhost:55434`.
 - T045 has technical coverage: the POP history UI shows internal trainings tied
   to obsolete approved versions and their relationship to the current approved
   version when available. Manual end-to-end acceptance remains pending in
@@ -208,8 +209,39 @@ Results:
   `APPROVED` and `REJECTED` events with tenant, document, version, user and
   timestamp; `RTApprovalEvent` recorded both `APPROVED` and `REJECTED`
   decisions under user `RT Aceite`.
-- Remaining manual acceptance: T038, T046, T047, T048, T053 and T054 remain
-  open; the feature is still not complete and not ready for deploy.
+- Remaining manual acceptance: T046, T047, T048, T053 and T054 remain open;
+  the feature is still not complete and not ready for deploy.
+
+### Functional Acceptance Evidence - T038 - 2026-05-19
+
+- Environment: disposable Docker PostgreSQL only,
+  `postgresql://postgres:****@localhost:55434/visadocs_t038_disposable`.
+  Neon and `DATABASE_URL` from `.env.local`/`.env.production.local` were not
+  used; those files were not modified. `prisma db push` and deploy were not
+  used.
+- Migrations applied before the test:
+  `20260512_baseline_current_schema`, `20260518_document_library_pops` and
+  `20260519180327_document_library_pops`.
+- Seeded disposable tenant with `ADMIN`, `RT`, one collaborator, one POP
+  `RASCUNHO`, one POP `REJEITADO` and one POP `VIGENTE` with
+  `ApprovedPopVersion` status `CURRENT`.
+- Training gate result: creating training from the `RASCUNHO` POP returned HTTP
+  `422`; creating training from the `REJEITADO` POP returned HTTP `422`; both
+  returned `Treinamento exige POP com versão aprovada vigente pelo Responsável Técnico`.
+- Approved-version result: creating training from the `VIGENTE` POP with the
+  `ApprovedPopVersion CURRENT` returned HTTP `200`, persisted
+  `approvedPopVersionId`, `popCodigoSnapshot`, `popTituloSnapshot` and
+  `popVersaoSnapshot` as `1.0`.
+- Evidence/certificate result: approved quiz attempt generated a PDF with HTTP
+  `200` and `application/pdf`; the PDF text includes `Registro operacional
+  interno`, `Nao substitui revisao do Responsavel Tecnico` and `nem representa
+  certificacao sanitaria`; no `Anvisa`, homologation, institutional approval or
+  automatic-conformity claim was found in the generated evidence.
+- Lifecycle evidence: `DocumentLifecycleEvent` recorded `LINKED_TO_TRAINING`
+  linked to the exact `ApprovedPopVersion` and `EVIDENCE_CREATED` linked to the
+  `TentativaQuiz`, preserving tenant, version, user and timestamp.
+- Remaining manual acceptance: T046, T047, T048, T053 and T054 remain open; the
+  feature is still not complete and not ready for deploy.
 
 ### Post-Implementation Remediation - 2026-05-18
 

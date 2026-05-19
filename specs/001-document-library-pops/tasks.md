@@ -275,7 +275,7 @@ baseline is resolved as documented.
   - Critério de aceite: Documento gerado não usa claims proibidos e carrega versão/tenant/colaborador/data/status.
   - Comando de verificação: `rg -n "certific|registro|versão|POP|tenant|Anvisa|conformidade|habilitação" app/api/certificados lib/certificado-*`
 
-- [ ] T038 Verificar US3 antes de histórico completo
+- [X] T038 Verificar US3 antes de histórico completo
   - Arquivos prováveis: `specs/001-document-library-pops/quickstart.md`
   - Objetivo: Registrar treinamento aprovado-only e evidência com versão exata.
   - Critério de aceite: Quickstart prova bloqueio para rascunho e sucesso para versão aprovada.
