@@ -6,6 +6,38 @@ import { forbidden, getCurrentUser, requireTenantId, unauthorized } from "@/lib/
 
 export const dynamic = "force-dynamic";
 
+const MIN_USEFUL_SOURCE_CHARS = 300;
+const INSUFFICIENT_SOURCE_CONTENT_ERROR =
+  "Selecione ao menos uma fonte documental com conteúdo técnico suficiente para gerar a minuta.";
+
+const PLACEHOLDER_PATTERNS = [
+  /\bcomplete a minuta\b/gi,
+  /\bsem conte[uú]do\b/gi,
+  /\bplaceholder\b/gi,
+  /\blorem ipsum\b/gi,
+  /\bteste\b/gi,
+];
+
+function normalizeUsefulSourceText(content: string | null | undefined, title: string) {
+  const normalized = (content || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const normalizedTitle = title.replace(/\s+/g, " ").trim();
+  const withoutTitleOnly = normalized.toLowerCase() === normalizedTitle.toLowerCase() ? "" : normalized;
+
+  return PLACEHOLDER_PATTERNS.reduce(
+    (text, pattern) => text.replace(pattern, " "),
+    withoutTitleOnly,
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function hasUsefulSourceContent(source: { title: string; content: string | null }) {
+  const usefulText = normalizeUsefulSourceText(source.content, source.title);
+  return usefulText.length >= MIN_USEFUL_SOURCE_CHARS;
+}
+
 function buildAuxiliaryDraft(title: string, objective: string | undefined, sources: Array<{ title: string; content: string | null; version: string | null }>) {
   const sourceSummary = sources
     .map((source, index) => `${index + 1}. ${source.title}${source.version ? ` v${source.version}` : ""}`)
@@ -13,7 +45,8 @@ function buildAuxiliaryDraft(title: string, objective: string | undefined, sourc
 
   const sourceContent = sources
     .map((source) => source.content)
-    .filter(Boolean)
+    .map((content) => content?.trim())
+    .filter((content): content is string => Boolean(content))
     .join("\n\n")
     .slice(0, 12000);
 
@@ -29,7 +62,7 @@ function buildAuxiliaryDraft(title: string, objective: string | undefined, sourc
     sourceSummary,
     "",
     "## Minuta auxiliar",
-    sourceContent || "Conteúdo-base não informado nas fontes selecionadas. Complete a minuta antes de submeter ao RT.",
+    sourceContent,
     "",
     "## Aviso regulatório",
     "Este artefato é uma minuta auxiliar e não representa conformidade sanitária automática, certificação ou aprovação institucional.",
@@ -73,7 +106,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Fontes insuficientes ou inválidas para geração assistida" }, { status: 422 });
     }
 
-    const content = buildAuxiliaryDraft(parsed.data.title, parsed.data.objective, sources);
+    const usefulSources = sources.filter(hasUsefulSourceContent);
+
+    if (usefulSources.length === 0) {
+      return NextResponse.json({ error: INSUFFICIENT_SOURCE_CONTENT_ERROR }, { status: 422 });
+    }
+
+    const content = buildAuxiliaryDraft(parsed.data.title, parsed.data.objective, usefulSources);
 
     const result = await prisma.$transaction(async (tx) => {
       const pop = await tx.pop.create({
@@ -103,7 +142,7 @@ export async function POST(request: Request) {
           createdByUserId: user.id,
           createdByUserName: user.name || user.email || null,
           sources: {
-            create: sources.map((source) => ({
+            create: usefulSources.map((source) => ({
               tenantId: tenantId!,
               libraryItemId: source.id,
               sourceTitle: source.title,
@@ -124,7 +163,7 @@ export async function POST(request: Request) {
       userId: user.id,
       userName: user.name || undefined,
       tenantId: tenantId!,
-      details: { popId: result.pop.id, sourceCount: sources.length, status: result.draft.status },
+      details: { popId: result.pop.id, sourceCount: usefulSources.length, selectedSourceCount: sources.length, status: result.draft.status },
     });
 
     await createDocumentLifecycleEvent({
@@ -139,8 +178,11 @@ export async function POST(request: Request) {
       userId: user.id,
       userName: user.name || undefined,
       metadata: {
-        sourceIds: sources.map((source) => source.id),
-        libraryItemTitles: sources.map((source) => source.title),
+        sourceIds: usefulSources.map((source) => source.id),
+        libraryItemTitles: usefulSources.map((source) => source.title),
+        selectedSourceCount: sources.length,
+        usefulSourceCount: usefulSources.length,
+        minUsefulSourceChars: MIN_USEFUL_SOURCE_CHARS,
       },
     });
 

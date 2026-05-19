@@ -158,8 +158,9 @@ baseline is resolved as documented.
 - [X] T020 Implementar geração assistida fail-closed
   - Arquivos prováveis: `app/api/pops/assisted-drafts/route.ts`
   - Objetivo: Criar minuta apenas com fontes suficientes do mesmo tenant e nunca retornar prompt/provedor/log interno.
-  - Critério de aceite: Sem fontes válidas retorna erro 422; com fontes válidas cria `AssistedPopDraft` em rascunho.
-  - Comando de verificação: `rg -n "422|DRAFT|RASCUNHO|sourceIds|tenantId|raw|prompt|provider" app/api/pops/assisted-drafts/route.ts`
+  - Critério de aceite: Sem fontes válidas ou sem ao menos uma fonte com 300 caracteres úteis normalizados retorna erro 422; com fonte útil válida cria `AssistedPopDraft` em rascunho.
+  - Status atual: A7 corrigido com bloqueio para conteúdo vazio, ausente, título isolado ou placeholder evidente.
+  - Comando de verificação: `rg -n "422|300|conteúdo técnico suficiente|DRAFT|RASCUNHO|sourceIds|tenantId|raw|prompt|provider" app/api/pops/assisted-drafts/route.ts`
 
 - [X] T021 Registrar fontes e eventos da minuta
   - Arquivos prováveis: `app/api/pops/assisted-drafts/route.ts`, `lib/audit.ts`

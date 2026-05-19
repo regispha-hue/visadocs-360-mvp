@@ -79,6 +79,21 @@ yarn prisma migrate dev --name document_library_pops
   "conformidade automatica" or "habilitacao profissional".
 - Assisted generation must fail closed when sources are insufficient.
 
+## Assisted generation source quality
+
+- A selected library item is considered useful for assisted POP generation only
+  when its normalized textual content has at least 300 useful characters.
+- Normalization collapses excessive spaces and line breaks, ignores title-only
+  content and removes evident placeholder phrases before counting useful text.
+- Placeholder-like content such as "complete a minuta", "sem conteudo",
+  "placeholder", "teste" and "lorem ipsum" must not be enough to generate a
+  draft.
+- If no selected source reaches this minimum, the API must return 422 with:
+  "Selecione ao menos uma fonte documental com conteúdo técnico suficiente para
+  gerar a minuta."
+- Passing this gate only allows creation of a rascunho/minuta assistida; RT
+  review and approval remain mandatory before operational use.
+
 ## Delivery evidence expected
 
 - Files modified.
@@ -153,7 +168,10 @@ Results:
 - A2 addressed: role strategy is now TEXT-safe and no longer depends on `ALTER TYPE UserRole`.
 - A3 addressed: manual/acceptance tasks were reopened where evidence is not yet sufficient.
 - A4 addressed with a small runtime patch: approving a new version now creates `DocumentLifecycleEvent` entries with action `VERSION_OBSOLETED` for prior current approved versions.
-- A5, A6, A7, A8 and A9 remain non-blocking follow-up items for a later remediation block.
+- A7 addressed in a small follow-up patch: assisted generation now requires at
+  least one selected source with 300 useful normalized characters and blocks
+  empty/title-only/placeholder-like content before creating a draft.
+- A5, A6, A8 and A9 remain non-blocking follow-up items for a later remediation block.
 
 ### Files Modified
 
