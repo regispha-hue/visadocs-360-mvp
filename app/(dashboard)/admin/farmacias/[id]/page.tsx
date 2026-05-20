@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,8 +71,10 @@ const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "destruct
   CANCELADO: { variant: "secondary", label: "Cancelado" },
 };
 
-export default function FarmaciaDetailPage({ params }: { params: { id: string } }) {
+export default function FarmaciaDetailPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -81,7 +83,7 @@ export default function FarmaciaDetailPage({ params }: { params: { id: string } 
 
   const fetchTenant = async () => {
     try {
-      const res = await fetch(`/api/farmacias/${params.id}`);
+      const res = await fetch(`/api/farmacias/${id}`);
       const data = await res.json();
       if (data?.tenant) {
         setTenant(data.tenant);
@@ -95,12 +97,12 @@ export default function FarmaciaDetailPage({ params }: { params: { id: string } 
 
   useEffect(() => {
     fetchTenant();
-  }, [params.id]);
+  }, [id]);
 
   const handleApprove = async () => {
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/farmacias/${params.id}/aprovar`, { method: "POST" });
+      const res = await fetch(`/api/farmacias/${id}/aprovar`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Erro ao aprovar");
       
@@ -121,7 +123,7 @@ export default function FarmaciaDetailPage({ params }: { params: { id: string } 
   const handleStatusChange = async (newStatus: string) => {
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/farmacias/${params.id}/status`, {
+      const res = await fetch(`/api/farmacias/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),

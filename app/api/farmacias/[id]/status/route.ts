@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -23,7 +24,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    const tenantId = params.id;
+    const tenantId = id;
     const { status, subscriptionStatus } = await request.json();
 
     const tenant = await prisma.tenant.findUnique({

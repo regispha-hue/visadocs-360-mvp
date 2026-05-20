@@ -7,8 +7,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -19,7 +20,7 @@ export async function GET(
 
     const colaborador = await prisma.colaborador.findFirst({
       where: {
-        id: params.id,
+        id: id,
         ...(user.role !== "SUPER_ADMIN" ? { tenantId: user.tenantId } : {}),
       },
     });
@@ -30,7 +31,7 @@ export async function GET(
 
     const treinamentos = await prisma.treinamento.findMany({
       where: {
-        colaboradorId: params.id,
+        colaboradorId: id,
         status: "CONCLUIDO",
       },
       include: {

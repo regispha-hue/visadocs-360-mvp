@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,8 +48,9 @@ interface Quiz {
   pop?: { codigo: string; titulo: string };
 }
 
-export default function QuizManagementPage({ params }: { params: { id: string } }) {
+export default function QuizManagementPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const popId = params.id;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

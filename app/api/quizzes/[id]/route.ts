@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic";
 // GET: get quiz by id with all questions & alternatives
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -19,7 +20,7 @@ export async function GET(
     const user = session.user as any;
 
     const quiz = await prisma.quiz.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         pop: { select: { id: true, codigo: true, titulo: true, setor: true } },
         questoes: {
@@ -50,8 +51,9 @@ export async function GET(
 // PATCH: update quiz (replace all questions)
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -62,7 +64,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const quiz = await prisma.quiz.findUnique({ where: { id: params.id } });
+    const quiz = await prisma.quiz.findUnique({ where: { id: id } });
     if (!quiz) {
       return NextResponse.json({ error: "Quiz não encontrado" }, { status: 404 });
     }
@@ -93,14 +95,14 @@ export async function PATCH(
       }
 
       // Delete existing questions (cascade deletes alternativas)
-      await prisma.questao.deleteMany({ where: { quizId: params.id } });
+      await prisma.questao.deleteMany({ where: { quizId: id } });
 
       // Create new questions
       for (let i = 0; i < questoes.length; i++) {
         const q = questoes[i];
         await prisma.questao.create({
           data: {
-            quizId: params.id,
+            quizId: id,
             pergunta: q.pergunta,
             ordem: i + 1,
             alternativas: {
@@ -116,7 +118,7 @@ export async function PATCH(
     }
 
     const updated = await prisma.quiz.update({
-      where: { id: params.id },
+      where: { id: id },
       data: updateData,
       include: {
         questoes: {
@@ -147,8 +149,9 @@ export async function PATCH(
 // DELETE: remove quiz
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -160,7 +163,7 @@ export async function DELETE(
     }
 
     const quiz = await prisma.quiz.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { pop: { select: { codigo: true } } },
     });
     if (!quiz) {
@@ -170,12 +173,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    await prisma.quiz.delete({ where: { id: params.id } });
+    await prisma.quiz.delete({ where: { id: id } });
 
     await createAuditLog({
       action: AUDIT_ACTIONS.QUIZ_DELETED,
       entity: "Quiz",
-      entityId: params.id,
+      entityId: id,
       userId: user.id,
       userName: user.name,
       tenantId: quiz.tenantId,

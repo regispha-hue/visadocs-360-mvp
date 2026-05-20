@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +20,7 @@ export async function GET(
 
     const user = session.user as any;
     const lote = await prisma.lote.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         materiaPrima: {
           select: { id: true, codigo: true, nome: true, unidadeMedida: true, especificacoes: true },
@@ -47,8 +48,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -63,7 +65,7 @@ export async function PATCH(
     }
 
     const lote = await prisma.lote.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { materiaPrima: { select: { nome: true } } },
     });
 
@@ -79,7 +81,7 @@ export async function PATCH(
     const oldStatus = lote.status;
 
     const updatedLote = await prisma.lote.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(data.loteInterno !== undefined && { loteInterno: data.loteInterno || null }),
         ...(data.dataFabricacao !== undefined && { dataFabricacao: data.dataFabricacao ? new Date(data.dataFabricacao) : null }),
@@ -133,8 +135,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -149,7 +152,7 @@ export async function DELETE(
     }
 
     const lote = await prisma.lote.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { materiaPrima: { select: { nome: true } } },
     });
 
@@ -161,7 +164,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    await prisma.lote.delete({ where: { id: params.id } });
+    await prisma.lote.delete({ where: { id: id } });
 
     await createAuditLog({
       action: AUDIT_ACTIONS.LOTE_DELETED,

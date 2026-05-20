@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +20,7 @@ export async function GET(
 
     const user = session.user as any;
     const treinamento = await prisma.treinamento.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         pop: true,
         colaborador: true,
@@ -45,8 +46,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -62,7 +64,7 @@ export async function PATCH(
     }
 
     const treinamento = await prisma.treinamento.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { pop: true, colaborador: true },
     });
 
@@ -85,7 +87,7 @@ export async function PATCH(
     }
 
     const updatedTreinamento = await prisma.treinamento.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(data.dataTreinamento && { dataTreinamento: new Date(data.dataTreinamento) }),
         ...(data.instrutor && { instrutor: data.instrutor }),

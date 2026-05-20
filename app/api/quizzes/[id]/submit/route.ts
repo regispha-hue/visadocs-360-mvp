@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic";
 // POST: submit quiz answers
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -28,7 +29,7 @@ export async function POST(
 
     // Fetch quiz with correct answers
     const quiz = await prisma.quiz.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         questoes: {
           orderBy: { ordem: "asc" },
@@ -89,7 +90,7 @@ export async function POST(
     // Create attempt record
     const tentativa = await prisma.tentativaQuiz.create({
       data: {
-        quizId: params.id,
+        quizId: id,
         colaboradorId,
         treinamentoId,
         nota,

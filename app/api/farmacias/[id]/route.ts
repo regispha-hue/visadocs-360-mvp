@@ -7,8 +7,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -17,7 +18,7 @@ export async function GET(
     }
 
     const user = session.user as any;
-    const tenantId = params.id;
+    const tenantId = id;
 
     // Only super admin can view any tenant, others can only view their own
     if (user.role !== "SUPER_ADMIN" && user.tenantId !== tenantId) {

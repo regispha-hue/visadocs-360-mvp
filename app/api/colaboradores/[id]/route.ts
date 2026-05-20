@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +20,7 @@ export async function GET(
 
     const user = session.user as any;
     const colaborador = await prisma.colaborador.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         treinamentos: {
           include: {
@@ -54,8 +55,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -70,7 +72,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const colaborador = await prisma.colaborador.findUnique({ where: { id: params.id } });
+    const colaborador = await prisma.colaborador.findUnique({ where: { id: id } });
 
     if (!colaborador) {
       return NextResponse.json({ error: "Colaborador não encontrado" }, { status: 404 });
@@ -84,7 +86,7 @@ export async function PATCH(
     const data = await request.json();
 
     const updatedColaborador = await prisma.colaborador.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(data.nome && { nome: data.nome }),
         ...(data.funcao && { funcao: data.funcao }),

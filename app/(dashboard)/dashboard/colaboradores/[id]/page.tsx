@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,8 +45,10 @@ interface Colaborador {
   }[];
 }
 
-export default function ColaboradorDetailPage({ params }: { params: { id: string } }) {
+export default function ColaboradorDetailPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const [colaborador, setColaborador] = useState<Colaborador | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingPop, setDownloadingPop] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export default function ColaboradorDetailPage({ params }: { params: { id: string
   useEffect(() => {
     const fetchColaborador = async () => {
       try {
-        const res = await fetch(`/api/colaboradores/${params.id}`);
+        const res = await fetch(`/api/colaboradores/${id}`);
         const data = await res.json();
         if (data?.colaborador) {
           setColaborador(data.colaborador);
@@ -67,7 +69,7 @@ export default function ColaboradorDetailPage({ params }: { params: { id: string
       }
     };
     fetchColaborador();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (

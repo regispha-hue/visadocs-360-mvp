@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +20,7 @@ export async function GET(
 
     const user = session.user as any;
     const materiaPrima = await prisma.materiaPrima.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         fornecedor: { select: { id: true, nome: true, cnpj: true, telefone: true, email: true } },
         lotes: {
@@ -53,8 +54,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -68,7 +70,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const materiaPrima = await prisma.materiaPrima.findUnique({ where: { id: params.id } });
+    const materiaPrima = await prisma.materiaPrima.findUnique({ where: { id: id } });
 
     if (!materiaPrima) {
       return NextResponse.json({ error: "Matéria-prima não encontrada" }, { status: 404 });
@@ -81,7 +83,7 @@ export async function PATCH(
     const data = await request.json();
 
     const updatedMP = await prisma.materiaPrima.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(data.nome && { nome: data.nome }),
         ...(data.descricao !== undefined && { descricao: data.descricao || null }),
@@ -121,8 +123,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -137,7 +140,7 @@ export async function DELETE(
     }
 
     const materiaPrima = await prisma.materiaPrima.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { _count: { select: { lotes: true } } },
     });
 
@@ -156,7 +159,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.materiaPrima.delete({ where: { id: params.id } });
+    await prisma.materiaPrima.delete({ where: { id: id } });
 
     await createAuditLog({
       action: AUDIT_ACTIONS.MATERIA_PRIMA_DELETED,
