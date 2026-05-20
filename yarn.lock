@@ -5418,7 +5418,6 @@ __metadata:
     input-otp: "npm:1.2.4"
     jotai: "npm:2.6.0"
     jsonwebtoken: "npm:9.0.2"
-    lodash: "npm:4.17.21"
     lucide-react: "npm:0.446.0"
     maplibre-gl: "npm:4.7.1"
     next: "npm:14.2.35"
@@ -9877,13 +9876,6 @@ __metadata:
   version: 4.1.1
   resolution: "lodash.once@npm:4.1.1"
   checksum: 10c0/46a9a0a66c45dd812fcc016e46605d85ad599fe87d71a02f6736220554b52ffbe82e79a483ad40f52a8a95755b0d1077fba259da8bfb6694a7abbf4a48f1fc04
-  languageName: node
-  linkType: hard
-
-"lodash@npm:4.17.21":
-  version: 4.17.21
-  resolution: "lodash@npm:4.17.21"
-  checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
   languageName: node
   linkType: hard
 
