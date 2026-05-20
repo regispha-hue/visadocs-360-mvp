@@ -198,7 +198,7 @@ export default function BibliotecaPopsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Buscar por c\u00f3digo, t\u00edtulo ou pasta..."
+            placeholder="Buscar por código, título ou pasta..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
