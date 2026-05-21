@@ -8,15 +8,16 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { tentativaId: string } }
+  { params }: { params: Promise<{ tentativaId: string }> }
 ) {
+  const { tentativaId } = await params;
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorized();
 
     // Fetch tentativa with all related data
     const tentativa = await prisma.tentativaQuiz.findUnique({
-      where: { id: params.tentativaId },
+      where: { id: tentativaId },
       include: {
         quiz: {
           include: {

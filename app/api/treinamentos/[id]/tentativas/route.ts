@@ -7,8 +7,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -17,7 +18,7 @@ export async function GET(
     const user = session.user as any;
 
     const treinamento = await prisma.treinamento.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       select: { tenantId: true },
     });
 
@@ -30,7 +31,7 @@ export async function GET(
     }
 
     const tentativas = await prisma.tentativaQuiz.findMany({
-      where: { treinamentoId: params.id },
+      where: { treinamentoId: id },
       orderBy: { completadoEm: "desc" },
       select: {
         id: true,

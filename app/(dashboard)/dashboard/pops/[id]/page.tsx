@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,8 +104,10 @@ const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondar
   ARQUIVADO: { variant: "warning", label: "Arquivado" },
 };
 
-export default function PopDetailPage({ params }: { params: { id: string } }) {
+export default function PopDetailPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const [pop, setPop] = useState<Pop | null>(null);
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<any>(null);
@@ -117,9 +119,9 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
     const fetchData = async () => {
       try {
         const [popRes, quizRes, historyRes, sessionRes] = await Promise.all([
-          fetch(`/api/pops/${params.id}`),
-          fetch(`/api/quizzes/by-pop/${params.id}`),
-          fetch(`/api/pops/${params.id}/history`),
+          fetch(`/api/pops/${id}`),
+          fetch(`/api/quizzes/by-pop/${id}`),
+          fetch(`/api/pops/${id}/history`),
           fetch("/api/auth/session"),
         ]);
         const popData = await popRes.json();
@@ -137,7 +139,7 @@ export default function PopDetailPage({ params }: { params: { id: string } }) {
       }
     };
     fetchData();
-  }, [params.id]);
+  }, [id]);
 
   const handleDownload = async () => {
     if (!pop?.arquivoUrl) return;

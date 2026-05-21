@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 // GET quiz by POP ID
 export async function GET(
   request: Request,
-  { params }: { params: { popId: string } }
+  { params }: { params: Promise<{ popId: string }> }
 ) {
+  const { popId } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -18,7 +19,7 @@ export async function GET(
     const user = session.user as any;
 
     const quiz = await prisma.quiz.findUnique({
-      where: { popId: params.popId },
+      where: { popId: popId },
       include: {
         pop: { select: { id: true, codigo: true, titulo: true, setor: true } },
         questoes: {

@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +20,7 @@ export async function GET(
 
     const user = session.user as any;
     const fornecedor = await prisma.fornecedor.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         materiasPrimas: {
           select: { id: true, codigo: true, nome: true, status: true },
@@ -50,8 +51,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -65,7 +67,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const fornecedor = await prisma.fornecedor.findUnique({ where: { id: params.id } });
+    const fornecedor = await prisma.fornecedor.findUnique({ where: { id: id } });
 
     if (!fornecedor) {
       return NextResponse.json({ error: "Fornecedor não encontrado" }, { status: 404 });
@@ -78,7 +80,7 @@ export async function PATCH(
     const data = await request.json();
 
     const updatedFornecedor = await prisma.fornecedor.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(data.nome && { nome: data.nome }),
         ...(data.cnpj !== undefined && { cnpj: data.cnpj || null }),
@@ -110,8 +112,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -126,7 +129,7 @@ export async function DELETE(
     }
 
     const fornecedor = await prisma.fornecedor.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { _count: { select: { materiasPrimas: true, lotes: true } } },
     });
 
@@ -145,7 +148,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.fornecedor.delete({ where: { id: params.id } });
+    await prisma.fornecedor.delete({ where: { id: id } });
 
     await createAuditLog({
       action: AUDIT_ACTIONS.FORNECEDOR_DELETED,

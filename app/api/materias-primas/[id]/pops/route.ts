@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -23,7 +24,7 @@ export async function POST(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const materiaPrima = await prisma.materiaPrima.findUnique({ where: { id: params.id } });
+    const materiaPrima = await prisma.materiaPrima.findUnique({ where: { id: id } });
 
     if (!materiaPrima) {
       return NextResponse.json({ error: "Matéria-prima não encontrada" }, { status: 404 });
@@ -47,7 +48,7 @@ export async function POST(
     }
 
     const existingLink = await prisma.popMateriaPrima.findFirst({
-      where: { popId, materiaPrimaId: params.id },
+      where: { popId, materiaPrimaId: id },
     });
 
     if (existingLink) {
@@ -57,7 +58,7 @@ export async function POST(
     const link = await prisma.popMateriaPrima.create({
       data: {
         popId,
-        materiaPrimaId: params.id,
+        materiaPrimaId: id,
         quantidade: quantidade ? parseFloat(quantidade) : null,
         observacoes: observacoes || null,
         tenantId: user.tenantId,
@@ -86,8 +87,9 @@ export async function POST(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -109,7 +111,7 @@ export async function DELETE(
     }
 
     const link = await prisma.popMateriaPrima.findFirst({
-      where: { popId, materiaPrimaId: params.id },
+      where: { popId, materiaPrimaId: id },
       include: {
         materiaPrima: { select: { tenantId: true, nome: true } },
         pop: { select: { titulo: true } },

@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,7 +20,7 @@ export async function GET(
 
     const user = session.user as any;
     const pop = await prisma.pop.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         treinamentos: {
           include: {
@@ -59,8 +60,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -75,7 +77,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const pop = await prisma.pop.findUnique({ where: { id: params.id } });
+    const pop = await prisma.pop.findUnique({ where: { id: id } });
 
     if (!pop) {
       return NextResponse.json({ error: "POP não encontrado" }, { status: 404 });
@@ -97,7 +99,7 @@ export async function PATCH(
     }
 
     const updatedPop = await prisma.pop.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         ...(data.titulo && { titulo: data.titulo }),
         ...(data.setor && { setor: data.setor }),
@@ -154,8 +156,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -170,7 +173,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const pop = await prisma.pop.findUnique({ where: { id: params.id } });
+    const pop = await prisma.pop.findUnique({ where: { id: id } });
 
     if (!pop) {
       return NextResponse.json({ error: "POP não encontrado" }, { status: 404 });
@@ -181,7 +184,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    await prisma.pop.delete({ where: { id: params.id } });
+    await prisma.pop.delete({ where: { id: id } });
 
     await createAuditLog({
       action: AUDIT_ACTIONS.POP_ARCHIVED,

@@ -19,8 +19,9 @@ function generatePassword(): string {
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -34,7 +35,7 @@ export async function POST(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    const tenantId = params.id;
+    const tenantId = id;
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },

@@ -6,7 +6,8 @@ import { canApproveAsRT, forbidden, getCurrentUser, unauthorized } from "@/lib/a
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorized();
@@ -20,7 +21,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     const pop = await prisma.pop.findFirst({
       where: {
-        id: params.id,
+        id: id,
         ...(user.role !== "SUPER_ADMIN" && { tenantId: user.tenantId || "__none__" }),
       },
       include: {

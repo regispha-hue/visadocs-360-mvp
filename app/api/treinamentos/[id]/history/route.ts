@@ -4,13 +4,14 @@ import { getCurrentUser, unauthorized } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorized();
 
     const treinamento = await prisma.treinamento.findFirst({
-      where: { id: params.id, ...(user.role !== "SUPER_ADMIN" && { tenantId: user.tenantId || "__none__" }) },
+      where: { id: id, ...(user.role !== "SUPER_ADMIN" && { tenantId: user.tenantId || "__none__" }) },
       include: {
         pop: { select: { id: true, codigo: true, titulo: true } },
         colaborador: { select: { id: true, nome: true, funcao: true } },

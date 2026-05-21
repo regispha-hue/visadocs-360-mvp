@@ -2,10 +2,8 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
-import dynamic from "next/dynamic";
 import { TrialBanner } from "@/components/trial-banner";
-
-const Sidebar = dynamic(() => import("@/components/sidebar").then(m => ({ default: m.Sidebar })), { ssr: false });
+import { DashboardSidebarClient } from "./_components/dashboard-sidebar-client";
 
 export default async function DashboardLayout({
   children,
@@ -39,7 +37,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+      <DashboardSidebarClient />
       <main className="flex-1 overflow-y-auto">
         {trialDaysLeft >= 0 && <TrialBanner daysLeft={trialDaysLeft} />}
         <div className="p-4 lg:p-8 lg:ml-0">
