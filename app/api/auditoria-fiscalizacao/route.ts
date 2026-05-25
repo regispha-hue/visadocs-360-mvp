@@ -636,15 +636,15 @@ async function gerarCronogramaValidades(tenantId: string): Promise<any> {
       }
     });
 
-    // Validades de certificados
+    // Validades de registros internos de treinamento
     treinamentos.forEach((treinamento: any) => {
       const dataValidade = new Date(treinamento.dataTreinamento.getTime() + 365 * 24 * 60 * 60 * 1000);
       const diasParaVencer = Math.floor((dataValidade.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
       
       validades.push({
         documento: `CERT-${treinamento.colaborador.nome}-${treinamento.pop.codigo}`,
-        tipo: "CERTIFICADO",
-        titulo: `Certificado ${treinamento.pop.codigo}`,
+        tipo: "REGISTRO_INTERNO",
+        titulo: `Registro interno ${treinamento.pop.codigo}`,
         colaborador: treinamento.colaborador.nome,
         dataValidade: dataValidade.toISOString().split('T')[0],
         diasParaVencer,
