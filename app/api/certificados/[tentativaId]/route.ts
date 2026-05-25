@@ -39,7 +39,7 @@ export async function GET(
     }
 
     if (!tentativa.aprovado) {
-      return NextResponse.json({ error: "Certificado dispon\u00edvel apenas para tentativas aprovadas" }, { status: 400 });
+      return NextResponse.json({ error: "Registro interno dispon\u00edvel apenas para tentativas aprovadas" }, { status: 400 });
     }
 
     // Check tenant access
@@ -90,7 +90,7 @@ export async function GET(
         approvedPopVersionId: tentativa.treinamento.approvedPopVersionId,
       },
     });
-    const filename = `Certificado_${tentativa.quiz.pop.codigo}_${tentativa.colaborador.nome.replace(/\s+/g, "_")}.pdf`;
+    const filename = `Registro_interno_${tentativa.quiz.pop.codigo}_${tentativa.colaborador.nome.replace(/\s+/g, "_")}.pdf`;
 
     return new NextResponse(pdfBuffer, {
       headers: {
@@ -100,6 +100,6 @@ export async function GET(
     });
   } catch (error: any) {
     console.error("Error generating certificate:", error);
-    return NextResponse.json({ error: "Erro ao gerar certificado" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao gerar registro interno" }, { status: 500 });
   }
 }

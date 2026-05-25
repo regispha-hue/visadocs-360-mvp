@@ -157,19 +157,19 @@ export default function QuizPage() {
     try {
       const res = await fetch(`/api/certificados/${tentativaId}`);
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Erro ao gerar certificado" }));
+        const err = await res.json().catch(() => ({ error: "Erro ao gerar registro interno" }));
         throw new Error(err.error);
       }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Certificado_${quiz?.pop?.codigo || "POP"}.pdf`;
+      a.download = `Registro_interno_${quiz?.pop?.codigo || "POP"}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Certificado baixado!");
+      toast.success("Registro interno baixado!");
     } catch (error: any) {
-      toast.error(error.message || "Erro ao baixar certificado");
+      toast.error(error.message || "Erro ao baixar registro interno");
     } finally {
       setDownloadingCert(false);
     }
@@ -262,12 +262,12 @@ export default function QuizPage() {
                     {downloadingCert ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Gerando Certificado...
+                        Gerando registro interno...
                       </>
                     ) : (
                       <>
                         <Award className="h-4 w-4 mr-2" />
-                        Baixar Microcertificado
+                        Baixar comprovante interno
                       </>
                     )}
                   </Button>

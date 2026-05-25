@@ -298,7 +298,7 @@ export default function FiscalizacaoPage() {
         <Tabs defaultValue="pops" className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="pops">POPs</TabsTrigger>
-            <TabsTrigger value="certificados">Certificados</TabsTrigger>
+            <TabsTrigger value="certificados">Registros Internos</TabsTrigger>
             <TabsTrigger value="validades">Validades</TabsTrigger>
             <TabsTrigger value="acessos">Acessos</TabsTrigger>
           </TabsList>
@@ -356,10 +356,10 @@ export default function FiscalizacaoPage() {
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
-                    Certificados de Treinamento
+                    Registros Internos de Treinamento
                   </span>
                   <span className="text-sm font-normal">
-                    {acessoData.certificados.length} certificados
+                    {acessoData.certificados.length} registros internos
                   </span>
                 </CardTitle>
               </CardHeader>
