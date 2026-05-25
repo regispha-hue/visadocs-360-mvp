@@ -477,7 +477,7 @@ function generateMockCompliance() {
       }
     },
     recommendations: [
-      "PRIORIDADE ALTA: Melhorar conformidade em manipulacao",
+      "PRIORIDADE ALTA: Revisar alinhamento documental em manipulacao",
       "REVISAR: Alinhar POPs de controle_qualidade com axiomas Nexoritia"
     ]
   };

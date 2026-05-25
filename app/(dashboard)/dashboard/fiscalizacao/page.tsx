@@ -180,7 +180,7 @@ export default function FiscalizacaoPage() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <QrCode className="h-5 w-5" />
-          BotÃ£o de PÃ¢nico - Modo FiscalizaÃ§Ã£o
+          Acesso rÃ¡pido para fiscalizaÃ§Ã£o
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -267,7 +267,7 @@ export default function FiscalizacaoPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Modo Auditoria - Read-Only</span>
+              <span>Modo consulta read-only</span>
               <Badge variant="outline">
                 FiscalizaÃ§Ã£o
               </Badge>
@@ -508,8 +508,8 @@ export default function FiscalizacaoPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">BotÃ£o de PÃ¢nico - FiscalizaÃ§Ã£o</h1>
-        <p className="text-gray-600">Modo auditoria para acesso rÃ¡pido do fiscal</p>
+        <h1 className="text-2xl font-bold">Acesso rÃ¡pido para fiscalizaÃ§Ã£o</h1>
+        <p className="text-gray-600">Modo consulta read-only para acesso documental controlado</p>
       </div>
 
       {renderQRCodeCard()}
@@ -520,7 +520,7 @@ export default function FiscalizacaoPage() {
             <Shield className="h-4 w-4" />
             <AlertDescription>
               <strong>Como usar:</strong> Imprima este QR Code e coloque em local visÃ­vel no balcÃ£o. 
-              O fiscal pode escanear ou digitar o cÃ³digo de acesso para visualizar todos os documentos 
+              O usuÃ¡rio autorizado pode escanear ou digitar o cÃ³digo de acesso para visualizar os documentos 
               de forma organizada e profissional.
             </AlertDescription>
           </Alert>

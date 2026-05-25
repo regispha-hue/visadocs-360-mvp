@@ -175,7 +175,7 @@ export default function RiscoPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Score Conformidade</p>
+                  <p className="text-sm text-gray-600">Indicador de risco documental</p>
                   <p className="text-2xl font-bold text-blue-600">
                     {analiseIA ? Math.round(analiseIA.scoreConformidade * 100) : 0}%
                   </p>
@@ -303,12 +303,12 @@ export default function RiscoPage() {
 
     return (
       <div className="space-y-6">
-        {/* Score de Conformidade */}
+        {/* Indicador de risco documental */}
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold">Score de Conformidade</h3>
+                <h3 className="text-lg font-semibold">Indicador de risco documental</h3>
                 <p className="text-3xl font-bold text-blue-600">
                   {Math.round(analiseIA.scoreConformidade * 100)}%
                 </p>
