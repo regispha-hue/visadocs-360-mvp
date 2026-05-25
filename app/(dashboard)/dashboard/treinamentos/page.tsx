@@ -101,12 +101,12 @@ export default function TreinamentosPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Certificado.pdf`;
+      a.download = `Registro_interno_treinamento.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Certificado baixado!");
+      toast.success("Registro interno baixado!");
     } catch (error: any) {
-      toast.error(error.message || "Erro ao baixar certificado");
+      toast.error(error.message || "Erro ao baixar registro interno");
     } finally {
       setDownloadingCertId(null);
     }
@@ -225,7 +225,7 @@ export default function TreinamentosPage() {
               variant="ghost"
               size="icon"
               onClick={() => handleDownloadCertificado(item.id)}
-              title="Baixar Microcertificado"
+              title="Baixar comprovante interno"
               aria-label="Baixar registro interno de treinamento"
               disabled={downloadingCertId === item.id}
             >

@@ -280,17 +280,17 @@ export default function ColaboradorDetailPage() {
                             const url = URL.createObjectURL(blob);
                             const a = document.createElement("a");
                             a.href = url;
-                            a.download = `Certificado_${t.pop.codigo}.pdf`;
+                            a.download = `Registro_interno_${t.pop.codigo}.pdf`;
                             a.click();
                             URL.revokeObjectURL(url);
                           } catch {
-                            toast.error("Erro ao baixar certificado");
+                            toast.error("Erro ao baixar registro interno");
                           } finally {
                             setDownloadingCert(null);
                           }
                         }}
                         disabled={downloadingCert === t.id}
-                        title="Baixar Certificado"
+                        title="Baixar registro interno de treinamento"
                       >
                         {downloadingCert === t.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
