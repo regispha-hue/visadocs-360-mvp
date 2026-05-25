@@ -68,27 +68,51 @@ export default function BibliotecaPopsPage() {
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [popsError, setPopsError] = useState<string | null>(null);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPops();
   }, []);
 
   async function fetchPops() {
-    try {
-      const [popsRes, libraryRes] = await Promise.all([
-        fetch("/api/pops?status=VIGENTE"),
-        fetch("/api/document-library?status=ACTIVE"),
-      ]);
-      const data = await popsRes.json();
-      const libraryData = await libraryRes.json();
-      setPops(data.pops || []);
-      setLibraryItems(libraryData.items || []);
-    } catch {
-      toast.error("Erro ao carregar POPs");
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    setPopsError(null);
+    setLibraryError(null);
+
+    const [popsResult, libraryResult] = await Promise.allSettled([
+      fetch("/api/pops?status=VIGENTE"),
+      fetch("/api/document-library?status=ACTIVE"),
+    ]);
+
+    if (popsResult.status === "fulfilled" && popsResult.value.ok) {
+      const data = await popsResult.value.json();
+      setPops(Array.isArray(data?.pops) ? data.pops : []);
+    } else {
+      setPops([]);
+      setPopsError("Não foi possível carregar POPs vigentes.");
     }
+
+    if (libraryResult.status === "fulfilled" && libraryResult.value.ok) {
+      const libraryData = await libraryResult.value.json();
+      setLibraryItems(Array.isArray(libraryData?.items) ? libraryData.items : []);
+    } else {
+      setLibraryItems([]);
+      setLibraryError("Não foi possível carregar o acervo documental.");
+    }
+
+    setLoading(false);
   }
+
+  const filteredLibraryItems = libraryItems.filter((item) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      item.title.toLowerCase().includes(q) ||
+      (item.code || "").toLowerCase().includes(q) ||
+      (item.category || "").toLowerCase().includes(q)
+    );
+  });
 
   const filteredPops = pops.filter((p) => {
     if (!search) return true;
@@ -193,6 +217,12 @@ export default function BibliotecaPopsPage() {
         Geração assistida cria apenas minuta auxiliar. Uso operacional depende de revisão e aprovação do Responsável Técnico.
       </div>
 
+      {(libraryError || popsError) && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {libraryError || popsError}
+        </div>
+      )}
+
       {/* Search and controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -215,10 +245,10 @@ export default function BibliotecaPopsPage() {
       </div>
 
       {/* Folders */}
-      {libraryItems.length > 0 && (
+      {filteredLibraryItems.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">Acervo documental</h3>
-          {libraryItems.slice(0, 12).map((item) => (
+          {filteredLibraryItems.slice(0, 12).map((item) => (
             <div key={item.id} className="flex items-center gap-3 border rounded-lg bg-white px-4 py-3">
               <Library className="h-4 w-4 text-teal-600 flex-shrink-0" />
               <div className="flex-1 min-w-0">
