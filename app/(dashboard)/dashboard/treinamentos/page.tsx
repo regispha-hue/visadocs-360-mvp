@@ -36,18 +36,26 @@ export default function TreinamentosPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTreinamento, setEditingTreinamento] = useState<Treinamento | null>(null);
   const [downloadingCertId, setDownloadingCertId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const fetchTreinamentos = async () => {
     try {
+      setLoadError(null);
       const params = new URLSearchParams();
       if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
       
       const res = await fetch(`/api/treinamentos?${params.toString()}`);
+      if (!res.ok) throw new Error("Erro ao carregar treinamentos");
       const data = await res.json();
-      if (data?.treinamentos) {
+      if (Array.isArray(data?.treinamentos)) {
         setTreinamentos(data.treinamentos);
+      } else {
+        setTreinamentos([]);
+        setLoadError("A resposta de treinamentos veio em formato inesperado.");
       }
     } catch (error) {
+      setTreinamentos([]);
+      setLoadError("Não foi possível carregar treinamentos.");
       toast.error("Erro ao carregar treinamentos");
     } finally {
       setLoading(false);
@@ -266,6 +274,12 @@ export default function TreinamentosPage() {
           </SelectContent>
         </Select>
       </div>
+
+      {loadError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {loadError}
+        </div>
+      )}
 
       <DataTable
         data={treinamentos}
