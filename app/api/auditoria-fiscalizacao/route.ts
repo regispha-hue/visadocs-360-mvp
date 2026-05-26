@@ -119,7 +119,7 @@ async function handleGerarQRCode(tenantId: string) {
     // Gerar Master List de POPs
     const masterListPOPs = await gerarMasterListPOPs(tenantId);
 
-    // Gerar lista de certificados
+    // Gerar lista de registros internos de treinamento
     const certificados = await gerarListaCertificados(tenantId);
 
     // Gerar cronograma de validades
@@ -317,7 +317,7 @@ async function handleCertificados(tenantId: string) {
     const certificados = await gerarListaCertificados(tenantId);
     return NextResponse.json({ certificados });
   } catch (error) {
-    return NextResponse.json({ error: "Erro ao buscar certificados" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao buscar registros internos de treinamento" }, { status: 500 });
   }
 }
 

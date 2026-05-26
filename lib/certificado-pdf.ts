@@ -73,7 +73,7 @@ export function generateCertificadoPdfBuffer(data: CertificadoPdfData): Buffer {
   textRight(lines, data.codigoValidacao, 770, 518, 11, "F2", 0.10, 0.10, 0.18);
   textRight(lines, `${dataFormatada} as ${horaFormatada}`, 770, 536, 9, "F1", 0.42, 0.45, 0.50);
 
-  textCenter(lines, "Registro operacional interno. Nao substitui revisao do Responsavel Tecnico nem representa certificacao sanitaria.", 568, 8, "F1", 0.45, 0.45, 0.48);
+  textCenter(lines, "Registro operacional interno. Nao substitui revisao do Responsavel Tecnico nem representa validacao sanitaria oficial.", 568, 8, "F1", 0.45, 0.45, 0.48);
 
   return buildPdf(lines.join("\n"));
 }
