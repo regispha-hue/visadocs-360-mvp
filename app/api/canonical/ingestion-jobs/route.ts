@@ -8,8 +8,12 @@ export const dynamic = "force-dynamic";
 
 const canonicalIngestionJobSchema = z.object({
   tenantId: z.string().min(1, "tenantId é obrigatório").optional(),
-  libraryItemId: z.string().min(1, "libraryItemId é obrigatório"),
+  libraryItemId: z.string().min(1, "libraryItemId é obrigatório").optional(),
+  documentaryLibraryItemId: z.string().min(1, "documentaryLibraryItemId é obrigatório").optional(),
   sourceType: z.literal("DOCUMENTARY_LIBRARY_ITEM"),
+}).refine((data) => data.libraryItemId || data.documentaryLibraryItemId, {
+  message: "libraryItemId ou documentaryLibraryItemId é obrigatório",
+  path: ["libraryItemId"],
 });
 
 const ACTIVE_JOB_STATUSES = ["PENDING", "QUEUED", "PROCESSING"];
@@ -29,9 +33,10 @@ export async function POST(request: Request) {
 
     const { tenantId, response } = requireTenantId(user, parsed.data.tenantId);
     if (response) return response;
+    const libraryItemId = parsed.data.libraryItemId || parsed.data.documentaryLibraryItemId;
 
     const libraryItem = await prisma.documentaryLibraryItem.findFirst({
-      where: { id: parsed.data.libraryItemId, tenantId: tenantId! },
+      where: { id: libraryItemId, tenantId: tenantId! },
       select: {
         id: true,
         title: true,

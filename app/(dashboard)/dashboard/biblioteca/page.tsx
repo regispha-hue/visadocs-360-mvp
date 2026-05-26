@@ -68,6 +68,7 @@ export default function BibliotecaPopsPage() {
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [canonicalSendingId, setCanonicalSendingId] = useState<string | null>(null);
   const [popsError, setPopsError] = useState<string | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
 
@@ -196,6 +197,43 @@ export default function BibliotecaPopsPage() {
     }
   }
 
+  async function handleSendToCanonicalLibrary(item: LibraryItem) {
+    setCanonicalSendingId(item.id);
+    try {
+      const res = await fetch("/api/canonical/ingestion-jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documentaryLibraryItemId: item.id,
+          sourceType: "DOCUMENTARY_LIBRARY_ITEM",
+        }),
+      });
+
+      if (res.status === 201) {
+        toast.success("Documento enviado para revisão canônica.");
+        return;
+      }
+
+      if (res.status === 409) {
+        toast.error("Este item já possui ingestão canônica ativa.");
+        return;
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        toast.error("Você não tem permissão para enviar este item à Biblioteca Canônica.");
+        return;
+      }
+
+      const data = await res.json().catch(() => null);
+      throw new Error(data?.error || "Erro ao enviar documento para revisão canônica.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao enviar documento para revisão canônica.";
+      toast.error(message);
+    } finally {
+      setCanonicalSendingId(null);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -257,10 +295,21 @@ export default function BibliotecaPopsPage() {
                   {item.type} · {item.category || "sem categoria"} · {item.version || "sem versão"}
                 </p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
-                <Wand2 className="h-4 w-4 mr-1" />
-                Minuta
-              </Button>
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleSendToCanonicalLibrary(item)}
+                  disabled={canonicalSendingId === item.id}
+                >
+                  <Library className="h-4 w-4 mr-1" />
+                  Enviar para Biblioteca Canônica
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
+                  <Wand2 className="h-4 w-4 mr-1" />
+                  Minuta
+                </Button>
+              </div>
             </div>
           ))}
         </div>
