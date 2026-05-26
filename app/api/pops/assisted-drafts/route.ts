@@ -65,7 +65,7 @@ function buildAuxiliaryDraft(title: string, objective: string | undefined, sourc
     sourceContent,
     "",
     "## Aviso regulatório",
-    "Este artefato é uma minuta auxiliar e não representa conformidade sanitária automática, certificação ou aprovação institucional.",
+    "Este artefato é uma minuta auxiliar e não representa conformidade sanitária automática, validação oficial ou aprovação institucional.",
   ].join("\n");
 }
 
