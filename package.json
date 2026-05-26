@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:qa-demo": "tsx --require dotenv/config scripts/seed-qa-demo.ts"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
