@@ -45,6 +45,32 @@ interface LibraryItem {
   version?: string;
 }
 
+interface CanonicalDocument {
+  id: string;
+  title: string;
+  code?: string | null;
+  kind: string;
+  status: string;
+  sourceType: string;
+  sourceId: string;
+  libraryItemId?: string | null;
+  category?: string | null;
+  version?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CanonicalIngestionJob {
+  id: string;
+  sourceType: string;
+  sourceId: string;
+  status: string;
+  canonicalDocumentId?: string | null;
+  requestedByUserName?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const FOLDER_ICONS: Record<string, string> = {
   "Gest\u00e3o da Qualidade e Documenta\u00e7\u00e3o": "\ud83d\udccb",
   "Recursos Humanos e Pessoal": "\ud83d\udc65",
@@ -63,6 +89,8 @@ const FOLDER_ICONS: Record<string, string> = {
 export default function BibliotecaPopsPage() {
   const [pops, setPops] = useState<Pop[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
+  const [canonicalDocuments, setCanonicalDocuments] = useState<CanonicalDocument[]>([]);
+  const [canonicalJobs, setCanonicalJobs] = useState<CanonicalIngestionJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
@@ -71,6 +99,7 @@ export default function BibliotecaPopsPage() {
   const [canonicalSendingId, setCanonicalSendingId] = useState<string | null>(null);
   const [popsError, setPopsError] = useState<string | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
+  const [canonicalError, setCanonicalError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPops();
@@ -80,10 +109,12 @@ export default function BibliotecaPopsPage() {
     setLoading(true);
     setPopsError(null);
     setLibraryError(null);
+    setCanonicalError(null);
 
-    const [popsResult, libraryResult] = await Promise.allSettled([
+    const [popsResult, libraryResult, canonicalResult] = await Promise.allSettled([
       fetch("/api/pops?status=VIGENTE"),
       fetch("/api/document-library?status=ACTIVE"),
+      fetch("/api/canonical/ingestion-jobs"),
     ]);
 
     if (popsResult.status === "fulfilled" && popsResult.value.ok) {
@@ -100,6 +131,16 @@ export default function BibliotecaPopsPage() {
     } else {
       setLibraryItems([]);
       setLibraryError("Não foi possível carregar o acervo documental.");
+    }
+
+    if (canonicalResult.status === "fulfilled" && canonicalResult.value.ok) {
+      const canonicalData = await canonicalResult.value.json();
+      setCanonicalDocuments(Array.isArray(canonicalData?.documents) ? canonicalData.documents : []);
+      setCanonicalJobs(Array.isArray(canonicalData?.jobs) ? canonicalData.jobs : []);
+    } else {
+      setCanonicalDocuments([]);
+      setCanonicalJobs([]);
+      setCanonicalError("Não foi possível carregar a Biblioteca Canônica.");
     }
 
     setLoading(false);
@@ -154,6 +195,19 @@ export default function BibliotecaPopsPage() {
 
   const expandAll = () => setOpenFolders(new Set(Object.keys(grouped)));
   const collapseAll = () => setOpenFolders(new Set());
+
+  const canonicalByLibraryItemId = new Map<string, CanonicalDocument>();
+  for (const document of canonicalDocuments) {
+    const libraryItemId = document.libraryItemId || document.sourceId;
+    if (libraryItemId) canonicalByLibraryItemId.set(libraryItemId, document);
+  }
+
+  const activeCanonicalJobBySourceId = new Map<string, CanonicalIngestionJob>();
+  for (const job of canonicalJobs) {
+    if (["PENDING", "QUEUED", "PROCESSING"].includes(job.status)) {
+      activeCanonicalJobBySourceId.set(job.sourceId, job);
+    }
+  }
 
   async function handleDownload(pop: Pop) {
     setDownloadingId(pop.id);
@@ -261,6 +315,12 @@ export default function BibliotecaPopsPage() {
         </div>
       )}
 
+      {canonicalError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {canonicalError}
+        </div>
+      )}
+
       {/* Search and controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -294,13 +354,22 @@ export default function BibliotecaPopsPage() {
                 <p className="text-xs text-gray-500">
                   {item.type} · {item.category || "sem categoria"} · {item.version || "sem versão"}
                 </p>
+                {(canonicalByLibraryItemId.has(item.id) || activeCanonicalJobBySourceId.has(item.id)) && (
+                  <p className="mt-1 text-xs text-teal-700">
+                    Já enviado para revisão canônica
+                  </p>
+                )}
               </div>
               <div className="flex flex-wrap justify-end gap-2">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => handleSendToCanonicalLibrary(item)}
-                  disabled={canonicalSendingId === item.id}
+                  disabled={
+                    canonicalSendingId === item.id ||
+                    canonicalByLibraryItemId.has(item.id) ||
+                    activeCanonicalJobBySourceId.has(item.id)
+                  }
                 >
                   <Library className="h-4 w-4 mr-1" />
                   Enviar para Biblioteca Canônica
@@ -314,6 +383,40 @@ export default function BibliotecaPopsPage() {
           ))}
         </div>
       )}
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-gray-700">Biblioteca Canônica</h3>
+        {canonicalDocuments.length === 0 && canonicalJobs.length === 0 ? (
+          <Card className="p-5 text-sm text-gray-500">
+            Nenhum documento enviado para revisão canônica.
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {canonicalDocuments.map((document) => {
+              const job = canonicalJobs.find((item) => item.canonicalDocumentId === document.id);
+              return (
+                <div key={document.id} className="flex flex-col gap-2 rounded-lg border bg-white px-4 py-3 sm:flex-row sm:items-center">
+                  <Library className="h-4 w-4 text-teal-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {document.code ? `${document.code} - ` : ""}
+                      {document.title}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {document.kind} · {document.sourceType} · {document.version || "sem versão"} · atualizado em{" "}
+                      {format(new Date(document.updatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">{document.status}</Badge>
+                    {job && <Badge variant="outline">Job {job.status}</Badge>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {Object.keys(grouped).length === 0 ? (
         <Card className="p-8 text-center text-gray-500">

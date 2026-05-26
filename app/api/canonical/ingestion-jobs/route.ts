@@ -19,6 +19,58 @@ const canonicalIngestionJobSchema = z.object({
 const ACTIVE_JOB_STATUSES = ["PENDING", "QUEUED", "PROCESSING"];
 const ACTIVE_DOCUMENT_STATUSES = ["DRAFT", "PENDING_REVIEW", "ACTIVE"];
 
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+
+    const { tenantId, response } = requireTenantId(user);
+    if (response) return response;
+
+    const [documents, jobs] = await Promise.all([
+      prisma.canonicalDocument.findMany({
+        where: { tenantId: tenantId! },
+        orderBy: { updatedAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          title: true,
+          code: true,
+          kind: true,
+          status: true,
+          sourceType: true,
+          sourceId: true,
+          libraryItemId: true,
+          category: true,
+          version: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      prisma.canonicalIngestionJob.findMany({
+        where: { tenantId: tenantId! },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          sourceType: true,
+          sourceId: true,
+          status: true,
+          canonicalDocumentId: true,
+          requestedByUserName: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+    ]);
+
+    return NextResponse.json({ documents, jobs });
+  } catch (error) {
+    console.error("Error listing canonical ingestion jobs:", error);
+    return NextResponse.json({ error: "Erro ao listar documentos canônicos" }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
