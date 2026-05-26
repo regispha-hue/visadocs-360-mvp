@@ -99,7 +99,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error("Error generating certificate:", error);
+    console.error("Error generating internal training evidence:", error);
     return NextResponse.json({ error: "Erro ao gerar registro interno" }, { status: 500 });
   }
 }
