@@ -16,6 +16,7 @@ import {
   FolderClosed,
   FileText,
   ChevronRight,
+  Eye,
   Library,
   Wand2,
 } from "lucide-react";
@@ -71,6 +72,18 @@ interface CanonicalIngestionJob {
   updatedAt: string;
 }
 
+interface CanonicalChunk {
+  id: string;
+  chunkIndex: number;
+  heading?: string | null;
+  text: string;
+  tokenEstimate: number;
+  semanticRole: string;
+  sourceHash: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const FOLDER_ICONS: Record<string, string> = {
   "Gest\u00e3o da Qualidade e Documenta\u00e7\u00e3o": "\ud83d\udccb",
   "Recursos Humanos e Pessoal": "\ud83d\udc65",
@@ -91,6 +104,12 @@ export default function BibliotecaPopsPage() {
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [canonicalDocuments, setCanonicalDocuments] = useState<CanonicalDocument[]>([]);
   const [canonicalJobs, setCanonicalJobs] = useState<CanonicalIngestionJob[]>([]);
+  const [selectedCanonicalDocumentId, setSelectedCanonicalDocumentId] = useState<string | null>(null);
+  const [canonicalChunks, setCanonicalChunks] = useState<CanonicalChunk[]>([]);
+  const [chunkSearch, setChunkSearch] = useState("");
+  const [chunksLoading, setChunksLoading] = useState(false);
+  const [chunksError, setChunksError] = useState<string | null>(null);
+  const [chunksNextCursor, setChunksNextCursor] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
@@ -288,6 +307,49 @@ export default function BibliotecaPopsPage() {
     }
   }
 
+  async function fetchCanonicalChunks(
+    documentId: string,
+    options?: { cursor?: number | null; append?: boolean; query?: string }
+  ) {
+    setChunksLoading(true);
+    setChunksError(null);
+    try {
+      const params = new URLSearchParams({ limit: "20" });
+      const query = options?.query ?? chunkSearch;
+      if (query.trim()) params.set("q", query.trim());
+      if (options?.cursor !== undefined && options.cursor !== null) params.set("cursor", String(options.cursor));
+
+      const res = await fetch(`/api/canonical/documents/${documentId}/chunks?${params.toString()}`);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Não foi possível carregar os chunks.");
+      }
+
+      const nextChunks = Array.isArray(data?.chunks) ? data.chunks : [];
+      setCanonicalChunks((prev) => (options?.append ? [...prev, ...nextChunks] : nextChunks));
+      setChunksNextCursor(typeof data?.pagination?.nextCursor === "number" ? data.pagination.nextCursor : null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Não foi possível carregar os chunks.";
+      setCanonicalChunks((prev) => (options?.append ? prev : []));
+      setChunksNextCursor(null);
+      setChunksError(message);
+    } finally {
+      setChunksLoading(false);
+    }
+  }
+
+  function handleViewChunks(documentId: string) {
+    setChunkSearch("");
+    setCanonicalChunks([]);
+    setChunksNextCursor(null);
+    setChunksError(null);
+    setSelectedCanonicalDocumentId((current) => (current === documentId ? null : documentId));
+    if (selectedCanonicalDocumentId !== documentId) {
+      fetchCanonicalChunks(documentId, { query: "" });
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -394,23 +456,103 @@ export default function BibliotecaPopsPage() {
           <div className="space-y-2">
             {canonicalDocuments.map((document) => {
               const job = canonicalJobs.find((item) => item.canonicalDocumentId === document.id);
+              const isViewingChunks = selectedCanonicalDocumentId === document.id;
               return (
-                <div key={document.id} className="flex flex-col gap-2 rounded-lg border bg-white px-4 py-3 sm:flex-row sm:items-center">
-                  <Library className="h-4 w-4 text-teal-600 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {document.code ? `${document.code} - ` : ""}
-                      {document.title}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {document.kind} · {document.sourceType} · {document.version || "sem versão"} · atualizado em{" "}
-                      {format(new Date(document.updatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                    </p>
+                <div key={document.id} className="rounded-lg border bg-white px-4 py-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Library className="h-4 w-4 text-teal-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {document.code ? `${document.code} - ` : ""}
+                        {document.title}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {document.kind} · {document.sourceType} · {document.version || "sem versão"} · atualizado em{" "}
+                        {format(new Date(document.updatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary">{document.status}</Badge>
+                      {job && <Badge variant="outline">Job {job.status}</Badge>}
+                      <Button size="sm" variant="outline" onClick={() => handleViewChunks(document.id)}>
+                        <Eye className="h-4 w-4 mr-1" />
+                        {isViewingChunks ? "Ocultar chunks" : "Ver chunks"}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{document.status}</Badge>
-                    {job && <Badge variant="outline">Job {job.status}</Badge>}
-                  </div>
+
+                  {isViewingChunks && (
+                    <div className="mt-4 rounded-md border bg-gray-50 p-3">
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <div className="relative flex-1">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Buscar texto nos chunks..."
+                            value={chunkSearch}
+                            onChange={(event) => setChunkSearch(event.target.value)}
+                            className="pl-10"
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                fetchCanonicalChunks(document.id);
+                              }
+                            }}
+                          />
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => fetchCanonicalChunks(document.id)} disabled={chunksLoading}>
+                          Buscar
+                        </Button>
+                      </div>
+
+                      {chunksError && (
+                        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                          {chunksError}
+                        </div>
+                      )}
+
+                      {chunksLoading && canonicalChunks.length === 0 ? (
+                        <div className="mt-4 flex justify-center py-6">
+                          <LoadingSpinner />
+                        </div>
+                      ) : canonicalChunks.length === 0 && !chunksError ? (
+                        <div className="mt-3 rounded-md border bg-white p-4 text-sm text-gray-500">
+                          Nenhum chunk encontrado para este documento.
+                        </div>
+                      ) : (
+                        <div className="mt-3 space-y-2">
+                          {canonicalChunks.map((chunk) => (
+                            <div key={chunk.id} className="rounded-md border bg-white p-3">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Badge variant="outline">Chunk {chunk.chunkIndex + 1}</Badge>
+                                  <Badge variant="secondary">{chunk.semanticRole}</Badge>
+                                  <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
+                                </div>
+                                <span className="font-mono text-[11px] text-gray-400">
+                                  {chunk.sourceHash.slice(0, 12)}
+                                </span>
+                              </div>
+                              {chunk.heading && (
+                                <p className="mt-2 text-sm font-medium text-gray-800">{chunk.heading}</p>
+                              )}
+                              <p className="mt-2 text-sm leading-6 text-gray-600">
+                                {chunk.text.length > 700 ? `${chunk.text.slice(0, 700)}...` : chunk.text}
+                              </p>
+                            </div>
+                          ))}
+                          {chunksNextCursor !== null && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => fetchCanonicalChunks(document.id, { cursor: chunksNextCursor, append: true })}
+                              disabled={chunksLoading}
+                            >
+                              Carregar mais chunks
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

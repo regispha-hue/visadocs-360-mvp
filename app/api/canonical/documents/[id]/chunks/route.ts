@@ -66,6 +66,87 @@ function splitIntoChunks(text: string) {
   return chunks;
 }
 
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+
+    const { id } = await params;
+    const { tenantId, response } = requireTenantId(user);
+    if (response) return response;
+
+    const url = new URL(request.url);
+    const q = (url.searchParams.get("q") || "").trim();
+    const limitParam = Number(url.searchParams.get("limit") || "20");
+    const cursorParam = url.searchParams.get("cursor");
+    const limit = Math.min(Math.max(Number.isFinite(limitParam) ? limitParam : 20, 1), 50);
+    const cursor = cursorParam ? Number(cursorParam) : null;
+
+    const canonicalDocument = await prisma.canonicalDocument.findFirst({
+      where: { id, tenantId: tenantId! },
+      select: {
+        id: true,
+        title: true,
+        code: true,
+        status: true,
+        kind: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!canonicalDocument) {
+      return NextResponse.json({ error: "Documento canônico não encontrado" }, { status: 404 });
+    }
+
+    const chunks = await prisma.canonicalChunk.findMany({
+      where: {
+        tenantId: tenantId!,
+        canonicalDocumentId: canonicalDocument.id,
+        ...(cursor !== null && Number.isFinite(cursor) ? { chunkIndex: { gt: cursor } } : {}),
+        ...(q
+          ? {
+              OR: [
+                { text: { contains: q, mode: "insensitive" } },
+                { heading: { contains: q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { chunkIndex: "asc" },
+      take: limit + 1,
+      select: {
+        id: true,
+        chunkIndex: true,
+        heading: true,
+        text: true,
+        tokenEstimate: true,
+        semanticRole: true,
+        sourceHash: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    const hasMore = chunks.length > limit;
+    const visibleChunks = hasMore ? chunks.slice(0, limit) : chunks;
+    const nextCursor = hasMore ? visibleChunks[visibleChunks.length - 1]?.chunkIndex ?? null : null;
+
+    return NextResponse.json({
+      canonicalDocument,
+      chunks: visibleChunks,
+      pagination: {
+        limit,
+        nextCursor,
+        hasMore,
+      },
+      query: q || null,
+    });
+  } catch (error) {
+    console.error("Error listing canonical chunks:", error);
+    return NextResponse.json({ error: "Erro ao listar chunks do documento canônico" }, { status: 500 });
+  }
+}
+
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
