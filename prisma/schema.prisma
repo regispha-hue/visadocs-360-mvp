@@ -59,6 +59,7 @@ model Tenant {
   documentLifecycleEvents DocumentLifecycleEvent[]
   canonicalIngestionJobs  CanonicalIngestionJob[]
   canonicalDocuments      CanonicalDocument[]
+  canonicalChunks         CanonicalChunk[]
 }
 
 model Pop {
@@ -351,6 +352,7 @@ model CanonicalDocument {
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   ingestionJobs         CanonicalIngestionJob[]
+  chunks                CanonicalChunk[]
 
   @@unique([tenantId, sourceType, sourceId, version])
   @@index([tenantId, kind])
@@ -359,6 +361,27 @@ model CanonicalDocument {
   @@index([tenantId, approvedPopVersionId])
   @@index([tenantId, sourceHash])
   @@index([tenantId, updatedAt])
+}
+
+model CanonicalChunk {
+  id                  String            @id @default(cuid())
+  tenantId            String
+  tenant              Tenant            @relation(fields: [tenantId], references: [id])
+  canonicalDocumentId String
+  canonicalDocument   CanonicalDocument @relation(fields: [canonicalDocumentId], references: [id])
+  chunkIndex          Int
+  heading             String?
+  text                String
+  tokenEstimate       Int
+  semanticRole        String            @default("UNKNOWN")
+  sourceHash          String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([tenantId, canonicalDocumentId, chunkIndex])
+  @@index([tenantId, canonicalDocumentId])
+  @@index([tenantId, sourceHash])
+  @@index([tenantId, semanticRole])
 }
 
 model Quiz {

@@ -284,16 +284,19 @@ Aceite:
 - falhas ficam registradas sem expor dado sensivel;
 - nenhum fluxo atual de POP/treinamento quebra.
 
-### Fase 2: chunking/FRAG-ALL
+### Fase 2: Canonical Chunking v1
 
 Objetivo: fragmentar documentos de forma deterministica e auditavel.
 
 Entregas:
 
 - criar CanonicalChunk;
-- estrategia FRAG-ALL: quebrar todo conteudo textual aproveitavel;
+- estrategia interna de chunking canonico: quebrar texto disponivel em fragmentos rastreaveis;
+- camada de armazenamento compativel com FRAG-ALL para futura importacao de FRAG_PACK;
 - guardar ordem, secao, hash e status;
 - permitir reprocessamento idempotente por sourceHash.
+
+Limite arquitetural: esta fase nao implementa o pipeline completo FRAG-ALL do NexoBook (`scan -> chunk -> classify -> dedupe -> pack`). A integracao futura deve importar, quando apropriado, `corpus_inventory.json`, `corpus_chunks.json`, `corpus_classification.json`, `corpus_deduplication.json` e `frag_pack.json`.
 
 Aceite:
 
