@@ -151,7 +151,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
               ? canonicalDocument.metadata
               : {}),
             chunking: {
-              strategy: "deterministic_frag_all_v1",
+              strategy: "canonical_chunking_v1",
+              compatibility: "FRAG-ALL compatible storage layer",
               chunkSize: `${MIN_CHUNK_SIZE}-${MAX_CHUNK_SIZE}`,
               overlap: OVERLAP_SIZE,
               chunksCreated: createdChunks.length,
@@ -193,7 +194,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       metadata: {
         chunksCreated: result.createdChunks.length,
         sourceHash,
-        strategy: "deterministic_frag_all_v1",
+        strategy: "canonical_chunking_v1",
+        compatibility: "FRAG-ALL compatible storage layer",
       },
     });
 
