@@ -60,6 +60,7 @@ model Tenant {
   canonicalIngestionJobs  CanonicalIngestionJob[]
   canonicalDocuments      CanonicalDocument[]
   canonicalChunks         CanonicalChunk[]
+  ragRetrievalLogs        RagRetrievalLog[]
 }
 
 model Pop {
@@ -382,6 +383,26 @@ model CanonicalChunk {
   @@index([tenantId, canonicalDocumentId])
   @@index([tenantId, sourceHash])
   @@index([tenantId, semanticRole])
+}
+
+model RagRetrievalLog {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  userId            String?
+  purpose           String   @default("CANONICAL_SEARCH")
+  queryPreview      String
+  queryHash         String
+  documentId        String?
+  retrievedChunkIds Json
+  resultCount       Int
+  filtersJson       Json?
+  createdAt         DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, purpose])
+  @@index([tenantId, documentId])
+  @@index([tenantId, queryHash])
 }
 
 model Quiz {
