@@ -84,6 +84,24 @@ interface CanonicalChunk {
   updatedAt: string;
 }
 
+interface CanonicalRetrievalChunk {
+  id: string;
+  canonicalDocumentId: string;
+  chunkIndex: number;
+  heading?: string | null;
+  text: string;
+  tokenEstimate: number;
+  semanticRole: string;
+  sourceHash: string;
+  canonicalDocument?: {
+    id: string;
+    title: string;
+    code?: string | null;
+    status: string;
+    kind: string;
+  };
+}
+
 const FOLDER_ICONS: Record<string, string> = {
   "Gest\u00e3o da Qualidade e Documenta\u00e7\u00e3o": "\ud83d\udccb",
   "Recursos Humanos e Pessoal": "\ud83d\udc65",
@@ -110,6 +128,13 @@ export default function BibliotecaPopsPage() {
   const [chunksLoading, setChunksLoading] = useState(false);
   const [chunksError, setChunksError] = useState<string | null>(null);
   const [chunksNextCursor, setChunksNextCursor] = useState<number | null>(null);
+  const [retrievalQuery, setRetrievalQuery] = useState("");
+  const [retrievalDocumentId, setRetrievalDocumentId] = useState("");
+  const [retrievalLoading, setRetrievalLoading] = useState(false);
+  const [retrievalError, setRetrievalError] = useState<string | null>(null);
+  const [retrievalLogId, setRetrievalLogId] = useState<string | null>(null);
+  const [retrievalResults, setRetrievalResults] = useState<CanonicalRetrievalChunk[]>([]);
+  const [retrievalSearched, setRetrievalSearched] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
@@ -350,6 +375,52 @@ export default function BibliotecaPopsPage() {
     }
   }
 
+  async function handleCanonicalRetrieval() {
+    const query = retrievalQuery.trim();
+    if (query.length < 2) {
+      setRetrievalError("Digite pelo menos 2 caracteres para consultar o acervo canônico.");
+      setRetrievalResults([]);
+      setRetrievalLogId(null);
+      setRetrievalSearched(true);
+      return;
+    }
+
+    setRetrievalLoading(true);
+    setRetrievalError(null);
+    setRetrievalLogId(null);
+    setRetrievalSearched(true);
+
+    try {
+      const res = await fetch("/api/canonical/retrievals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: query,
+          documentId: retrievalDocumentId || undefined,
+          purpose: "CANONICAL_SEARCH",
+          limit: 10,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error("Você não tem permissão para consultar o acervo canônico.");
+        }
+        throw new Error(data?.error || "Não foi possível consultar o acervo canônico.");
+      }
+
+      setRetrievalResults(Array.isArray(data?.chunks) ? data.chunks : []);
+      setRetrievalLogId(typeof data?.retrievalLogId === "string" ? data.retrievalLogId : null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Não foi possível consultar o acervo canônico.";
+      setRetrievalResults([]);
+      setRetrievalError(message);
+    } finally {
+      setRetrievalLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -403,6 +474,105 @@ export default function BibliotecaPopsPage() {
           </Button>
         </div>
       </div>
+
+      <Card className="p-4">
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium text-gray-800">Consulta Canônica</h3>
+            <p className="mt-1 text-xs text-gray-500">
+              Consulta textual auditável sobre chunks canônicos. Cada consulta gera registro interno de recuperação.
+            </p>
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-[1fr_280px_auto]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Consultar texto no acervo canônico..."
+                value={retrievalQuery}
+                onChange={(event) => setRetrievalQuery(event.target.value)}
+                className="pl-10"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleCanonicalRetrieval();
+                  }
+                }}
+              />
+            </div>
+
+            <select
+              value={retrievalDocumentId}
+              onChange={(event) => setRetrievalDocumentId(event.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="">Todos os documentos canônicos</option>
+              {canonicalDocuments.map((document) => (
+                <option key={document.id} value={document.id}>
+                  {document.code ? `${document.code} - ` : ""}{document.title}
+                </option>
+              ))}
+            </select>
+
+            <Button onClick={handleCanonicalRetrieval} disabled={retrievalLoading}>
+              Consultar acervo canônico
+            </Button>
+          </div>
+
+          {retrievalError && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {retrievalError}
+            </div>
+          )}
+
+          {retrievalLoading ? (
+            <div className="flex justify-center py-6">
+              <LoadingSpinner />
+            </div>
+          ) : retrievalSearched && retrievalResults.length === 0 && !retrievalError ? (
+            <div className="rounded-md border bg-gray-50 p-4 text-sm text-gray-500">
+              Nenhum trecho encontrado para esta consulta textual.
+              {retrievalLogId && (
+                <span className="mt-2 block font-mono text-xs text-gray-400">Retrieval log: {retrievalLogId}</span>
+              )}
+            </div>
+          ) : retrievalResults.length > 0 ? (
+            <div className="space-y-3">
+              {retrievalLogId && (
+                <div className="rounded-md border bg-teal-50 p-3 text-xs text-teal-800">
+                  Consulta registrada para auditoria: <span className="font-mono">{retrievalLogId}</span>
+                </div>
+              )}
+              {retrievalResults.map((chunk) => (
+                <div key={chunk.id} className="rounded-md border bg-white p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-gray-900">
+                        {chunk.canonicalDocument?.code ? `${chunk.canonicalDocument.code} - ` : ""}
+                        {chunk.canonicalDocument?.title || chunk.canonicalDocumentId}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Documento {chunk.canonicalDocumentId} · Chunk {chunk.chunkIndex + 1}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary">{chunk.semanticRole}</Badge>
+                      <Badge variant="outline">{chunk.tokenEstimate} tokens estimados</Badge>
+                    </div>
+                  </div>
+                  {chunk.heading && <p className="mt-2 text-sm font-medium text-gray-800">{chunk.heading}</p>}
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                    {chunk.text.length > 700 ? `${chunk.text.slice(0, 700)}...` : chunk.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-md border bg-gray-50 p-4 text-sm text-gray-500">
+              Informe um termo para consultar o acervo canônico.
+            </div>
+          )}
+        </div>
+      </Card>
 
       {/* Folders */}
       {filteredLibraryItems.length > 0 && (
