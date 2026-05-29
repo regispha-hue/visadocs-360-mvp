@@ -20,47 +20,48 @@ model User {
 }
 
 model Tenant {
-  id                      String                   @id @default(cuid())
-  nome                    String
-  cnpj                    String?
-  responsavel             String?
-  email                   String?
-  telefone                String?
-  endereco                String?
-  status                  String                   @default("ATIVO")
-  subscriptionStatus      String                   @default("ATIVO")
-  trialEndsAt             DateTime?
-  logoUrl                 String?
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
-  users                   User[]
-  pops                    Pop[]
-  colaboradores           Colaborador[]
-  treinamentos            Treinamento[]
-  auditLogs               AuditLog[]
-  auditoriasFiscalizacao  AuditoriaFiscalizacao[]
-  quizzes                 Quiz[]
-  documentos              Documento[]
-  fornecedores            Fornecedor[]
-  materiasPrimas          MateriaPrima[]
-  lotes                   Lote[]
-  popMateriasPrimas       PopMateriaPrima[]
-  riscos                  Risco[]
-  naoConformidades        NaoConformidade[]
-  auditorias              Auditoria[]
-  auditoriasRisco         AuditoriaRisco[]
-  normas                  Norma[]
-  alertasNorma            AlertaNorma[]
-  verificacoesPratica     VerificacaoPratica[]
-  documentaryLibraryItems DocumentaryLibraryItem[]
-  assistedPopDrafts       AssistedPopDraft[]
-  approvedPopVersions     ApprovedPopVersion[]
-  rtApprovalEvents        RTApprovalEvent[]
-  documentLifecycleEvents DocumentLifecycleEvent[]
-  canonicalIngestionJobs  CanonicalIngestionJob[]
-  canonicalDocuments      CanonicalDocument[]
-  canonicalChunks         CanonicalChunk[]
-  ragRetrievalLogs        RagRetrievalLog[]
+  id                               String                            @id @default(cuid())
+  nome                             String
+  cnpj                             String?
+  responsavel                      String?
+  email                            String?
+  telefone                         String?
+  endereco                         String?
+  status                           String                            @default("ATIVO")
+  subscriptionStatus               String                            @default("ATIVO")
+  trialEndsAt                      DateTime?
+  logoUrl                          String?
+  createdAt                        DateTime                          @default(now())
+  updatedAt                        DateTime                          @updatedAt
+  users                            User[]
+  pops                             Pop[]
+  colaboradores                    Colaborador[]
+  treinamentos                     Treinamento[]
+  auditLogs                        AuditLog[]
+  auditoriasFiscalizacao           AuditoriaFiscalizacao[]
+  quizzes                          Quiz[]
+  documentos                       Documento[]
+  fornecedores                     Fornecedor[]
+  materiasPrimas                   MateriaPrima[]
+  lotes                            Lote[]
+  popMateriasPrimas                PopMateriaPrima[]
+  riscos                           Risco[]
+  naoConformidades                 NaoConformidade[]
+  auditorias                       Auditoria[]
+  auditoriasRisco                  AuditoriaRisco[]
+  normas                           Norma[]
+  alertasNorma                     AlertaNorma[]
+  verificacoesPratica              VerificacaoPratica[]
+  documentaryLibraryItems          DocumentaryLibraryItem[]
+  assistedPopDrafts                AssistedPopDraft[]
+  approvedPopVersions              ApprovedPopVersion[]
+  rtApprovalEvents                 RTApprovalEvent[]
+  documentLifecycleEvents          DocumentLifecycleEvent[]
+  canonicalIngestionJobs           CanonicalIngestionJob[]
+  canonicalDocuments               CanonicalDocument[]
+  canonicalChunks                  CanonicalChunk[]
+  ragRetrievalLogs                 RagRetrievalLog[]
+  assistedPopDraftCanonicalSources AssistedPopDraftCanonicalSource[]
 }
 
 model Pop {
@@ -180,15 +181,15 @@ model DocumentaryLibraryItem {
 }
 
 model AssistedPopDraft {
-  id                  String                   @id @default(cuid())
+  id                  String                            @id @default(cuid())
   tenantId            String
-  tenant              Tenant                   @relation(fields: [tenantId], references: [id])
+  tenant              Tenant                            @relation(fields: [tenantId], references: [id])
   popId               String?
-  pop                 Pop?                     @relation(fields: [popId], references: [id])
+  pop                 Pop?                              @relation(fields: [popId], references: [id])
   title               String
   code                String?
-  status              String                   @default("RASCUNHO")
-  version             String                   @default("0.1")
+  status              String                            @default("RASCUNHO")
+  version             String                            @default("0.1")
   objective           String?
   content             String?
   notes               String?
@@ -197,9 +198,10 @@ model AssistedPopDraft {
   submittedByUserName String?
   createdByUserId     String?
   createdByUserName   String?
-  createdAt           DateTime                 @default(now())
-  updatedAt           DateTime                 @updatedAt
+  createdAt           DateTime                          @default(now())
+  updatedAt           DateTime                          @updatedAt
   sources             AssistedPopDraftSource[]
+  canonicalSources    AssistedPopDraftCanonicalSource[]
   approvedVersions    ApprovedPopVersion[]
   approvalEvents      RTApprovalEvent[]
 
@@ -222,6 +224,30 @@ model AssistedPopDraftSource {
   @@unique([draftId, libraryItemId])
   @@index([tenantId, draftId])
   @@index([tenantId, libraryItemId])
+}
+
+model AssistedPopDraftCanonicalSource {
+  id                  String            @id @default(cuid())
+  tenantId            String
+  tenant              Tenant            @relation(fields: [tenantId], references: [id])
+  assistedPopDraftId  String
+  assistedPopDraft    AssistedPopDraft  @relation(fields: [assistedPopDraftId], references: [id])
+  canonicalDocumentId String
+  canonicalDocument   CanonicalDocument @relation(fields: [canonicalDocumentId], references: [id])
+  canonicalChunkId    String
+  canonicalChunk      CanonicalChunk    @relation(fields: [canonicalChunkId], references: [id])
+  ragRetrievalLogId   String?
+  ragRetrievalLog     RagRetrievalLog?  @relation(fields: [ragRetrievalLogId], references: [id])
+  chunkIndex          Int
+  sourceTextPreview   String
+  sourceHash          String
+  createdAt           DateTime          @default(now())
+
+  @@unique([assistedPopDraftId, canonicalChunkId])
+  @@index([tenantId, assistedPopDraftId])
+  @@index([tenantId, canonicalChunkId])
+  @@index([tenantId, canonicalDocumentId])
+  @@index([tenantId, ragRetrievalLogId])
 }
 
 model ApprovedPopVersion {
@@ -327,11 +353,11 @@ model CanonicalIngestionJob {
 }
 
 model CanonicalDocument {
-  id                    String                  @id @default(cuid())
+  id                    String                            @id @default(cuid())
   tenantId              String
-  tenant                Tenant                  @relation(fields: [tenantId], references: [id])
+  tenant                Tenant                            @relation(fields: [tenantId], references: [id])
   kind                  String
-  status                String                  @default("ACTIVE")
+  status                String                            @default("ACTIVE")
   title                 String
   code                  String?
   category              String?
@@ -339,9 +365,9 @@ model CanonicalDocument {
   sourceType            String
   sourceId              String
   libraryItemId         String?
-  libraryItem           DocumentaryLibraryItem? @relation(fields: [libraryItemId], references: [id])
+  libraryItem           DocumentaryLibraryItem?           @relation(fields: [libraryItemId], references: [id])
   approvedPopVersionId  String?
-  approvedPopVersion    ApprovedPopVersion?     @relation(fields: [approvedPopVersionId], references: [id])
+  approvedPopVersion    ApprovedPopVersion?               @relation(fields: [approvedPopVersionId], references: [id])
   sourceHash            String?
   normalizedTextHash    String?
   normalizedTextPreview String?
@@ -350,10 +376,11 @@ model CanonicalDocument {
   createdByUserId       String?
   createdByUserName     String?
   metadata              Json?
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
   ingestionJobs         CanonicalIngestionJob[]
   chunks                CanonicalChunk[]
+  assistedDraftSources  AssistedPopDraftCanonicalSource[]
 
   @@unique([tenantId, sourceType, sourceId, version])
   @@index([tenantId, kind])
@@ -365,19 +392,20 @@ model CanonicalDocument {
 }
 
 model CanonicalChunk {
-  id                  String            @id @default(cuid())
-  tenantId            String
-  tenant              Tenant            @relation(fields: [tenantId], references: [id])
-  canonicalDocumentId String
-  canonicalDocument   CanonicalDocument @relation(fields: [canonicalDocumentId], references: [id])
-  chunkIndex          Int
-  heading             String?
-  text                String
-  tokenEstimate       Int
-  semanticRole        String            @default("UNKNOWN")
-  sourceHash          String
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                   String                            @id @default(cuid())
+  tenantId             String
+  tenant               Tenant                            @relation(fields: [tenantId], references: [id])
+  canonicalDocumentId  String
+  canonicalDocument    CanonicalDocument                 @relation(fields: [canonicalDocumentId], references: [id])
+  chunkIndex           Int
+  heading              String?
+  text                 String
+  tokenEstimate        Int
+  semanticRole         String                            @default("UNKNOWN")
+  sourceHash           String
+  createdAt            DateTime                          @default(now())
+  updatedAt            DateTime                          @updatedAt
+  assistedDraftSources AssistedPopDraftCanonicalSource[]
 
   @@unique([tenantId, canonicalDocumentId, chunkIndex])
   @@index([tenantId, canonicalDocumentId])
@@ -386,18 +414,19 @@ model CanonicalChunk {
 }
 
 model RagRetrievalLog {
-  id                String   @id @default(cuid())
-  tenantId          String
-  tenant            Tenant   @relation(fields: [tenantId], references: [id])
-  userId            String?
-  purpose           String   @default("CANONICAL_SEARCH")
-  queryPreview      String
-  queryHash         String
-  documentId        String?
-  retrievedChunkIds Json
-  resultCount       Int
-  filtersJson       Json?
-  createdAt         DateTime @default(now())
+  id                   String                            @id @default(cuid())
+  tenantId             String
+  tenant               Tenant                            @relation(fields: [tenantId], references: [id])
+  userId               String?
+  purpose              String                            @default("CANONICAL_SEARCH")
+  queryPreview         String
+  queryHash            String
+  documentId           String?
+  retrievedChunkIds    Json
+  resultCount          Int
+  filtersJson          Json?
+  createdAt            DateTime                          @default(now())
+  assistedDraftSources AssistedPopDraftCanonicalSource[]
 
   @@index([tenantId, createdAt])
   @@index([tenantId, purpose])
