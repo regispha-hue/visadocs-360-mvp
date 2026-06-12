@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { UserCreateDialog } from "@/components/user-create-dialog";
 import {
   Building2,
   User,
@@ -22,6 +23,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Copy,
+  UserPlus,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -80,6 +82,7 @@ export default function FarmaciaDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [approvalResult, setApprovalResult] = useState<{ email: string; tempPassword: string } | null>(null);
+  const [userDialog, setUserDialog] = useState(false);
 
   const fetchTenant = async () => {
     try {
@@ -308,6 +311,43 @@ export default function FarmaciaDetailPage() {
         </Card>
       </div>
 
+      <Card className="mt-6">
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-teal-600" />
+            Usuários
+          </CardTitle>
+          <Button onClick={() => setUserDialog(true)} disabled={tenant.status !== "ATIVO"}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Novo usuário
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {(tenant.users?.length ?? 0) === 0 ? (
+            <div className="flex min-h-[120px] items-center justify-center text-muted-foreground">
+              Nenhum usuário vinculado a esta farmácia
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tenant.users.map((tenantUser) => (
+                <div key={tenantUser.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                  <div>
+                    <p className="font-medium">{tenantUser.name || "Sem nome"}</p>
+                    <p className="text-sm text-muted-foreground">{tenantUser.email}</p>
+                  </div>
+                  <Badge variant="outline">{tenantUser.role}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+          {tenant.status !== "ATIVO" && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              A criação de usuários exige tenant ATIVO.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Approval Result Dialog */}
       <Dialog open={approvalDialog} onOpenChange={setApprovalDialog}>
         <DialogContent>
@@ -353,6 +393,14 @@ export default function FarmaciaDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UserCreateDialog
+        open={userDialog}
+        onOpenChange={setUserDialog}
+        tenantId={id}
+        roles={["ADMIN", "RT", "OPERADOR"]}
+        onSuccess={fetchTenant}
+      />
     </div>
   );
 }
