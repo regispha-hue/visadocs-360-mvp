@@ -67,6 +67,12 @@ const farmaciaNavItems: NavItem[] = [
     icon: Users,
   },
   {
+    href: "/dashboard/usuarios",
+    label: "Usuários",
+    icon: Shield,
+    roles: ["ADMIN"],
+  },
+  {
     href: "/dashboard/progresso",
     label: "Progresso LMS",
     icon: BarChart3,
