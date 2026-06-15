@@ -67,7 +67,7 @@ export async function GET() {
     return NextResponse.json({ documents, jobs });
   } catch (error) {
     console.error("Error listing canonical ingestion jobs:", error);
-    return NextResponse.json({ error: "Erro ao listar documentos canônicos" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao listar documentos preparados para consulta" }, { status: 500 });
   }
 }
 
