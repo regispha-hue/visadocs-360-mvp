@@ -54,8 +54,6 @@ interface Tenant {
     cep: string;
   };
   status: string;
-  subscriptionStatus: string;
-  trialEndsAt?: string;
   createdAt: string;
   _count: {
     pops: number;
@@ -191,11 +189,6 @@ export default function FarmaciaDetailPage() {
               <Badge variant={statusBadge.variant} className="text-base px-4 py-1">
                 {statusBadge.label}
               </Badge>
-              {tenant.subscriptionStatus === "TRIAL" && tenant.trialEndsAt && (
-                <Badge variant="outline">
-                  Trial até {format(new Date(tenant.trialEndsAt), "dd/MM/yyyy", { locale: ptBR })}
-                </Badge>
-              )}
             </div>
             <div className="flex gap-2">
               {tenant.status === "PENDENTE" && (
