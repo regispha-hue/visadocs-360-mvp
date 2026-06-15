@@ -7,9 +7,14 @@ import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { DocumentLibraryItemDialog } from "@/components/document-library-item-dialog";
+import {
+  CanonicalPopDraftDialog,
+  type CanonicalDraftChunkSummary,
+} from "@/components/canonical-pop-draft-dialog";
 import {
   Search,
   Download,
@@ -139,6 +144,8 @@ export default function BibliotecaPopsPage() {
   const [retrievalLogId, setRetrievalLogId] = useState<string | null>(null);
   const [retrievalResults, setRetrievalResults] = useState<CanonicalRetrievalChunk[]>([]);
   const [retrievalSearched, setRetrievalSearched] = useState(false);
+  const [selectedCanonicalChunks, setSelectedCanonicalChunks] = useState<CanonicalDraftChunkSummary[]>([]);
+  const [canonicalDraftDialogOpen, setCanonicalDraftDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
@@ -153,6 +160,16 @@ export default function BibliotecaPopsPage() {
 
   const userRole = (session?.user as { role?: string } | undefined)?.role;
   const canManageCanonicalContent = userRole === "ADMIN" || userRole === "RT";
+  const selectedCanonicalChunkIds = selectedCanonicalChunks.map((chunk) => chunk.id);
+  const selectedRetrievalLogIds = new Set(
+    selectedCanonicalChunks.map((chunk) => chunk.retrievalLogId).filter(Boolean)
+  );
+  const selectedDraftRetrievalLogId =
+    selectedCanonicalChunks.length > 0 &&
+    selectedCanonicalChunks.every((chunk) => chunk.retrievalLogId) &&
+    selectedRetrievalLogIds.size === 1
+      ? selectedCanonicalChunks[0].retrievalLogId || null
+      : null;
 
   useEffect(() => {
     fetchPops();
@@ -302,6 +319,52 @@ export default function BibliotecaPopsPage() {
     } finally {
       setGeneratingId(null);
     }
+  }
+
+  function toggleCanonicalChunkSelection(chunk: CanonicalDraftChunkSummary, checked: boolean) {
+    setSelectedCanonicalChunks((current) => {
+      if (!checked) return current.filter((item) => item.id !== chunk.id);
+      if (current.some((item) => item.id === chunk.id)) return current;
+      return [...current, chunk];
+    });
+  }
+
+  function isCanonicalChunkSelected(chunkId: string) {
+    return selectedCanonicalChunks.some((chunk) => chunk.id === chunkId);
+  }
+
+  async function handleCreateCanonicalPopDraft(values: {
+    title: string;
+    code: string;
+    objective?: string;
+    chunkIds: string[];
+    retrievalLogId?: string | null;
+  }) {
+    const res = await fetch("/api/pops/assisted-drafts/from-canonical-sources", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: values.title,
+        code: values.code,
+        objective: values.objective,
+        chunkIds: values.chunkIds,
+        retrievalLogId: values.retrievalLogId || undefined,
+      }),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      if (res.status === 400) throw new Error("Revise os dados da minuta e selecione ao menos um chunk.");
+      if (res.status === 401) throw new Error("Sessão expirada. Faça login novamente.");
+      if (res.status === 403) throw new Error("Você não tem permissão para criar minuta POP.");
+      if (res.status === 404) throw new Error("Chunk ou consulta canônica não encontrado para este tenant.");
+      if (res.status === 409) throw new Error("Já existe POP com este código neste tenant.");
+      throw new Error(data?.error || "Erro ao criar minuta POP.");
+    }
+
+    setSelectedCanonicalChunks([]);
+    await fetchPops();
+    return { popId: data?.pop?.id || null, draftId: data?.draft?.id || null };
   }
 
   async function handleSendToCanonicalLibrary(item: LibraryItem) {
@@ -497,6 +560,14 @@ export default function BibliotecaPopsPage() {
         onSuccess={fetchPops}
       />
 
+      <CanonicalPopDraftDialog
+        open={canonicalDraftDialogOpen}
+        onOpenChange={setCanonicalDraftDialogOpen}
+        chunks={selectedCanonicalChunks}
+        retrievalLogId={selectedDraftRetrievalLogId}
+        onSubmit={handleCreateCanonicalPopDraft}
+      />
+
       <div className="rounded-lg border bg-amber-50 p-3 text-sm text-amber-900">
         Geração assistida cria apenas minuta auxiliar. Uso operacional depende de revisão e aprovação do Responsável Técnico.
       </div>
@@ -528,6 +599,12 @@ export default function BibliotecaPopsPage() {
           {canManageCanonicalContent && (
             <Button variant="outline" size="sm" onClick={() => setDocumentDialogOpen(true)}>
               <FilePlus2 className="h-4 w-4 mr-1" /> Novo item documental
+            </Button>
+          )}
+          {canManageCanonicalContent && selectedCanonicalChunkIds.length > 0 && (
+            <Button size="sm" onClick={() => setCanonicalDraftDialogOpen(true)}>
+              <Wand2 className="h-4 w-4 mr-1" />
+              Criar minuta POP ({selectedCanonicalChunkIds.length})
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={expandAll}>
@@ -604,12 +681,39 @@ export default function BibliotecaPopsPage() {
               {retrievalLogId && (
                 <div className="rounded-md border bg-teal-50 p-3 text-xs text-teal-800">
                   Consulta registrada para auditoria: <span className="font-mono">{retrievalLogId}</span>
+                  {canManageCanonicalContent && (
+                    <span className="mt-1 block text-teal-700">
+                      Selecione trechos para criar uma minuta POP rastreável.
+                    </span>
+                  )}
                 </div>
               )}
               {retrievalResults.map((chunk) => (
                 <div key={chunk.id} className="rounded-md border bg-white p-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
+                    <div className="flex min-w-0 gap-3">
+                      {canManageCanonicalContent && (
+                        <Checkbox
+                          checked={isCanonicalChunkSelected(chunk.id)}
+                          onCheckedChange={(checked) =>
+                            toggleCanonicalChunkSelection(
+                              {
+                                id: chunk.id,
+                                chunkIndex: chunk.chunkIndex,
+                                documentTitle: chunk.canonicalDocument?.title || chunk.canonicalDocumentId,
+                                documentCode: chunk.canonicalDocument?.code,
+                                heading: chunk.heading,
+                                text: chunk.text,
+                                retrievalLogId,
+                              },
+                              checked === true
+                            )
+                          }
+                          aria-label={`Selecionar chunk ${chunk.chunkIndex + 1}`}
+                          className="mt-1"
+                        />
+                      )}
+                      <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-gray-900">
                         {chunk.canonicalDocument?.code ? `${chunk.canonicalDocument.code} - ` : ""}
                         {chunk.canonicalDocument?.title || chunk.canonicalDocumentId}
@@ -617,6 +721,7 @@ export default function BibliotecaPopsPage() {
                       <p className="text-xs text-gray-500">
                         Documento {chunk.canonicalDocumentId} · Chunk {chunk.chunkIndex + 1}
                       </p>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary">{chunk.semanticRole}</Badge>
@@ -769,10 +874,33 @@ export default function BibliotecaPopsPage() {
                           {canonicalChunks.map((chunk) => (
                             <div key={chunk.id} className="rounded-md border bg-white p-3">
                               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <Badge variant="outline">Chunk {chunk.chunkIndex + 1}</Badge>
-                                  <Badge variant="secondary">{chunk.semanticRole}</Badge>
-                                  <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
+                                <div className="flex gap-3">
+                                  {canManageCanonicalContent && (
+                                    <Checkbox
+                                      checked={isCanonicalChunkSelected(chunk.id)}
+                                      onCheckedChange={(checked) =>
+                                        toggleCanonicalChunkSelection(
+                                          {
+                                            id: chunk.id,
+                                            chunkIndex: chunk.chunkIndex,
+                                            documentTitle: document.title,
+                                            documentCode: document.code,
+                                            heading: chunk.heading,
+                                            text: chunk.text,
+                                            retrievalLogId: null,
+                                          },
+                                          checked === true
+                                        )
+                                      }
+                                      aria-label={`Selecionar chunk ${chunk.chunkIndex + 1}`}
+                                      className="mt-1"
+                                    />
+                                  )}
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline">Chunk {chunk.chunkIndex + 1}</Badge>
+                                    <Badge variant="secondary">{chunk.semanticRole}</Badge>
+                                    <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
+                                  </div>
                                 </div>
                                 <span className="font-mono text-[11px] text-gray-400">
                                   {chunk.sourceHash.slice(0, 12)}
