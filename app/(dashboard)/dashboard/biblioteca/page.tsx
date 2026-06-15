@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { DocumentLibraryItemDialog } from "@/components/document-library-item-dialog";
 import {
   Search,
   Download,
@@ -19,6 +21,7 @@ import {
   Eye,
   Library,
   Wand2,
+  FilePlus2,
 } from "lucide-react";
 import { SETORES } from "@/lib/types";
 import { format } from "date-fns";
@@ -118,6 +121,7 @@ const FOLDER_ICONS: Record<string, string> = {
 };
 
 export default function BibliotecaPopsPage() {
+  const { data: session } = useSession();
   const [pops, setPops] = useState<Pop[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [canonicalDocuments, setCanonicalDocuments] = useState<CanonicalDocument[]>([]);
@@ -141,9 +145,15 @@ export default function BibliotecaPopsPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [canonicalSendingId, setCanonicalSendingId] = useState<string | null>(null);
+  const [chunkingDocumentId, setChunkingDocumentId] = useState<string | null>(null);
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [popsError, setPopsError] = useState<string | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [canonicalError, setCanonicalError] = useState<string | null>(null);
+
+  const userRole = (session?.user as { role?: string } | undefined)?.role;
+  const canWriteCanonicalContent =
+    typeof userRole === "string" && ["SUPER_ADMIN", "ADMIN", "RT"].includes(userRole);
 
   useEffect(() => {
     fetchPops();
@@ -309,6 +319,7 @@ export default function BibliotecaPopsPage() {
 
       if (res.status === 201) {
         toast.success("Documento enviado para revisão canônica.");
+        await fetchPops();
         return;
       }
 
@@ -329,6 +340,49 @@ export default function BibliotecaPopsPage() {
       toast.error(message);
     } finally {
       setCanonicalSendingId(null);
+    }
+  }
+
+  async function handleGenerateCanonicalChunks(document: CanonicalDocument) {
+    setChunkingDocumentId(document.id);
+    try {
+      const res = await fetch(`/api/canonical/documents/${document.id}/chunks`, {
+        method: "POST",
+      });
+      const data = await res.json().catch(() => null);
+
+      if (res.status === 201) {
+        toast.success(`Chunks gerados para ${document.title}.`);
+        setSelectedCanonicalDocumentId(document.id);
+        setChunkSearch("");
+        await fetchPops();
+        await fetchCanonicalChunks(document.id, { query: "" });
+        return;
+      }
+
+      if (res.status === 409) {
+        toast.error("Chunks já gerados para este documento.");
+        setSelectedCanonicalDocumentId(document.id);
+        await fetchCanonicalChunks(document.id, { query: "" });
+        return;
+      }
+
+      if (res.status === 422) {
+        toast.error(data?.error || "Documento sem texto suficiente para gerar chunks.");
+        return;
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        toast.error("Você não tem permissão para gerar chunks canônicos.");
+        return;
+      }
+
+      throw new Error(data?.error || "Erro ao gerar chunks canônicos.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erro ao gerar chunks canônicos.";
+      toast.error(message);
+    } finally {
+      setChunkingDocumentId(null);
     }
   }
 
@@ -438,6 +492,12 @@ export default function BibliotecaPopsPage() {
         description={`${libraryItems.length} itens de acervo e ${totalPops} POPs vigentes para consulta interna`}
       />
 
+      <DocumentLibraryItemDialog
+        open={documentDialogOpen}
+        onOpenChange={setDocumentDialogOpen}
+        onSuccess={fetchPops}
+      />
+
       <div className="rounded-lg border bg-amber-50 p-3 text-sm text-amber-900">
         Geração assistida cria apenas minuta auxiliar. Uso operacional depende de revisão e aprovação do Responsável Técnico.
       </div>
@@ -466,6 +526,11 @@ export default function BibliotecaPopsPage() {
           />
         </div>
         <div className="flex gap-2">
+          {canWriteCanonicalContent && (
+            <Button variant="outline" size="sm" onClick={() => setDocumentDialogOpen(true)}>
+              <FilePlus2 className="h-4 w-4 mr-1" /> Novo item documental
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={expandAll}>
             <FolderOpen className="h-4 w-4 mr-1" /> Expandir tudo
           </Button>
@@ -592,25 +657,27 @@ export default function BibliotecaPopsPage() {
                   </p>
                 )}
               </div>
-              <div className="flex flex-wrap justify-end gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleSendToCanonicalLibrary(item)}
-                  disabled={
-                    canonicalSendingId === item.id ||
-                    canonicalByLibraryItemId.has(item.id) ||
-                    activeCanonicalJobBySourceId.has(item.id)
-                  }
-                >
-                  <Library className="h-4 w-4 mr-1" />
-                  Enviar para Biblioteca Canônica
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
-                  <Wand2 className="h-4 w-4 mr-1" />
-                  Minuta
-                </Button>
-              </div>
+              {canWriteCanonicalContent && (
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleSendToCanonicalLibrary(item)}
+                    disabled={
+                      canonicalSendingId === item.id ||
+                      canonicalByLibraryItemId.has(item.id) ||
+                      activeCanonicalJobBySourceId.has(item.id)
+                    }
+                  >
+                    <Library className="h-4 w-4 mr-1" />
+                    Enviar para Biblioteca Canônica
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
+                    <Wand2 className="h-4 w-4 mr-1" />
+                    Minuta
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -644,6 +711,17 @@ export default function BibliotecaPopsPage() {
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary">{document.status}</Badge>
                       {job && <Badge variant="outline">Job {job.status}</Badge>}
+                      {canWriteCanonicalContent && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleGenerateCanonicalChunks(document)}
+                          disabled={chunkingDocumentId === document.id}
+                        >
+                          <FileText className="h-4 w-4 mr-1" />
+                          {chunkingDocumentId === document.id ? "Gerando..." : "Gerar chunks"}
+                        </Button>
+                      )}
                       <Button size="sm" variant="outline" onClick={() => handleViewChunks(document.id)}>
                         <Eye className="h-4 w-4 mr-1" />
                         {isViewingChunks ? "Ocultar chunks" : "Ver chunks"}
