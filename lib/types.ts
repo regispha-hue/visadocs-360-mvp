@@ -61,7 +61,6 @@ export const STATUS_TENANT_LABELS: Record<string, string> = {
 };
 
 export const STATUS_SUBSCRIPTION_LABELS: Record<string, string> = {
-  TRIAL: "Trial",
   ATIVO: "Ativo",
   SUSPENSO: "Suspenso",
   CANCELADO: "Cancelado",
