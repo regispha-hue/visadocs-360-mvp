@@ -65,7 +65,7 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
     }
 
     if (!content.trim()) {
-      toast.error("Informe o conteudo textual para preparar chunks canonicos.");
+      toast.error("Informe o conteúdo textual para preparar os trechos do documento.");
       return;
     }
 
@@ -117,7 +117,7 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
             Novo item documental
           </DialogTitle>
           <DialogDescription>
-            Crie uma fonte textual para envio posterior a Biblioteca Canonica e geracao de chunks.
+            Crie uma fonte textual para preparar o documento para busca e consulta interna.
           </DialogDescription>
         </DialogHeader>
 
@@ -189,7 +189,7 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
               id="library-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
-              placeholder="Cole aqui o texto da fonte documental que sera usado para gerar chunks canonicos."
+              placeholder="Cole aqui o texto da fonte documental que será usado para preparar os trechos de consulta."
               rows={10}
               required
             />

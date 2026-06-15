@@ -79,7 +79,7 @@ export function CanonicalPopDraftDialog({
     }
 
     if (chunks.length === 0) {
-      toast.error("Selecione ao menos um chunk canonico.");
+      toast.error("Selecione ao menos um trecho de documento.");
       return;
     }
 
@@ -116,7 +116,7 @@ export function CanonicalPopDraftDialog({
             Criar minuta POP
           </DialogTitle>
           <DialogDescription>
-            Crie uma minuta auxiliar rastreavel a partir dos chunks canonicos selecionados. Nada sera aprovado
+            Crie uma minuta auxiliar rastreável a partir dos trechos selecionados. Nada será aprovado
             automaticamente.
           </DialogDescription>
         </DialogHeader>
@@ -167,7 +167,7 @@ export function CanonicalPopDraftDialog({
 
             <div className="rounded-md border bg-gray-50 p-3">
               <p className="text-sm font-medium text-gray-800">
-                {chunks.length} chunk{chunks.length === 1 ? "" : "s"} selecionado{chunks.length === 1 ? "" : "s"}
+                {chunks.length} trecho{chunks.length === 1 ? "" : "s"} selecionado{chunks.length === 1 ? "" : "s"}
               </p>
               {retrievalLogId && (
                 <p className="mt-1 font-mono text-xs text-gray-500">Retrieval log: {retrievalLogId}</p>
@@ -177,14 +177,14 @@ export function CanonicalPopDraftDialog({
                   <div key={chunk.id} className="rounded border bg-white p-2 text-xs text-gray-600">
                     <p className="font-medium text-gray-800">
                       {chunk.documentCode ? `${chunk.documentCode} - ` : ""}
-                      {chunk.documentTitle} · Chunk {chunk.chunkIndex + 1}
+                      {chunk.documentTitle} · Trecho {chunk.chunkIndex + 1}
                     </p>
                     {chunk.heading && <p className="mt-1 text-gray-700">{chunk.heading}</p>}
                     <p className="mt-1 line-clamp-2">{chunk.text}</p>
                   </div>
                 ))}
                 {chunks.length > 8 && (
-                  <p className="text-xs text-gray-500">+ {chunks.length - 8} chunks adicionais selecionados.</p>
+                  <p className="text-xs text-gray-500">+ {chunks.length - 8} trechos adicionais selecionados.</p>
                 )}
               </div>
             </div>
