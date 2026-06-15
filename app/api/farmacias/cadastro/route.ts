@@ -111,10 +111,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Calculate trial end date (14 days from now)
-    const trialEndsAt = new Date();
-    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
-
     // Create tenant with PENDENTE status
     const tenant = await prisma.tenant.create({
       data: {
@@ -125,8 +121,7 @@ export async function POST(request: Request) {
         telefone: normalizedTelefone,
         endereco: enderecoForDb,
         status: "PENDENTE",
-        subscriptionStatus: "TRIAL",
-        trialEndsAt,
+        subscriptionStatus: "ATIVO",
       },
     });
 

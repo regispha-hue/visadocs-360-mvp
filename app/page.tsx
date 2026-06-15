@@ -39,7 +39,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
               <Link href="/cadastro">
-                Comece Agora - 14 dias grátis
+                Comece Agora
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -114,7 +114,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Comece a usar hoje mesmo</h2>
           <p className="text-xl opacity-90 mb-8">
-            14 dias de trial grátis. Sem cartão de crédito.
+            Cadastre sua farmácia para iniciar a gestão documental.
           </p>
           <Button size="lg" variant="secondary" asChild>
             <Link href="/cadastro">

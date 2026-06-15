@@ -36,9 +36,9 @@ interface Documento {
 }
 
 const TIPO_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  RQ: { label: "Registros da Qualidade", icon: "\ud83d\udccb", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  MBP: { label: "Manual de Boas Pr\u00e1ticas", icon: "\ud83d\udcd6", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  ANEXO: { label: "Anexos", icon: "\ud83d\udcce", color: "bg-amber-50 text-amber-700 border-amber-200" },
+  RQ: { label: "Registros da Qualidade", icon: "📋", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  MBP: { label: "Manual de Boas Práticas MBP", icon: "📖", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  ANEXO: { label: "Anexos", icon: "📎", color: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
 export default function DocumentosPage() {
@@ -111,7 +111,7 @@ export default function DocumentosPage() {
     <div>
       <PageHeader
         title="Biblioteca de Documentos"
-        description="Registros da Qualidade (RQ's), Manual de Boas Pr\u00e1ticas e Anexos"
+        description="Registros da Qualidade (RQ's), Manual de Boas Práticas MBP e Anexos"
       />
 
       {/* Stats */}
@@ -119,7 +119,7 @@ export default function DocumentosPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">\ud83d\udccb</span>
+              <span className="text-2xl">📋</span>
               <div>
                 <p className="text-2xl font-bold">{totalRQs}</p>
                 <p className="text-sm text-muted-foreground">Registros da Qualidade</p>
@@ -130,10 +130,10 @@ export default function DocumentosPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">\ud83d\udcd6</span>
+              <span className="text-2xl">📖</span>
               <div>
                 <p className="text-2xl font-bold">{totalMBP}</p>
-                <p className="text-sm text-muted-foreground">Manual de Boas Pr\u00e1ticas</p>
+                <p className="text-sm text-muted-foreground">Manual de Boas Práticas MBP</p>
               </div>
             </div>
           </CardContent>
@@ -141,7 +141,7 @@ export default function DocumentosPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">\ud83d\udcce</span>
+              <span className="text-2xl">📎</span>
               <div>
                 <p className="text-2xl font-bold">{totalAnexos}</p>
                 <p className="text-sm text-muted-foreground">Anexos</p>
@@ -156,7 +156,7 @@ export default function DocumentosPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por c\u00f3digo, t\u00edtulo ou POP..."
+            placeholder="Buscar por código, título ou POP..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -189,7 +189,7 @@ export default function DocumentosPage() {
                 )}
               </div>
               <Button variant="ghost" size="sm" onClick={() => setViewingDoc(null)}>
-                \u2715
+                ✕
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto p-6">
