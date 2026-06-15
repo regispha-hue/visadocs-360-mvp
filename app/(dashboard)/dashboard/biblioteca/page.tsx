@@ -152,8 +152,7 @@ export default function BibliotecaPopsPage() {
   const [canonicalError, setCanonicalError] = useState<string | null>(null);
 
   const userRole = (session?.user as { role?: string } | undefined)?.role;
-  const canWriteCanonicalContent =
-    typeof userRole === "string" && ["SUPER_ADMIN", "ADMIN", "RT"].includes(userRole);
+  const canManageCanonicalContent = userRole === "ADMIN" || userRole === "RT";
 
   useEffect(() => {
     fetchPops();
@@ -526,7 +525,7 @@ export default function BibliotecaPopsPage() {
           />
         </div>
         <div className="flex gap-2">
-          {canWriteCanonicalContent && (
+          {canManageCanonicalContent && (
             <Button variant="outline" size="sm" onClick={() => setDocumentDialogOpen(true)}>
               <FilePlus2 className="h-4 w-4 mr-1" /> Novo item documental
             </Button>
@@ -657,7 +656,7 @@ export default function BibliotecaPopsPage() {
                   </p>
                 )}
               </div>
-              {canWriteCanonicalContent && (
+              {canManageCanonicalContent && (
                 <div className="flex flex-wrap justify-end gap-2">
                   <Button
                     size="sm"
@@ -711,7 +710,7 @@ export default function BibliotecaPopsPage() {
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary">{document.status}</Badge>
                       {job && <Badge variant="outline">Job {job.status}</Badge>}
-                      {canWriteCanonicalContent && (
+                      {canManageCanonicalContent && (
                         <Button
                           size="sm"
                           variant="outline"
