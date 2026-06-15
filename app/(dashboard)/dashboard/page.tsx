@@ -48,7 +48,7 @@ export default async function DashboardPage() {
     }),
     prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { nome: true, subscriptionStatus: true },
+      select: { nome: true },
     }),
   ]);
 
