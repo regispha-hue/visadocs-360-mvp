@@ -121,7 +121,7 @@ const FOLDER_ICONS: Record<string, string> = {
 };
 
 export default function BibliotecaPopsPage() {
-  const { data: session } = useSession();
+  const { data: session } = useSession() || {};
   const [pops, setPops] = useState<Pop[]>([]);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [canonicalDocuments, setCanonicalDocuments] = useState<CanonicalDocument[]>([]);
