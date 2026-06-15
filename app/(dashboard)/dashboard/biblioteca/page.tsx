@@ -111,18 +111,18 @@ interface CanonicalRetrievalChunk {
 }
 
 const FOLDER_ICONS: Record<string, string> = {
-  "Gest\u00e3o da Qualidade e Documenta\u00e7\u00e3o": "\ud83d\udccb",
+  "Gestão da Qualidade e Documentação": "\ud83d\udccb",
   "Recursos Humanos e Pessoal": "\ud83d\udc65",
-  "Qualifica\u00e7\u00e3o de Fornecedores e Prestadores": "\ud83e\udd1d",
-  "Infraestrutura e Seguran\u00e7a": "\ud83c\udfe2",
-  "Equipamentos e Calibra\u00e7\u00e3o": "\u2699\ufe0f",
-  "Limpeza e Higieniza\u00e7\u00e3o": "\ud83e\uddf9",
-  "Atendimento e Dispensa\u00e7\u00e3o": "\ud83d\udc8a",
-  "Escritura\u00e7\u00e3o e Rastreabilidade": "\ud83d\udcdd",
+  "Qualificação de Fornecedores e Prestadores": "\ud83e\udd1d",
+  "Infraestrutura e Segurança": "\ud83c\udfe2",
+  "Equipamentos e Calibração": "\u2699\ufe0f",
+  "Limpeza e Higienização": "\ud83e\uddf9",
+  "Atendimento e Dispensação": "\ud83d\udc8a",
+  "Escrituração e Rastreabilidade": "\ud83d\udcdd",
   "Controle de Qualidade": "\ud83d\udd2c",
   "Almoxarifado e Estoque": "\ud83d\udce6",
-  "\u00c1rea de Manipula\u00e7\u00e3o": "\u2697\ufe0f",
-  "\u00c1gua Purificada": "\ud83d\udca7",
+  "Área de Manipulação": "\u2697\ufe0f",
+  "Água Purificada": "\ud83d\udca7",
 };
 
 export default function BibliotecaPopsPage() {
@@ -210,7 +210,7 @@ export default function BibliotecaPopsPage() {
     } else {
       setCanonicalDocuments([]);
       setCanonicalJobs([]);
-      setCanonicalError("Não foi possível carregar a Biblioteca Canônica.");
+      setCanonicalError("Não foi possível carregar os documentos preparados para consulta.");
     }
 
     setLoading(false);
@@ -357,7 +357,7 @@ export default function BibliotecaPopsPage() {
       if (res.status === 400) throw new Error("Revise os dados da minuta e selecione ao menos um chunk.");
       if (res.status === 401) throw new Error("Sessão expirada. Faça login novamente.");
       if (res.status === 403) throw new Error("Você não tem permissão para criar minuta POP.");
-      if (res.status === 404) throw new Error("Chunk ou consulta canônica não encontrado para este tenant.");
+      if (res.status === 404) throw new Error("Trecho ou consulta não encontrado para este tenant.");
       if (res.status === 409) throw new Error("Já existe POP com este código neste tenant.");
       throw new Error(data?.error || "Erro ao criar minuta POP.");
     }
@@ -380,7 +380,7 @@ export default function BibliotecaPopsPage() {
       });
 
       if (res.status === 201) {
-        toast.success("Documento enviado para revisão canônica.");
+        toast.success("Documento enviado para preparação.");
         await fetchPops();
         return;
       }
@@ -391,14 +391,14 @@ export default function BibliotecaPopsPage() {
       }
 
       if (res.status === 401 || res.status === 403) {
-        toast.error("Você não tem permissão para enviar este item à Biblioteca Canônica.");
+        toast.error("Você não tem permissão para preparar este documento para consulta.");
         return;
       }
 
       const data = await res.json().catch(() => null);
-      throw new Error(data?.error || "Erro ao enviar documento para revisão canônica.");
+      throw new Error(data?.error || "Erro ao preparar documento para consulta.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao enviar documento para revisão canônica.";
+      const message = error instanceof Error ? error.message : "Erro ao preparar documento para consulta.";
       toast.error(message);
     } finally {
       setCanonicalSendingId(null);
@@ -414,7 +414,7 @@ export default function BibliotecaPopsPage() {
       const data = await res.json().catch(() => null);
 
       if (res.status === 201) {
-        toast.success(`Chunks gerados para ${document.title}.`);
+        toast.success(`Trechos preparados para ${document.title}.`);
         setSelectedCanonicalDocumentId(document.id);
         setChunkSearch("");
         await fetchPops();
@@ -423,25 +423,25 @@ export default function BibliotecaPopsPage() {
       }
 
       if (res.status === 409) {
-        toast.error("Chunks já gerados para este documento.");
+        toast.error("Os trechos deste documento já foram preparados.");
         setSelectedCanonicalDocumentId(document.id);
         await fetchCanonicalChunks(document.id, { query: "" });
         return;
       }
 
       if (res.status === 422) {
-        toast.error(data?.error || "Documento sem texto suficiente para gerar chunks.");
+        toast.error(data?.error || "Documento sem texto suficiente para preparar trechos.");
         return;
       }
 
       if (res.status === 401 || res.status === 403) {
-        toast.error("Você não tem permissão para gerar chunks canônicos.");
+        toast.error("Você não tem permissão para preparar trechos deste documento.");
         return;
       }
 
-      throw new Error(data?.error || "Erro ao gerar chunks canônicos.");
+      throw new Error(data?.error || "Erro ao preparar trechos do documento.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao gerar chunks canônicos.";
+      const message = error instanceof Error ? error.message : "Erro ao preparar trechos do documento.";
       toast.error(message);
     } finally {
       setChunkingDocumentId(null);
@@ -464,14 +464,14 @@ export default function BibliotecaPopsPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data?.error || "Não foi possível carregar os chunks.");
+        throw new Error(data?.error || "Não foi possível carregar os trechos.");
       }
 
       const nextChunks = Array.isArray(data?.chunks) ? data.chunks : [];
       setCanonicalChunks((prev) => (options?.append ? [...prev, ...nextChunks] : nextChunks));
       setChunksNextCursor(typeof data?.pagination?.nextCursor === "number" ? data.pagination.nextCursor : null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Não foi possível carregar os chunks.";
+      const message = error instanceof Error ? error.message : "Não foi possível carregar os trechos.";
       setCanonicalChunks((prev) => (options?.append ? prev : []));
       setChunksNextCursor(null);
       setChunksError(message);
@@ -494,7 +494,7 @@ export default function BibliotecaPopsPage() {
   async function handleCanonicalRetrieval() {
     const query = retrievalQuery.trim();
     if (query.length < 2) {
-      setRetrievalError("Digite pelo menos 2 caracteres para consultar o acervo canônico.");
+      setRetrievalError("Digite pelo menos 2 caracteres para buscar nos documentos.");
       setRetrievalResults([]);
       setRetrievalLogId(null);
       setRetrievalSearched(true);
@@ -521,15 +521,15 @@ export default function BibliotecaPopsPage() {
 
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
-          throw new Error("Você não tem permissão para consultar o acervo canônico.");
+          throw new Error("Você não tem permissão para buscar nos documentos.");
         }
-        throw new Error(data?.error || "Não foi possível consultar o acervo canônico.");
+        throw new Error(data?.error || "Não foi possível buscar nos documentos.");
       }
 
       setRetrievalResults(Array.isArray(data?.chunks) ? data.chunks : []);
       setRetrievalLogId(typeof data?.retrievalLogId === "string" ? data.retrievalLogId : null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Não foi possível consultar o acervo canônico.";
+      const message = error instanceof Error ? error.message : "Não foi possível buscar nos documentos.";
       setRetrievalResults([]);
       setRetrievalError(message);
     } finally {
@@ -555,8 +555,8 @@ export default function BibliotecaPopsPage() {
             <p className="font-medium">
               {selectedCanonicalChunksCount}{" "}
               {selectedCanonicalChunksCount === 1
-                ? "chunk selecionado"
-                : "chunks selecionados"}
+                ? "trecho selecionado"
+                : "trechos selecionados"}
             </p>
             <p className="mt-1 text-xs text-blue-700">
               Crie uma minuta auxiliar para revisão do RT a partir dos trechos
@@ -643,9 +643,9 @@ export default function BibliotecaPopsPage() {
       <Card className="p-4">
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-medium text-gray-800">Consulta Canônica</h3>
+            <h3 className="text-sm font-medium text-gray-800">Busca nos documentos de referência</h3>
             <p className="mt-1 text-xs text-gray-500">
-              Consulta textual auditável sobre chunks canônicos. Cada consulta gera registro interno de recuperação.
+              Pesquise nos trechos preparados dos documentos. Cada busca gera um registro interno para auditoria.
             </p>
           </div>
 
@@ -653,7 +653,7 @@ export default function BibliotecaPopsPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Consultar texto no acervo canônico..."
+                placeholder="Buscar texto nos documentos de referência..."
                 value={retrievalQuery}
                 onChange={(event) => setRetrievalQuery(event.target.value)}
                 className="pl-10"
@@ -670,7 +670,7 @@ export default function BibliotecaPopsPage() {
               onChange={(event) => setRetrievalDocumentId(event.target.value)}
               className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <option value="">Todos os documentos canônicos</option>
+              <option value="">Todos os documentos de referência</option>
               {canonicalDocuments.map((document) => (
                 <option key={document.id} value={document.id}>
                   {document.code ? `${document.code} - ` : ""}{document.title}
@@ -679,7 +679,7 @@ export default function BibliotecaPopsPage() {
             </select>
 
             <Button onClick={handleCanonicalRetrieval} disabled={retrievalLoading}>
-              Consultar acervo canônico
+              Buscar nos documentos
             </Button>
           </div>
 
@@ -733,7 +733,7 @@ export default function BibliotecaPopsPage() {
                               checked === true
                             )
                           }
-                          aria-label={`Selecionar chunk ${chunk.chunkIndex + 1}`}
+                          aria-label={`Selecionar trecho ${chunk.chunkIndex + 1}`}
                           className="mt-1"
                         />
                       )}
@@ -743,7 +743,7 @@ export default function BibliotecaPopsPage() {
                         {chunk.canonicalDocument?.title || chunk.canonicalDocumentId}
                       </p>
                       <p className="text-xs text-gray-500">
-                        Documento {chunk.canonicalDocumentId} · Chunk {chunk.chunkIndex + 1}
+                        Documento {chunk.canonicalDocumentId} · Trecho {chunk.chunkIndex + 1}
                       </p>
                       </div>
                     </div>
@@ -761,7 +761,7 @@ export default function BibliotecaPopsPage() {
             </div>
           ) : (
             <div className="rounded-md border bg-gray-50 p-4 text-sm text-gray-500">
-              Informe um termo para consultar o acervo canônico.
+              Informe um termo para buscar nos documentos.
             </div>
           )}
         </div>
@@ -781,7 +781,7 @@ export default function BibliotecaPopsPage() {
                 </p>
                 {(canonicalByLibraryItemId.has(item.id) || activeCanonicalJobBySourceId.has(item.id)) && (
                   <p className="mt-1 text-xs text-teal-700">
-                    Já enviado para revisão canônica
+                    Já preparado para consulta
                   </p>
                 )}
               </div>
@@ -798,7 +798,7 @@ export default function BibliotecaPopsPage() {
                     }
                   >
                     <Library className="h-4 w-4 mr-1" />
-                    Enviar para Biblioteca Canônica
+                    Preparar para consulta
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
                     <Wand2 className="h-4 w-4 mr-1" />
@@ -812,10 +812,10 @@ export default function BibliotecaPopsPage() {
       )}
 
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-700">Biblioteca Canônica</h3>
+        <h3 className="text-sm font-medium text-gray-700">Documentos preparados para consulta</h3>
         {canonicalDocuments.length === 0 && canonicalJobs.length === 0 ? (
           <Card className="p-5 text-sm text-gray-500">
-            Nenhum documento enviado para revisão canônica.
+            Nenhum documento preparado para consulta.
           </Card>
         ) : (
           <div className="space-y-2">
@@ -847,12 +847,12 @@ export default function BibliotecaPopsPage() {
                           disabled={chunkingDocumentId === document.id}
                         >
                           <FileText className="h-4 w-4 mr-1" />
-                          {chunkingDocumentId === document.id ? "Gerando..." : "Gerar chunks"}
+                          {chunkingDocumentId === document.id ? "Preparando..." : "Preparar trechos"}
                         </Button>
                       )}
                       <Button size="sm" variant="outline" onClick={() => handleViewChunks(document.id)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        {isViewingChunks ? "Ocultar chunks" : "Ver chunks"}
+                        {isViewingChunks ? "Ocultar trechos" : "Ver trechos"}
                       </Button>
                     </div>
                   </div>
@@ -863,7 +863,7 @@ export default function BibliotecaPopsPage() {
                         <div className="relative flex-1">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            placeholder="Buscar texto nos chunks..."
+                            placeholder="Buscar texto nos trechos..."
                             value={chunkSearch}
                             onChange={(event) => setChunkSearch(event.target.value)}
                             className="pl-10"
@@ -895,7 +895,7 @@ export default function BibliotecaPopsPage() {
                         </div>
                       ) : canonicalChunks.length === 0 && !chunksError ? (
                         <div className="mt-3 rounded-md border bg-white p-4 text-sm text-gray-500">
-                          Nenhum chunk encontrado para este documento.
+                          Nenhum trecho encontrado para este documento.
                         </div>
                       ) : (
                         <div className="mt-3 space-y-2">
@@ -920,12 +920,12 @@ export default function BibliotecaPopsPage() {
                                           checked === true
                                         )
                                       }
-                                      aria-label={`Selecionar chunk ${chunk.chunkIndex + 1}`}
+                                      aria-label={`Selecionar trecho ${chunk.chunkIndex + 1}`}
                                       className="mt-1"
                                     />
                                   )}
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <Badge variant="outline">Chunk {chunk.chunkIndex + 1}</Badge>
+                                    <Badge variant="outline">Trecho {chunk.chunkIndex + 1}</Badge>
                                     <Badge variant="secondary">{chunk.semanticRole}</Badge>
                                     <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
                                   </div>
@@ -949,7 +949,7 @@ export default function BibliotecaPopsPage() {
                               onClick={() => fetchCanonicalChunks(document.id, { cursor: chunksNextCursor, append: true })}
                               disabled={chunksLoading}
                             >
-                              Carregar mais chunks
+                              Carregar mais trechos
                             </Button>
                           )}
                         </div>
@@ -1056,3 +1056,4 @@ export default function BibliotecaPopsPage() {
     </div>
   );
 }
+
