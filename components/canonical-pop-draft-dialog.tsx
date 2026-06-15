@@ -41,8 +41,19 @@ interface CanonicalPopDraftDialogProps {
   }) => Promise<{ popId?: string | null; draftId?: string | null }>;
 }
 
+interface DraftSuccessState {
+  popId: string | null;
+  draftId: string | null;
+  title: string;
+  code: string;
+}
+
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+function abbreviateId(id: string) {
+  return id.length > 10 ? `${id.slice(0, 8)}...` : id;
 }
 
 export function CanonicalPopDraftDialog({
@@ -56,25 +67,30 @@ export function CanonicalPopDraftDialog({
   const [code, setCode] = useState("");
   const [objective, setObjective] = useState("");
   const [loading, setLoading] = useState(false);
-  const [createdPopId, setCreatedPopId] = useState<string | null>(null);
+  const [success, setSuccess] = useState<DraftSuccessState | null>(null);
 
   const resetForm = () => {
     setTitle("");
     setCode("");
     setObjective("");
-    setCreatedPopId(null);
+    setSuccess(null);
+  };
+
+  const handleContinue = () => {
+    resetForm();
+    onOpenChange(false);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (title.trim().length < 3) {
-      toast.error("Informe um titulo com pelo menos 3 caracteres.");
+      toast.error("Informe um título com pelo menos 3 caracteres.");
       return;
     }
 
     if (!code.trim()) {
-      toast.error("Informe o codigo da minuta POP.");
+      toast.error("Informe o código da minuta POP.");
       return;
     }
 
@@ -85,15 +101,22 @@ export function CanonicalPopDraftDialog({
 
     setLoading(true);
     try {
+      const draftTitle = title.trim();
+      const draftCode = code.trim();
       const result = await onSubmit({
-        title: title.trim(),
-        code: code.trim(),
+        title: draftTitle,
+        code: draftCode,
         objective: objective.trim() || undefined,
         chunkIds: chunks.map((chunk) => chunk.id),
         retrievalLogId,
       });
-      setCreatedPopId(result.popId || null);
-      toast.success("Minuta POP criada para revisao do RT.");
+      setSuccess({
+        popId: result.popId || null,
+        draftId: result.draftId || null,
+        title: draftTitle,
+        code: draftCode,
+      });
+      toast.success("Minuta POP criada em rascunho.");
     } catch (error) {
       toast.error(getErrorMessage(error, "Erro ao criar minuta POP."));
     } finally {
@@ -121,30 +144,54 @@ export function CanonicalPopDraftDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {createdPopId ? (
+        {success ? (
           <div className="space-y-4">
-            <div className="rounded-md border bg-teal-50 p-4 text-sm text-teal-800">
-              Minuta criada como rascunho para revisao do RT.
+            <div className="rounded-md border bg-teal-50 p-4 text-sm text-teal-900">
+              <p className="font-semibold">Minuta criada em rascunho</p>
+              <p className="mt-2">
+                A minuta foi criada com fontes de referência vinculadas. Ela ainda precisa de revisão do Responsável Técnico.
+              </p>
+              <p className="mt-3 text-xs text-teal-800">
+                {success.code} - {success.title}
+              </p>
+              <p className="mt-2 text-xs text-teal-800">
+                Nenhuma versão vigente foi publicada automaticamente.
+              </p>
+              {success.draftId && (
+                <p className="mt-3 font-mono text-xs text-teal-700">
+                  Draft: {abbreviateId(success.draftId)}
+                </p>
+              )}
             </div>
-            <Button asChild>
-              <Link href={`/dashboard/pops/${createdPopId}`}>Abrir POP criado</Link>
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {success.popId && (
+                <Button asChild>
+                  <Link href={`/dashboard/pops/${success.popId}`}>Abrir minuta</Link>
+                </Button>
+              )}
+              <Button type="button" variant="outline" onClick={handleContinue}>
+                Continuar na biblioteca
+              </Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="rounded-md border bg-amber-50 p-3 text-sm text-amber-900">
+              Esta ação cria apenas uma minuta em RASCUNHO. Nenhuma versão vigente será publicada.
+            </div>
             <div>
-              <Label htmlFor="canonical-draft-title">Titulo</Label>
+              <Label htmlFor="canonical-draft-title">Título</Label>
               <Input
                 id="canonical-draft-title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Titulo da minuta POP"
+                placeholder="Título da minuta POP"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="canonical-draft-code">Codigo</Label>
+              <Label htmlFor="canonical-draft-code">Código</Label>
               <Input
                 id="canonical-draft-code"
                 value={code}
@@ -170,7 +217,7 @@ export function CanonicalPopDraftDialog({
                 {chunks.length} trecho{chunks.length === 1 ? "" : "s"} selecionado{chunks.length === 1 ? "" : "s"}
               </p>
               {retrievalLogId && (
-                <p className="mt-1 font-mono text-xs text-gray-500">Retrieval log: {retrievalLogId}</p>
+                <p className="mt-1 font-mono text-xs text-gray-500">Registro da busca: {retrievalLogId}</p>
               )}
               <div className="mt-3 max-h-48 space-y-2 overflow-y-auto">
                 {chunks.slice(0, 8).map((chunk) => (
@@ -197,10 +244,10 @@ export function CanonicalPopDraftDialog({
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando...
+                    Criando minuta...
                   </>
                 ) : (
-                  "Criar minuta POP"
+                  "Criar minuta em rascunho"
                 )}
               </Button>
             </DialogFooter>
