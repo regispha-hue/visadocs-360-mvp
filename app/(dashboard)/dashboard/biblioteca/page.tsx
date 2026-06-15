@@ -546,6 +546,30 @@ export default function BibliotecaPopsPage() {
   }
 
   const totalPops = filteredPops.length;
+  const selectedCanonicalChunksCount = selectedCanonicalChunkIds.length;
+  const selectedCanonicalChunksCta =
+    canManageCanonicalContent && selectedCanonicalChunksCount > 0 ? (
+      <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-950">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium">
+              {selectedCanonicalChunksCount}{" "}
+              {selectedCanonicalChunksCount === 1
+                ? "chunk selecionado"
+                : "chunks selecionados"}
+            </p>
+            <p className="mt-1 text-xs text-blue-700">
+              Crie uma minuta auxiliar para revisão do RT a partir dos trechos
+              selecionados.
+            </p>
+          </div>
+          <Button size="sm" onClick={() => setCanonicalDraftDialogOpen(true)}>
+            <Wand2 className="h-4 w-4 mr-1" />
+            Criar minuta POP
+          </Button>
+        </div>
+      </div>
+    ) : null;
 
   return (
     <div className="space-y-6">
@@ -854,6 +878,10 @@ export default function BibliotecaPopsPage() {
                           Buscar
                         </Button>
                       </div>
+
+                      {selectedCanonicalChunksCta && (
+                        <div className="mt-3">{selectedCanonicalChunksCta}</div>
+                      )}
 
                       {chunksError && (
                         <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
