@@ -71,6 +71,13 @@ const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "destruct
   CANCELADO: { variant: "secondary", label: "Cancelado" },
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Administrador",
+  RT: "Responsável Técnico",
+  OPERADOR: "Operador",
+  SUPER_ADMIN: "Administrador geral",
+};
+
 export default function FarmaciaDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -328,7 +335,7 @@ export default function FarmaciaDetailPage() {
                     <p className="font-medium">{tenantUser.name || "Sem nome"}</p>
                     <p className="text-sm text-muted-foreground">{tenantUser.email}</p>
                   </div>
-                  <Badge variant="outline">{tenantUser.role}</Badge>
+                  <Badge variant="outline">{ROLE_LABELS[tenantUser.role] ?? tenantUser.role}</Badge>
                 </div>
               ))}
             </div>

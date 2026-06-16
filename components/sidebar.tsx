@@ -38,7 +38,7 @@ interface NavItem {
 const farmaciaNavItems: NavItem[] = [
   {
     href: "/dashboard",
-    label: "Dashboard",
+    label: "Painel",
     icon: LayoutDashboard,
   },
   {
@@ -94,7 +94,7 @@ const farmaciaNavItems: NavItem[] = [
 const superAdminNavItems: NavItem[] = [
   {
     href: "/admin",
-    label: "Dashboard",
+    label: "Painel",
     icon: LayoutDashboard,
   },
   {

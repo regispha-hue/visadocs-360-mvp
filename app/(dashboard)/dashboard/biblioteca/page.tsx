@@ -125,6 +125,37 @@ const FOLDER_ICONS: Record<string, string> = {
   "Água Purificada": "\ud83d\udca7",
 };
 
+const CANONICAL_STATUS_LABELS: Record<string, string> = {
+  ACTIVE: "Ativo",
+  ARCHIVED: "Arquivado",
+  CHUNKED: "Trechos gerados",
+  DRAFT: "Rascunho",
+  INACTIVE: "Inativo",
+  PENDING: "Pendente",
+  PENDING_REVIEW: "Pendente de revisão",
+  PROCESSING: "Em processamento",
+  QUEUED: "Na fila",
+};
+
+const SEMANTIC_ROLE_LABELS: Record<string, string> = {
+  UNKNOWN: "Não classificado",
+};
+
+function formatCanonicalStatus(status?: string | null) {
+  if (!status) return "Sem status";
+  return CANONICAL_STATUS_LABELS[status] ?? status;
+}
+
+function formatCanonicalJobStatus(status?: string | null) {
+  if (!status) return "Processamento sem status";
+  return `Processamento ${formatCanonicalStatus(status).toLowerCase()}`;
+}
+
+function formatSemanticRole(role?: string | null) {
+  if (!role) return "Não classificado";
+  return SEMANTIC_ROLE_LABELS[role] ?? role;
+}
+
 export default function BibliotecaPopsPage() {
   const { data: session } = useSession() || {};
   const [pops, setPops] = useState<Pop[]>([]);
@@ -750,7 +781,7 @@ export default function BibliotecaPopsPage() {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{chunk.semanticRole}</Badge>
+                      <Badge variant="secondary">{formatSemanticRole(chunk.semanticRole)}</Badge>
                       <Badge variant="outline">{chunk.tokenEstimate} tokens estimados</Badge>
                     </div>
                   </div>
@@ -839,8 +870,8 @@ export default function BibliotecaPopsPage() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{document.status}</Badge>
-                      {job && <Badge variant="outline">Job {job.status}</Badge>}
+                      <Badge variant="secondary">{formatCanonicalStatus(document.status)}</Badge>
+                      {job && <Badge variant="outline">{formatCanonicalJobStatus(job.status)}</Badge>}
                       {canManageCanonicalContent && (
                         <Button
                           size="sm"
@@ -928,7 +959,7 @@ export default function BibliotecaPopsPage() {
                                   )}
                                   <div className="flex flex-wrap items-center gap-2">
                                     <Badge variant="outline">Trecho {chunk.chunkIndex + 1}</Badge>
-                                    <Badge variant="secondary">{chunk.semanticRole}</Badge>
+                                    <Badge variant="secondary">{formatSemanticRole(chunk.semanticRole)}</Badge>
                                     <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
                                   </div>
                                 </div>
