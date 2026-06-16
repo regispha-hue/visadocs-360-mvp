@@ -916,6 +916,12 @@ export default function BibliotecaPopsPage() {
                         <div className="mt-3">{selectedCanonicalChunksCta}</div>
                       )}
 
+                      {!canManageCanonicalContent && (
+                        <div className="mt-3 rounded-md border bg-white p-3 text-sm text-gray-600">
+                          A criação de minuta POP está disponível apenas para Administradores e Responsáveis Técnicos.
+                        </div>
+                      )}
+
                       {chunksError && (
                         <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                           {chunksError}
