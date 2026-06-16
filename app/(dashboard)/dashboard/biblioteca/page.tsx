@@ -354,11 +354,13 @@ export default function BibliotecaPopsPage() {
     const data = await res.json().catch(() => null);
 
     if (!res.ok) {
-      if (res.status === 400) throw new Error("Revise os dados da minuta e selecione ao menos um chunk.");
+      if (res.status === 400) throw new Error("Revise os dados da minuta e selecione ao menos um trecho.");
       if (res.status === 401) throw new Error("Sessão expirada. Faça login novamente.");
       if (res.status === 403) throw new Error("Você não tem permissão para criar minuta POP.");
       if (res.status === 404) throw new Error("Trecho ou consulta não encontrado para este tenant.");
-      if (res.status === 409) throw new Error("Já existe POP com este código neste tenant.");
+      if (res.status === 409) {
+        throw new Error("Já existe POP com este código neste tenant. Escolha outro código para a minuta.");
+      }
       throw new Error(data?.error || "Erro ao criar minuta POP.");
     }
 
@@ -697,7 +699,7 @@ export default function BibliotecaPopsPage() {
             <div className="rounded-md border bg-gray-50 p-4 text-sm text-gray-500">
               Nenhum trecho encontrado para esta consulta textual.
               {retrievalLogId && (
-                <span className="mt-2 block font-mono text-xs text-gray-400">Retrieval log: {retrievalLogId}</span>
+                <span className="mt-2 block font-mono text-xs text-gray-400">Registro da busca: {retrievalLogId}</span>
               )}
             </div>
           ) : retrievalResults.length > 0 ? (
@@ -802,7 +804,7 @@ export default function BibliotecaPopsPage() {
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => handleGenerateDraft(item)} disabled={generatingId === item.id}>
                     <Wand2 className="h-4 w-4 mr-1" />
-                    Minuta
+                    Minuta simples
                   </Button>
                 </div>
               )}
