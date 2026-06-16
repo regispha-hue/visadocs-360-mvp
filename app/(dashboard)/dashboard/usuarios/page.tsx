@@ -36,7 +36,7 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Administrador",
   RT: "Responsável Técnico",
   OPERADOR: "Operador",
-  SUPER_ADMIN: "Super Admin",
+  SUPER_ADMIN: "Administrador geral",
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -132,7 +132,7 @@ export default function UsuariosPage() {
     <div>
       <PageHeader
         title="Usuários"
-        description={`Gerencie acessos de ${tenant?.nome ?? "seu tenant"}`}
+        description={`Gerencie acessos de ${tenant?.nome ?? "sua farmácia"}`}
       >
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -145,12 +145,12 @@ export default function UsuariosPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCog className="h-5 w-5 text-teal-600" />
-              Usuários do tenant
+              Usuários da farmácia
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{users.length}</p>
-            <p className="text-sm text-muted-foreground">Acessos vinculados ao tenant ativo</p>
+            <p className="text-sm text-muted-foreground">Acessos vinculados à farmácia ativa</p>
           </CardContent>
         </Card>
 
@@ -163,7 +163,7 @@ export default function UsuariosPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Administradores podem criar usuários RT e Operador. Criação de ADMIN e SUPER_ADMIN não fica disponível nesta tela.
+              Administradores podem criar usuários Responsável Técnico e Operador. Criação de Administrador e Administrador geral não fica disponível nesta tela.
             </p>
           </CardContent>
         </Card>

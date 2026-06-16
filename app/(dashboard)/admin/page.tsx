@@ -47,7 +47,7 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <PageHeader
-        title="Dashboard Super Admin"
+        title="Painel do administrador geral"
         description="Visão geral do sistema VISADOCS"
       />
 

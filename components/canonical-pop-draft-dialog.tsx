@@ -159,7 +159,7 @@ export function CanonicalPopDraftDialog({
               </p>
               {success.draftId && (
                 <p className="mt-3 font-mono text-xs text-teal-700">
-                  Draft: {abbreviateId(success.draftId)}
+                  Minuta: {abbreviateId(success.draftId)}
                 </p>
               )}
             </div>
