@@ -21,6 +21,52 @@ function previewQuery(query: string) {
   return query.replace(/\s+/g, " ").trim().slice(0, 160);
 }
 
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+const STOPWORDS = new Set([
+  "de",
+  "da",
+  "do",
+  "das",
+  "dos",
+  "e",
+  "a",
+  "o",
+  "as",
+  "os",
+  "em",
+  "para",
+  "por",
+  "com",
+  "um",
+  "uma",
+  "no",
+  "na",
+  "nos",
+  "nas",
+]);
+
+function tokenizeQuery(query: string) {
+  const normalizedQuery = normalizeSearchText(query);
+  const tokens = normalizedQuery
+    .split(/[^a-z0-9]+/i)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3)
+    .filter((token) => !STOPWORDS.has(token));
+
+  if (tokens.length > 0) {
+    return Array.from(new Set(tokens));
+  }
+
+  const fallback = normalizedQuery.replace(/[^a-z0-9]+/gi, "").trim();
+  return fallback.length >= 2 ? [fallback] : [];
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -38,6 +84,8 @@ export async function POST(request: Request) {
 
     const query = parsed.data.q.trim();
     const limit = parsed.data.limit ?? 10;
+    const normalizedQuery = normalizeSearchText(query);
+    const queryTokens = tokenizeQuery(query);
     let documentFilter = {};
 
     if (parsed.data.documentId) {
@@ -53,17 +101,14 @@ export async function POST(request: Request) {
       documentFilter = { canonicalDocumentId: canonicalDocument.id };
     }
 
-    const chunks = await prisma.canonicalChunk.findMany({
+    const candidateLimit = Math.max(500, limit * 50);
+    const candidateChunks = await prisma.canonicalChunk.findMany({
       where: {
         tenantId: tenantId!,
         ...documentFilter,
-        OR: [
-          { text: { contains: query, mode: "insensitive" } },
-          { heading: { contains: query, mode: "insensitive" } },
-        ],
       },
       orderBy: [{ canonicalDocumentId: "asc" }, { chunkIndex: "asc" }],
-      take: limit,
+      take: candidateLimit,
       select: {
         id: true,
         canonicalDocumentId: true,
@@ -85,6 +130,27 @@ export async function POST(request: Request) {
       },
     });
 
+    const chunks = candidateChunks
+      .map((chunk) => {
+        const searchableText = normalizeSearchText(`${chunk.heading ?? ""} ${chunk.text}`);
+        const matchedTokens = queryTokens.filter((token) => searchableText.includes(token));
+        const phraseMatch = normalizedQuery.length >= 2 && searchableText.includes(normalizedQuery);
+        const score = (phraseMatch ? 3 : 0) + matchedTokens.length;
+
+        return { chunk, score, matchedTokenCount: matchedTokens.length };
+      })
+      .filter((result) => result.score > 0)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if (b.matchedTokenCount !== a.matchedTokenCount) return b.matchedTokenCount - a.matchedTokenCount;
+        if (a.chunk.canonicalDocumentId !== b.chunk.canonicalDocumentId) {
+          return a.chunk.canonicalDocumentId.localeCompare(b.chunk.canonicalDocumentId);
+        }
+        return a.chunk.chunkIndex - b.chunk.chunkIndex;
+      })
+      .slice(0, limit)
+      .map((result) => result.chunk);
+
     const retrievalLog = await prisma.ragRetrievalLog.create({
       data: {
         tenantId: tenantId!,
@@ -98,7 +164,9 @@ export async function POST(request: Request) {
         filtersJson: {
           documentId: parsed.data.documentId || null,
           limit,
-          mode: "TEXT_CONTAINS",
+          mode: "TEXT_TOKENIZED_NORMALIZED",
+          queryTokens,
+          candidateLimit,
         },
       },
       select: { id: true },
