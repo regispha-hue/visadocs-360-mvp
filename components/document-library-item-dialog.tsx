@@ -43,7 +43,7 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
   const [type, setType] = useState<DocumentLibraryType>("POP");
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
-  const [category, setCategory] = useState(DEFAULT_POP_LIBRARY_FOLDER);
+  const [category, setCategory] = useState<string>(DEFAULT_POP_LIBRARY_FOLDER);
   const [version, setVersion] = useState("1.0");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
