@@ -185,6 +185,32 @@ function groupByFolder<T>(items: T[], getCategory: (item: T) => string | null | 
     });
 }
 
+function getPopLibraryFolder(item: LibraryItem) {
+  const path = normalizeFolderPath(item.category);
+  const parts = path.split("/").filter(Boolean);
+  const last = parts[parts.length - 1] || "";
+  const code = item.code || "";
+
+  if (parts.length > 3 && code && last.toLowerCase().startsWith(code.toLowerCase())) {
+    return parts.slice(0, -1).join("/");
+  }
+
+  return path;
+}
+
+function getPopCanonicalFolder(document: CanonicalDocument) {
+  const path = normalizeFolderPath(document.category);
+  const parts = path.split("/").filter(Boolean);
+  const last = parts[parts.length - 1] || "";
+  const code = document.code || "";
+
+  if (parts.length > 3 && code && last.toLowerCase().startsWith(code.toLowerCase())) {
+    return parts.slice(0, -1).join("/");
+  }
+
+  return path;
+}
+
 function folderKey(scope: string, folderPath: string) {
   return `${scope}:${folderPath}`;
 }
@@ -387,8 +413,8 @@ export default function BibliotecaPopsPage() {
     grouped["Outros"] = otherPops.sort((a, b) => a.codigo.localeCompare(b.codigo));
   }
 
-  const groupedLibraryItems = groupByFolder(filteredLibraryItems, (item) => item.category);
-  const groupedCanonicalDocuments = groupByFolder(filteredCanonicalDocuments, (document) => document.category);
+  const groupedLibraryItems = groupByFolder(filteredLibraryItems, getPopLibraryFolder);
+  const groupedCanonicalDocuments = groupByFolder(filteredCanonicalDocuments, getPopCanonicalFolder);
 
   const toggleFolder = (key: string) => {
     setOpenFolders((prev) => {
