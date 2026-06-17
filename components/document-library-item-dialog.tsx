@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { DOCUMENT_FOLDER_OPTIONS, formatFolderLabel } from "@/lib/document-folders";
+import { DEFAULT_POP_LIBRARY_FOLDER, DOCUMENT_FOLDER_OPTIONS, formatFolderLabel } from "@/lib/document-folders";
 
 type DocumentLibraryType = "POP" | "RQ" | "MANUAL" | "TREINAMENTO" | "EVIDENCIA" | "REFERENCIA";
 
@@ -40,19 +40,19 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: DocumentLibraryItemDialogProps) {
-  const [type, setType] = useState<DocumentLibraryType>("REFERENCIA");
+  const [type, setType] = useState<DocumentLibraryType>("POP");
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
-  const [category, setCategory] = useState("Farmacia de Manipulacao/00. Acervo Matriz Atualizado");
+  const [category, setCategory] = useState<string>(DEFAULT_POP_LIBRARY_FOLDER);
   const [version, setVersion] = useState("1.0");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
-    setType("REFERENCIA");
+    setType("POP");
     setTitle("");
     setCode("");
-    setCategory("Farmacia de Manipulacao/00. Acervo Matriz Atualizado");
+    setCategory(DEFAULT_POP_LIBRARY_FOLDER);
     setVersion("1.0");
     setContent("");
   };

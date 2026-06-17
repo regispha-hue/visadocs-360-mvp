@@ -29,7 +29,12 @@ import {
   FilePlus2,
 } from "lucide-react";
 import { SETORES } from "@/lib/types";
-import { DEFAULT_DOCUMENT_FOLDER, formatFolderLabel, normalizeFolderPath } from "@/lib/document-folders";
+import {
+  DEFAULT_DOCUMENT_FOLDER,
+  formatFolderLabel,
+  isPopLibraryFolder,
+  normalizeFolderPath,
+} from "@/lib/document-folders";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import toast from "react-hot-toast";
@@ -225,6 +230,14 @@ function isQaCanonicalDocument(document: CanonicalDocument) {
   );
 }
 
+function isPopLibraryItem(item: LibraryItem) {
+  return item.type === "POP" || isPopLibraryFolder(item.category);
+}
+
+function isPopCanonicalDocument(document: CanonicalDocument) {
+  return isPopLibraryFolder(document.category);
+}
+
 export default function BibliotecaPopsPage() {
   const { data: session } = useSession() || {};
   const [pops, setPops] = useState<Pop[]>([]);
@@ -317,12 +330,16 @@ export default function BibliotecaPopsPage() {
     setLoading(false);
   }
 
-  const visibleLibraryItems = showQaArtifacts ? libraryItems : libraryItems.filter((item) => !isQaLibraryItem(item));
+  const popLibraryItems = libraryItems.filter(isPopLibraryItem);
+  const popCanonicalDocuments = canonicalDocuments.filter(isPopCanonicalDocument);
+  const visibleLibraryItems = showQaArtifacts
+    ? popLibraryItems
+    : popLibraryItems.filter((item) => !isQaLibraryItem(item));
   const visibleCanonicalDocuments = showQaArtifacts
-    ? canonicalDocuments
-    : canonicalDocuments.filter((document) => !isQaCanonicalDocument(document));
-  const hiddenQaLibraryItemsCount = libraryItems.length - visibleLibraryItems.length;
-  const hiddenQaCanonicalDocumentsCount = canonicalDocuments.length - visibleCanonicalDocuments.length;
+    ? popCanonicalDocuments
+    : popCanonicalDocuments.filter((document) => !isQaCanonicalDocument(document));
+  const hiddenQaLibraryItemsCount = popLibraryItems.length - visibleLibraryItems.length;
+  const hiddenQaCanonicalDocumentsCount = popCanonicalDocuments.length - visibleCanonicalDocuments.length;
   const hiddenQaArtifactsCount = hiddenQaLibraryItemsCount + hiddenQaCanonicalDocumentsCount;
 
   const filteredLibraryItems = visibleLibraryItems.filter((item) => {
@@ -705,8 +722,8 @@ export default function BibliotecaPopsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Biblioteca documental"
-        description={`${libraryItems.length} itens de acervo e ${totalPops} POPs vigentes para consulta interna`}
+        title="Biblioteca de POPs"
+        description={`${visibleLibraryItems.length} itens organizados em pastas e ${totalPops} POPs vigentes na esteira operacional`}
       />
 
       <DocumentLibraryItemDialog
@@ -921,7 +938,7 @@ export default function BibliotecaPopsPage() {
       {/* Folders */}
       {filteredLibraryItems.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-700">Acervo documental</h3>
+          <h3 className="text-sm font-medium text-gray-700">Acervo de POPs</h3>
           {groupedLibraryItems.map((group) => {
             const key = folderKey("library", group.path);
             const isOpen = openFolders.has(key);
@@ -996,10 +1013,10 @@ export default function BibliotecaPopsPage() {
       )}
 
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-700">Documentos preparados para consulta</h3>
+        <h3 className="text-sm font-medium text-gray-700">POPs preparados para consulta</h3>
         {filteredCanonicalDocuments.length === 0 && canonicalJobs.length === 0 ? (
           <Card className="p-5 text-sm text-gray-500">
-            Nenhum documento preparado para consulta.
+            Nenhum POP preparado para consulta.
           </Card>
         ) : (
           <div className="space-y-2">
