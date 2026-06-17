@@ -53,6 +53,7 @@ interface LibraryItem {
   category?: string;
   status: string;
   version?: string;
+  source?: string | null;
 }
 
 interface CanonicalDocument {
@@ -183,6 +184,47 @@ function folderKey(scope: string, folderPath: string) {
   return `${scope}:${folderPath}`;
 }
 
+function normalizeQaSignal(value?: string | null) {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function hasQaMarker(value?: string | null) {
+  const normalized = normalizeQaSignal(value);
+  return (
+    normalized.startsWith("qa") ||
+    normalized.startsWith("qa-") ||
+    normalized.includes("qa ") ||
+    normalized.includes("qa-p0") ||
+    normalized.includes("qa-p1") ||
+    normalized.includes("p0c") ||
+    normalized.includes("p1a") ||
+    normalized.includes("p1b") ||
+    normalized.includes("p1c")
+  );
+}
+
+function isQaLibraryItem(item: LibraryItem) {
+  return (
+    hasQaMarker(item.category) ||
+    hasQaMarker(item.title) ||
+    hasQaMarker(item.code) ||
+    hasQaMarker(item.source)
+  );
+}
+
+function isQaCanonicalDocument(document: CanonicalDocument) {
+  return (
+    hasQaMarker(document.category) ||
+    hasQaMarker(document.title) ||
+    hasQaMarker(document.code) ||
+    normalizeFolderPath(document.category).toLowerCase().startsWith("qa")
+  );
+}
+
 export default function BibliotecaPopsPage() {
   const { data: session } = useSession() || {};
   const [pops, setPops] = useState<Pop[]>([]);
@@ -212,6 +254,7 @@ export default function BibliotecaPopsPage() {
   const [canonicalSendingId, setCanonicalSendingId] = useState<string | null>(null);
   const [chunkingDocumentId, setChunkingDocumentId] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [showQaArtifacts, setShowQaArtifacts] = useState(false);
   const [popsError, setPopsError] = useState<string | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [canonicalError, setCanonicalError] = useState<string | null>(null);
@@ -274,7 +317,15 @@ export default function BibliotecaPopsPage() {
     setLoading(false);
   }
 
-  const filteredLibraryItems = libraryItems.filter((item) => {
+  const visibleLibraryItems = showQaArtifacts ? libraryItems : libraryItems.filter((item) => !isQaLibraryItem(item));
+  const visibleCanonicalDocuments = showQaArtifacts
+    ? canonicalDocuments
+    : canonicalDocuments.filter((document) => !isQaCanonicalDocument(document));
+  const hiddenQaLibraryItemsCount = libraryItems.length - visibleLibraryItems.length;
+  const hiddenQaCanonicalDocumentsCount = canonicalDocuments.length - visibleCanonicalDocuments.length;
+  const hiddenQaArtifactsCount = hiddenQaLibraryItemsCount + hiddenQaCanonicalDocumentsCount;
+
+  const filteredLibraryItems = visibleLibraryItems.filter((item) => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -284,7 +335,7 @@ export default function BibliotecaPopsPage() {
     );
   });
 
-  const filteredCanonicalDocuments = canonicalDocuments.filter((document) => {
+  const filteredCanonicalDocuments = visibleCanonicalDocuments.filter((document) => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -688,6 +739,26 @@ export default function BibliotecaPopsPage() {
         </div>
       )}
 
+      {hiddenQaArtifactsCount > 0 && (
+        <div className="flex flex-col gap-3 rounded-lg border bg-slate-50 p-3 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            Itens de teste ocultos: {hiddenQaArtifactsCount}
+            {hiddenQaLibraryItemsCount > 0 && ` · acervo ${hiddenQaLibraryItemsCount}`}
+            {hiddenQaCanonicalDocumentsCount > 0 && ` · preparados ${hiddenQaCanonicalDocumentsCount}`}
+          </span>
+          {canManageCanonicalContent && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowQaArtifacts((current) => !current)}
+            >
+              {showQaArtifacts ? "Ocultar itens de teste" : "Mostrar itens de teste"}
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Search and controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -751,7 +822,7 @@ export default function BibliotecaPopsPage() {
               className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="">Todos os documentos de referência</option>
-              {canonicalDocuments.map((document) => (
+              {visibleCanonicalDocuments.map((document) => (
                 <option key={document.id} value={document.id}>
                   {document.code ? `${document.code} - ` : ""}{document.title}
                 </option>
