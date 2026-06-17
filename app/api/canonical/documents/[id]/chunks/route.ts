@@ -179,9 +179,9 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     }
 
     const sourceText = normalizeText(
-      canonicalDocument.normalizedTextPreview ||
-        canonicalDocument.libraryItem?.content ||
-        canonicalDocument.approvedPopVersion?.contentSnapshot
+      canonicalDocument.libraryItem?.content ||
+        canonicalDocument.approvedPopVersion?.contentSnapshot ||
+        canonicalDocument.normalizedTextPreview
     );
 
     if (!sourceText) {
@@ -203,22 +203,26 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     const previousStatus = canonicalDocument.status;
 
     const result = await prisma.$transaction(async (tx) => {
-      const createdChunks = await Promise.all(
-        chunks.map((chunk, index) =>
-          tx.canonicalChunk.create({
-            data: {
-              tenantId: tenantId!,
-              canonicalDocumentId: canonicalDocument.id,
-              chunkIndex: index,
-              heading: chunk.heading,
-              text: chunk.text,
-              tokenEstimate: chunk.tokenEstimate,
-              semanticRole: "UNKNOWN",
-              sourceHash: chunk.sourceHash,
-            },
-          })
-        )
-      );
+      await tx.canonicalChunk.createMany({
+        data: chunks.map((chunk, index) => ({
+          tenantId: tenantId!,
+          canonicalDocumentId: canonicalDocument.id,
+          chunkIndex: index,
+          heading: chunk.heading,
+          text: chunk.text,
+          tokenEstimate: chunk.tokenEstimate,
+          semanticRole: "UNKNOWN",
+          sourceHash: chunk.sourceHash,
+        })),
+      });
+
+      const createdChunks = await tx.canonicalChunk.findMany({
+        where: {
+          tenantId: tenantId!,
+          canonicalDocumentId: canonicalDocument.id,
+        },
+        orderBy: { chunkIndex: "asc" },
+      });
 
       const updatedDocument = await tx.canonicalDocument.update({
         where: { id: canonicalDocument.id },
@@ -243,7 +247,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       });
 
       return { createdChunks, updatedDocument };
-    });
+    }, { timeout: 15000 });
 
     await createAuditLog({
       action: AUDIT_ACTIONS.CANONICAL_DOCUMENT_CHUNKED,
