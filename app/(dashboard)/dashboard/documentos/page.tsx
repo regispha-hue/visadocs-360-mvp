@@ -29,11 +29,23 @@ interface Documento {
   categoria: string;
   conteudo: string;
   versao: string;
+  source?: "documentos" | "document-library";
   pop?: {
     id: string;
     codigo: string;
     titulo: string;
   } | null;
+}
+
+interface LibraryItem {
+  id: string;
+  type: string;
+  title: string;
+  code?: string | null;
+  category?: string | null;
+  status: string;
+  version?: string | null;
+  source?: string | null;
 }
 
 const TIPO_CONFIG = {
@@ -66,6 +78,37 @@ const TIPO_CONFIG = {
 >;
 
 const DEFAULT_RQ_MBP_FOLDER = "RQ's e MBP/Sem pasta/Revisar";
+
+function isRqMbpLibraryItem(item: LibraryItem) {
+  const folder = normalizeFolderPath(item.category);
+  return (
+    folder.startsWith("RQ's e MBP/") ||
+    item.type === "RQ" ||
+    item.type === "MANUAL" ||
+    (item.type === "REFERENCIA" && folder.includes("/Anexos")) ||
+    (item.type === "REFERENCIA" && folder.includes("/Indice"))
+  );
+}
+
+function mapLibraryItemType(item: LibraryItem): Documento["tipo"] {
+  if (item.type === "RQ") return "RQ";
+  if (item.type === "MANUAL") return "MBP";
+  return "ANEXO";
+}
+
+function mapLibraryItemToDocumento(item: LibraryItem): Documento {
+  return {
+    id: `library:${item.id}`,
+    codigo: item.code || item.id.slice(0, 8),
+    titulo: item.title,
+    tipo: mapLibraryItemType(item),
+    categoria: normalizeFolderPath(item.category),
+    conteudo: "Fonte documental importada. O conteudo textual fica disponivel na camada de consulta interna e na preparacao canonica.",
+    versao: item.version || "sem versao",
+    source: "document-library",
+    pop: null,
+  };
+}
 
 function getDocumentFolder(documento: Documento) {
   if (documento.categoria?.trim()) return normalizeFolderPath(documento.categoria);
@@ -107,10 +150,17 @@ export default function DocumentosPage() {
   const [viewingDoc, setViewingDoc] = useState<Documento | null>(null);
 
   useEffect(() => {
-    fetch("/api/documentos")
-      .then((res) => res.json())
-      .then((data) => {
-        setDocumentos(data.documentos || []);
+    Promise.all([fetch("/api/documentos"), fetch("/api/document-library?status=ACTIVE")])
+      .then(async ([documentosRes, libraryRes]) => {
+        const documentosData = documentosRes.ok ? await documentosRes.json() : { documentos: [] };
+        const libraryData = libraryRes.ok ? await libraryRes.json() : { items: [] };
+        const legacyDocuments = Array.isArray(documentosData.documentos)
+          ? documentosData.documentos.map((documento: Documento) => ({ ...documento, source: "documentos" as const }))
+          : [];
+        const libraryDocuments = Array.isArray(libraryData.items)
+          ? libraryData.items.filter(isRqMbpLibraryItem).map(mapLibraryItemToDocumento)
+          : [];
+        setDocumentos([...legacyDocuments, ...libraryDocuments]);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -247,6 +297,9 @@ export default function DocumentosPage() {
                   <span className="font-mono text-teal-600">{viewingDoc.codigo}</span> {viewingDoc.titulo}
                 </h3>
                 <p className="text-sm text-muted-foreground">{formatFolderLabel(getDocumentFolder(viewingDoc))}</p>
+                {viewingDoc.source === "document-library" && (
+                  <p className="text-sm text-muted-foreground">Fonte importada pelo acervo documental.</p>
+                )}
                 {viewingDoc.pop && (
                   <p className="text-sm text-muted-foreground">
                     Vinculado: {viewingDoc.pop.codigo} - {viewingDoc.pop.titulo}
@@ -343,6 +396,11 @@ export default function DocumentosPage() {
                                   <Badge variant="outline" className="flex-shrink-0 text-xs">
                                     {documento.versao}
                                   </Badge>
+                                  {documento.source === "document-library" && (
+                                    <Badge variant="secondary" className="flex-shrink-0 text-xs">
+                                      Acervo
+                                    </Badge>
+                                  )}
                                   <Button
                                     variant="ghost"
                                     size="sm"
