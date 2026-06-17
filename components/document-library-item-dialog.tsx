@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DOCUMENT_FOLDER_OPTIONS, formatFolderLabel } from "@/lib/document-folders";
 
 type DocumentLibraryType = "POP" | "RQ" | "MANUAL" | "TREINAMENTO" | "EVIDENCIA" | "REFERENCIA";
 
@@ -42,7 +43,7 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
   const [type, setType] = useState<DocumentLibraryType>("REFERENCIA");
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Farmacia de Manipulacao/00. Acervo Matriz Atualizado");
   const [version, setVersion] = useState("1.0");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,7 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
     setType("REFERENCIA");
     setTitle("");
     setCode("");
-    setCategory("");
+    setCategory("Farmacia de Manipulacao/00. Acervo Matriz Atualizado");
     setVersion("1.0");
     setContent("");
   };
@@ -173,13 +174,22 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
             </div>
 
             <div>
-              <Label htmlFor="library-category">Categoria</Label>
-              <Input
-                id="library-category"
+              <Label>Pasta</Label>
+              <Select
                 value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                placeholder="Opcional"
-              />
+                onValueChange={setCategory}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a pasta" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOCUMENT_FOLDER_OPTIONS.map((folder) => (
+                    <SelectItem key={folder} value={folder}>
+                      {formatFolderLabel(folder)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
