@@ -38,6 +38,15 @@ function hasUsefulSourceContent(source: { title: string; content: string | null 
   return usefulText.length >= MIN_USEFUL_SOURCE_CHARS;
 }
 
+function isUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2002"
+  );
+}
+
 function buildAuxiliaryDraft(title: string, objective: string | undefined, sources: Array<{ title: string; content: string | null; version: string | null }>) {
   const sourceSummary = sources
     .map((source, index) => `${index + 1}. ${source.title}${source.version ? ` v${source.version}` : ""}`)
@@ -85,7 +94,7 @@ export async function POST(request: Request) {
     if (response) return response;
 
     const existingPop = await prisma.pop.findFirst({
-      where: { codigo: parsed.data.code, tenantId: tenantId! },
+      where: { codigo: parsed.data.code },
       select: { id: true },
     });
 
@@ -188,6 +197,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, draft: result.draft, pop: result.pop });
   } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return NextResponse.json({ error: "Já existe POP com este código. Escolha outro código para a minuta." }, { status: 409 });
+    }
+
     console.error("Error creating assisted POP draft:", error);
     return NextResponse.json({ error: "Erro ao gerar minuta assistida" }, { status: 500 });
   }
