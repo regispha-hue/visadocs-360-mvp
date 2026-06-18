@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     });
 
     if (existingPop) {
-      return NextResponse.json({ error: "Já existe POP com este código neste tenant" }, { status: 409 });
+      return NextResponse.json({ error: "Já existe POP com este código. Escolha outro código para a minuta." }, { status: 409 });
     }
 
     const retrievalLog = parsed.data.retrievalLogId
