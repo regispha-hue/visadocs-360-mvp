@@ -213,20 +213,23 @@ export default function DocumentosPage() {
 
   const loadDocuments = async () => {
     setLoading(true);
-    Promise.all([fetch("/api/documentos"), fetch("/api/document-library?status=ACTIVE")])
-      .then(async ([documentosRes, libraryRes]) => {
-        const documentosData = documentosRes.ok ? await documentosRes.json() : { documentos: [] };
-        const libraryData = libraryRes.ok ? await libraryRes.json() : { items: [] };
-        const legacyDocuments = Array.isArray(documentosData.documentos)
-          ? documentosData.documentos.map((documento: Documento) => ({ ...documento, source: "documentos" as const }))
-          : [];
-        const libraryDocuments = Array.isArray(libraryData.items)
-          ? libraryData.items.filter(isRqMbpLibraryItem).map(mapLibraryItemToDocumento)
-          : [];
-        setDocumentos([...legacyDocuments, ...libraryDocuments]);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    try {
+      const [documentosRes, libraryRes] = await Promise.all([
+        fetch("/api/documentos"),
+        fetch("/api/document-library?status=ACTIVE"),
+      ]);
+      const documentosData = documentosRes.ok ? await documentosRes.json() : { documentos: [] };
+      const libraryData = libraryRes.ok ? await libraryRes.json() : { items: [] };
+      const legacyDocuments = Array.isArray(documentosData.documentos)
+        ? documentosData.documentos.map((documento: Documento) => ({ ...documento, source: "documentos" as const }))
+        : [];
+      const libraryDocuments = Array.isArray(libraryData.items)
+        ? libraryData.items.filter(isRqMbpLibraryItem).map(mapLibraryItemToDocumento)
+        : [];
+      setDocumentos([...legacyDocuments, ...libraryDocuments]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
