@@ -238,6 +238,28 @@ function collectFolderTreeKeys<T>(scope: string, nodes: FolderTreeNode<T>[]) {
   return keys;
 }
 
+function getPopDisplayFolderPath(path?: string | null) {
+  const parts = normalizeFolderPath(path).split("/").map((part) => part.trim()).filter(Boolean);
+
+  if (parts[0] !== "Biblioteca de POPs") {
+    return parts.join("/");
+  }
+
+  if (parts[1] === "Acervo Drogarias" && parts[2] === "POPs") {
+    return ["POP Drogarias", ...parts.slice(3)].join("/");
+  }
+
+  if (parts[1] === "Acervo LGPD") {
+    return ["POP LGPD", ...parts.slice(2)].join("/");
+  }
+
+  if (parts[1] === "Gerados sob demanda") {
+    return ["POPs sob demanda", ...parts.slice(2)].join("/");
+  }
+
+  return parts.slice(1).join("/");
+}
+
 function folderKey(scope: string, folderPath: string) {
   return `${scope}:${folderPath}`;
 }
@@ -441,8 +463,10 @@ export default function BibliotecaPopsPage() {
     grouped["Outros"] = otherPops.sort((a, b) => a.codigo.localeCompare(b.codigo));
   }
 
-  const libraryItemTree = buildFolderTree(filteredLibraryItems, (item) => item.category);
-  const canonicalDocumentTree = buildFolderTree(filteredCanonicalDocuments, (document) => document.category);
+  const libraryItemTree = buildFolderTree(filteredLibraryItems, (item) => getPopDisplayFolderPath(item.category));
+  const canonicalDocumentTree = buildFolderTree(filteredCanonicalDocuments, (document) =>
+    getPopDisplayFolderPath(document.category)
+  );
 
   const toggleFolder = (key: string) => {
     setOpenFolders((prev) => {
