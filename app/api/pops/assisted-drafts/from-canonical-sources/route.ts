@@ -18,6 +18,15 @@ function previewText(text: string) {
   return text.replace(/\s+/g, " ").trim().slice(0, 1200);
 }
 
+function isUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2002"
+  );
+}
+
 function buildCanonicalDraftContent({
   title,
   code,
@@ -83,7 +92,7 @@ export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorized();
-    if (!["ADMIN", "RT"].includes(user.role)) return forbidden();
+    if (!["SUPER_ADMIN", "ADMIN", "RT"].includes(user.role)) return forbidden();
 
     const body = await request.json().catch(() => null);
     const parsed = canonicalDraftSchema.safeParse(body);
@@ -97,12 +106,12 @@ export async function POST(request: Request) {
     const uniqueChunkIds = Array.from(new Set(parsed.data.chunkIds));
 
     const existingPop = await prisma.pop.findFirst({
-      where: { tenantId: tenantId!, codigo: parsed.data.code },
+      where: { codigo: parsed.data.code },
       select: { id: true },
     });
 
     if (existingPop) {
-      return NextResponse.json({ error: "Já existe POP com este código neste tenant" }, { status: 409 });
+      return NextResponse.json({ error: "Já existe POP com este código. Escolha outro código para a minuta." }, { status: 409 });
     }
 
     const retrievalLog = parsed.data.retrievalLogId
@@ -239,6 +248,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, draft: result.draft, pop: result.pop }, { status: 201 });
   } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return NextResponse.json({ error: "Já existe POP com este código. Escolha outro código para a minuta." }, { status: 409 });
+    }
+
     console.error("Error creating assisted POP draft from canonical sources:", error);
     return NextResponse.json({ error: "Erro ao gerar minuta a partir de fontes canônicas" }, { status: 500 });
   }
