@@ -253,6 +253,16 @@ function getPopDisplayFolderPath(path?: string | null) {
     return ["POP LGPD", ...parts.slice(2)].join("/");
   }
 
+  if (
+    parts[1] === "Acervo Manipulacao" ||
+    parts[1] === "Acervo Manipulação" ||
+    parts[1] === "POPs para Farmacias de Manipulacao" ||
+    parts[1] === "POPs para Farmácias de Manipulação"
+  ) {
+    const rest = parts.slice(2);
+    if (rest[0] === "POPs") rest.shift();
+    return ["POPs para Farmácias de Manipulação", ...rest].join("/");
+  }
   if (parts[1] === "Gerados sob demanda") {
     return ["POPs sob demanda", ...parts.slice(2)].join("/");
   }
