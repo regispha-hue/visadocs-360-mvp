@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { FilePlus2, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FilePlus2, Loader2, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,7 @@ interface DocumentLibraryItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void | Promise<void>;
+  editingItemId?: string | null;
 }
 
 const TYPE_OPTIONS: Array<{ value: DocumentLibraryType; label: string }> = [
@@ -39,14 +40,24 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
-export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: DocumentLibraryItemDialogProps) {
+export function DocumentLibraryItemDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+  editingItemId = null,
+}: DocumentLibraryItemDialogProps) {
   const [type, setType] = useState<DocumentLibraryType>("POP");
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
   const [category, setCategory] = useState<string>(DEFAULT_POP_LIBRARY_FOLDER);
   const [version, setVersion] = useState("1.0");
   const [content, setContent] = useState("");
+  const [source, setSource] = useState("manual-ui");
+  const [sourcePopId, setSourcePopId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingItem, setLoadingItem] = useState(false);
+
+  const isEditing = Boolean(editingItemId);
 
   const resetForm = () => {
     setType("POP");
@@ -55,7 +66,43 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
     setCategory(DEFAULT_POP_LIBRARY_FOLDER);
     setVersion("1.0");
     setContent("");
+    setSource("manual-ui");
+    setSourcePopId("");
   };
+
+  useEffect(() => {
+    if (!open || !editingItemId) return;
+
+    let cancelled = false;
+    setLoadingItem(true);
+
+    fetch(`/api/document-library/${editingItemId}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(data?.error || "Erro ao carregar item documental");
+        if (cancelled) return;
+
+        const item = data?.item;
+        setType(item?.type || "POP");
+        setTitle(item?.title || "");
+        setCode(item?.code || "");
+        setCategory(item?.category || DEFAULT_POP_LIBRARY_FOLDER);
+        setVersion(item?.version || "1.0");
+        setContent(item?.content || "");
+        setSource(item?.source || "manual-ui");
+        setSourcePopId(item?.sourcePopId || "");
+      })
+      .catch((error) => {
+        if (!cancelled) toast.error(getErrorMessage(error, "Erro ao carregar item documental"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingItem(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editingItemId, open]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -72,8 +119,8 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
 
     setLoading(true);
     try {
-      const res = await fetch("/api/document-library", {
-        method: "POST",
+      const res = await fetch(isEditing ? `/api/document-library/${editingItemId}` : "/api/document-library", {
+        method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type,
@@ -82,22 +129,23 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
           category: category.trim(),
           version: version.trim() || "1.0",
           content: content.trim(),
-          source: "manual-ui",
+          source,
+          sourcePopId,
           status: "ACTIVE",
         }),
       });
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data?.error || "Erro ao criar item documental");
+        throw new Error(data?.error || `Erro ao ${isEditing ? "atualizar" : "criar"} item documental`);
       }
 
-      toast.success("Item documental criado.");
+      toast.success(isEditing ? "Item documental atualizado." : "Item documental criado.");
       resetForm();
       onOpenChange(false);
       await onSuccess();
     } catch (error) {
-      toast.error(getErrorMessage(error, "Erro ao criar item documental"));
+      toast.error(getErrorMessage(error, `Erro ao ${isEditing ? "atualizar" : "criar"} item documental`));
     } finally {
       setLoading(false);
     }
@@ -114,14 +162,25 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FilePlus2 className="h-5 w-5 text-teal-600" />
-            Novo item documental
+            {isEditing ? (
+              <Pencil className="h-5 w-5 text-teal-600" />
+            ) : (
+              <FilePlus2 className="h-5 w-5 text-teal-600" />
+            )}
+            {isEditing ? "Editar item documental" : "Novo item documental"}
           </DialogTitle>
           <DialogDescription>
-            Crie uma fonte textual para preparar o documento para busca e consulta interna.
+            {isEditing
+              ? "Atualize a fonte textual e a pasta do documento no acervo do tenant."
+              : "Crie uma fonte textual para preparar o documento para busca e consulta interna."}
           </DialogDescription>
         </DialogHeader>
 
+        {loadingItem ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -216,14 +275,15 @@ export function DocumentLibraryItemDialog({ open, onOpenChange, onSuccess }: Doc
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Criando...
+                  {isEditing ? "Salvando..." : "Criando..."}
                 </>
               ) : (
-                "Criar item"
+                isEditing ? "Salvar alterações" : "Criar item"
               )}
             </Button>
           </DialogFooter>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 import { PageHeader } from "@/components/page-header";
+import { DocumentLibraryItemDialog } from "@/components/document-library-item-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,15 @@ interface LibraryItem {
   status: string;
   version?: string | null;
   source?: string | null;
+}
+
+interface FolderTreeNode<T> {
+  path: string;
+  label: string;
+  children: FolderTreeNode<T>[];
+  items: T[];
+  count: number;
+  needsReview: boolean;
 }
 
 const TIPO_CONFIG = {
@@ -116,26 +127,71 @@ function getDocumentFolder(documento: Documento) {
   return DEFAULT_RQ_MBP_FOLDER;
 }
 
-function groupDocumentsByFolder(documentos: Documento[]) {
-  const grouped = new Map<string, Documento[]>();
+function buildDocumentTree(documentos: Documento[]) {
+  const roots: FolderTreeNode<Documento>[] = [];
+  const nodes = new Map<string, FolderTreeNode<Documento>>();
+
+  function getOrCreateNode(path: string, label: string) {
+    const existing = nodes.get(path);
+    if (existing) return existing;
+
+    const node: FolderTreeNode<Documento> = {
+      path,
+      label,
+      children: [],
+      items: [],
+      count: 0,
+      needsReview: path === DEFAULT_RQ_MBP_FOLDER || path.includes("/Sem pasta/"),
+    };
+    nodes.set(path, node);
+    return node;
+  }
 
   for (const documento of documentos) {
     const folderPath = getDocumentFolder(documento);
-    grouped.set(folderPath, [...(grouped.get(folderPath) || []), documento]);
+    const parts = folderPath.split("/").map((part) => part.trim()).filter(Boolean);
+    let currentPath = "";
+    let parent: FolderTreeNode<Documento> | null = null;
+
+    for (const part of parts) {
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+      const node = getOrCreateNode(currentPath, part);
+      node.count += 1;
+
+      if (!parent && !roots.includes(node)) roots.push(node);
+      if (parent && !parent.children.includes(node)) parent.children.push(node);
+      parent = node;
+    }
+
+    const targetNode = parent || getOrCreateNode(DEFAULT_RQ_MBP_FOLDER, DEFAULT_RQ_MBP_FOLDER);
+    if (!parent && !roots.includes(targetNode)) roots.push(targetNode);
+    targetNode.items.push(documento);
   }
 
-  return Array.from(grouped.entries())
-    .map(([path, items]) => ({
-      path,
-      label: formatFolderLabel(path),
-      items: items.sort((a, b) => a.codigo.localeCompare(b.codigo)),
-      needsReview: path === DEFAULT_RQ_MBP_FOLDER || path.includes("/Sem pasta/"),
-    }))
-    .sort((a, b) => {
+  const sortNodes = (treeNodes: FolderTreeNode<Documento>[]) => {
+    treeNodes.sort((a, b) => {
       if (a.needsReview && !b.needsReview) return 1;
       if (!a.needsReview && b.needsReview) return -1;
       return a.label.localeCompare(b.label);
     });
+    for (const node of treeNodes) {
+      node.items.sort((a, b) => a.codigo.localeCompare(b.codigo));
+      node.children = sortNodes(node.children);
+    }
+    return treeNodes;
+  };
+
+  return sortNodes(roots);
+}
+
+function collectFolderTreeKeys(tipo: Documento["tipo"], nodes: FolderTreeNode<Documento>[]) {
+  const keys: string[] = [];
+  const visit = (node: FolderTreeNode<Documento>) => {
+    keys.push(folderKey(tipo, node.path));
+    node.children.forEach(visit);
+  };
+  nodes.forEach(visit);
+  return keys;
 }
 
 function folderKey(tipo: string, folderPath: string) {
@@ -143,27 +199,41 @@ function folderKey(tipo: string, folderPath: string) {
 }
 
 export default function DocumentosPage() {
+  const { data: session } = useSession();
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [viewingDoc, setViewingDoc] = useState<Documento | null>(null);
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [editingLibraryItemId, setEditingLibraryItemId] = useState<string | null>(null);
+
+  const userRole = (session?.user as { role?: string } | undefined)?.role;
+  const canManageDocumentLibrary = userRole === "SUPER_ADMIN" || userRole === "ADMIN" || userRole === "RT";
+
+  const loadDocuments = async () => {
+    setLoading(true);
+    try {
+      const [documentosRes, libraryRes] = await Promise.all([
+        fetch("/api/documentos"),
+        fetch("/api/document-library?status=ACTIVE"),
+      ]);
+      const documentosData = documentosRes.ok ? await documentosRes.json() : { documentos: [] };
+      const libraryData = libraryRes.ok ? await libraryRes.json() : { items: [] };
+      const legacyDocuments = Array.isArray(documentosData.documentos)
+        ? documentosData.documentos.map((documento: Documento) => ({ ...documento, source: "documentos" as const }))
+        : [];
+      const libraryDocuments = Array.isArray(libraryData.items)
+        ? libraryData.items.filter(isRqMbpLibraryItem).map(mapLibraryItemToDocumento)
+        : [];
+      setDocumentos([...legacyDocuments, ...libraryDocuments]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    Promise.all([fetch("/api/documentos"), fetch("/api/document-library?status=ACTIVE")])
-      .then(async ([documentosRes, libraryRes]) => {
-        const documentosData = documentosRes.ok ? await documentosRes.json() : { documentos: [] };
-        const libraryData = libraryRes.ok ? await libraryRes.json() : { items: [] };
-        const legacyDocuments = Array.isArray(documentosData.documentos)
-          ? documentosData.documentos.map((documento: Documento) => ({ ...documento, source: "documentos" as const }))
-          : [];
-        const libraryDocuments = Array.isArray(libraryData.items)
-          ? libraryData.items.filter(isRqMbpLibraryItem).map(mapLibraryItemToDocumento)
-          : [];
-        setDocumentos([...legacyDocuments, ...libraryDocuments]);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    loadDocuments();
   }, []);
 
   const filtered = documentos.filter((documento) => {
@@ -191,9 +261,9 @@ export default function DocumentosPage() {
     }
 
     return {
-      RQ: groupDocumentsByFolder(grouped.RQ),
-      MBP: groupDocumentsByFolder(grouped.MBP),
-      ANEXO: groupDocumentsByFolder(grouped.ANEXO),
+      RQ: buildDocumentTree(grouped.RQ),
+      MBP: buildDocumentTree(grouped.MBP),
+      ANEXO: buildDocumentTree(grouped.ANEXO),
     };
   }, [filtered]);
 
@@ -210,14 +280,104 @@ export default function DocumentosPage() {
     const all = new Set<string>();
     for (const tipo of Object.keys(groupedByType) as Documento["tipo"][]) {
       if (groupedByType[tipo].length > 0) all.add(tipo);
-      for (const group of groupedByType[tipo]) {
-        all.add(folderKey(tipo, group.path));
-      }
+      collectFolderTreeKeys(tipo, groupedByType[tipo]).forEach((key) => all.add(key));
     }
     setOpenFolders(all);
   };
 
   const collapseAll = () => setOpenFolders(new Set());
+
+  const editLibraryDocument = (documento: Documento) => {
+    if (documento.source !== "document-library") return;
+    setEditingLibraryItemId(documento.id.replace(/^library:/, ""));
+    setDocumentDialogOpen(true);
+  };
+
+  const renderDocumentNode = (tipo: Documento["tipo"], node: FolderTreeNode<Documento>, depth = 0) => {
+    const key = folderKey(tipo, node.path);
+    const isFolderOpen = openFolders.has(key);
+
+    return (
+      <div key={key} className="border-t first:border-t-0">
+        <button
+          type="button"
+          onClick={() => toggleFolder(key)}
+          className="flex w-full items-center gap-3 py-3 pr-6 text-left transition-colors hover:bg-muted/30"
+          style={{ paddingLeft: `${24 + depth * 20}px` }}
+        >
+          {isFolderOpen ? (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          )}
+          <FolderOpen className="h-4 w-4 text-amber-500" />
+          <span className="flex-1 truncate text-sm font-medium">{node.label}</span>
+          {node.needsReview && <Badge variant="outline">Revisar</Badge>}
+          <Badge variant="outline" className="text-xs">
+            {node.count}
+          </Badge>
+        </button>
+
+        {isFolderOpen && (
+          <div className="bg-muted/10">
+            {node.children.map((child) => renderDocumentNode(tipo, child, depth + 1))}
+            {node.items.map((documento) => {
+              const ItemIcon = TIPO_CONFIG[documento.tipo].icon;
+
+              return (
+                <div
+                  key={documento.id}
+                  className="group flex items-center gap-3 py-2.5 pr-6 transition-colors hover:bg-muted/20"
+                  style={{ paddingLeft: `${60 + depth * 20}px` }}
+                >
+                  <ItemIcon
+                    className={`h-4 w-4 flex-shrink-0 ${TIPO_CONFIG[documento.tipo].itemIcon}`}
+                  />
+                  <span className="flex-shrink-0 font-mono text-xs text-teal-600">
+                    {documento.codigo}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm">{documento.titulo}</p>
+                    {documento.pop && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        POP vinculado: {documento.pop.codigo} - {documento.pop.titulo}
+                      </p>
+                    )}
+                  </div>
+                  <Badge variant="outline" className="flex-shrink-0 text-xs">
+                    {documento.versao}
+                  </Badge>
+                  {documento.source === "document-library" && (
+                    <Badge variant="secondary" className="flex-shrink-0 text-xs">
+                      Acervo
+                    </Badge>
+                  )}
+                  {canManageDocumentLibrary && documento.source === "document-library" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={() => editLibraryDocument(documento)}
+                    >
+                      Editar
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={() => setViewingDoc(documento)}
+                  >
+                    <Eye className="mr-1 h-3.5 w-3.5" /> Ver
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (loading) return <LoadingSpinner />;
 
@@ -230,6 +390,16 @@ export default function DocumentosPage() {
       <PageHeader
         title="RQ's e MBP"
         description="Registros, manuais e anexos organizados por pastas do acervo documental"
+      />
+
+      <DocumentLibraryItemDialog
+        open={documentDialogOpen}
+        onOpenChange={(open) => {
+          setDocumentDialogOpen(open);
+          if (!open) setEditingLibraryItemId(null);
+        }}
+        onSuccess={loadDocuments}
+        editingItemId={editingLibraryItemId}
       />
 
       <div className="mb-6 grid gap-4 md:grid-cols-3">
@@ -324,7 +494,7 @@ export default function DocumentosPage() {
           const config = TIPO_CONFIG[tipo];
           const TypeIcon = config.icon;
           const isOpen = openFolders.has(tipo);
-          const totalInTipo = groups.reduce((total, group) => total + group.items.length, 0);
+          const totalInTipo = groups.reduce((total, group) => total + group.count, 0);
 
           return (
             <Card key={tipo} className="overflow-hidden">
@@ -345,78 +515,7 @@ export default function DocumentosPage() {
 
               {isOpen && (
                 <div className="divide-y">
-                  {groups.map((group) => {
-                    const key = folderKey(tipo, group.path);
-                    const isFolderOpen = openFolders.has(key);
-
-                    return (
-                      <div key={key}>
-                        <button
-                          type="button"
-                          onClick={() => toggleFolder(key)}
-                          className="flex w-full items-center gap-3 px-6 py-3 text-left transition-colors hover:bg-muted/30"
-                        >
-                          {isFolderOpen ? (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          )}
-                          <FolderOpen className="h-4 w-4 text-amber-500" />
-                          <span className="flex-1 truncate text-sm font-medium">{group.label}</span>
-                          {group.needsReview && <Badge variant="outline">Revisar</Badge>}
-                          <Badge variant="outline" className="text-xs">
-                            {group.items.length}
-                          </Badge>
-                        </button>
-
-                        {isFolderOpen && (
-                          <div className="bg-muted/10">
-                            {group.items.map((documento) => {
-                              const ItemIcon = TIPO_CONFIG[documento.tipo].icon;
-
-                              return (
-                                <div
-                                  key={documento.id}
-                                  className="group flex items-center gap-3 px-10 py-2.5 transition-colors hover:bg-muted/20"
-                                >
-                                  <ItemIcon
-                                    className={`h-4 w-4 flex-shrink-0 ${TIPO_CONFIG[documento.tipo].itemIcon}`}
-                                  />
-                                  <span className="flex-shrink-0 font-mono text-xs text-teal-600">
-                                    {documento.codigo}
-                                  </span>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm">{documento.titulo}</p>
-                                    {documento.pop && (
-                                      <p className="truncate text-xs text-muted-foreground">
-                                        POP vinculado: {documento.pop.codigo} - {documento.pop.titulo}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <Badge variant="outline" className="flex-shrink-0 text-xs">
-                                    {documento.versao}
-                                  </Badge>
-                                  {documento.source === "document-library" && (
-                                    <Badge variant="secondary" className="flex-shrink-0 text-xs">
-                                      Acervo
-                                    </Badge>
-                                  )}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 opacity-0 transition-opacity group-hover:opacity-100"
-                                    onClick={() => setViewingDoc(documento)}
-                                  >
-                                    <Eye className="mr-1 h-3.5 w-3.5" /> Ver
-                                  </Button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {groups.map((group) => renderDocumentNode(tipo, group))}
                 </div>
               )}
             </Card>

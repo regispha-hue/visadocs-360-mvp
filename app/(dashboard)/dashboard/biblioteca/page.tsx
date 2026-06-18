@@ -117,6 +117,15 @@ interface CanonicalRetrievalChunk {
   };
 }
 
+interface FolderTreeNode<T> {
+  path: string;
+  label: string;
+  children: FolderTreeNode<T>[];
+  items: T[];
+  count: number;
+  needsReview: boolean;
+}
+
 const FOLDER_ICONS: Record<string, string> = {
   "Gestão da Qualidade e Documentação": "\ud83d\udccb",
   "Recursos Humanos e Pessoal": "\ud83d\udc65",
@@ -163,52 +172,70 @@ function formatSemanticRole(role?: string | null) {
   return SEMANTIC_ROLE_LABELS[role] ?? role;
 }
 
-function groupByFolder<T>(items: T[], getCategory: (item: T) => string | null | undefined) {
-  const grouped = new Map<string, T[]>();
+function buildFolderTree<T>(items: T[], getCategory: (item: T) => string | null | undefined) {
+  const roots: FolderTreeNode<T>[] = [];
+  const nodes = new Map<string, FolderTreeNode<T>>();
+
+  function getOrCreateNode(path: string, label: string) {
+    const existing = nodes.get(path);
+    if (existing) return existing;
+
+    const node: FolderTreeNode<T> = {
+      path,
+      label,
+      children: [],
+      items: [],
+      count: 0,
+      needsReview: path === DEFAULT_DOCUMENT_FOLDER,
+    };
+    nodes.set(path, node);
+    return node;
+  }
 
   for (const item of items) {
     const folderPath = normalizeFolderPath(getCategory(item));
-    grouped.set(folderPath, [...(grouped.get(folderPath) || []), item]);
+    const parts = folderPath.split("/").map((part) => part.trim()).filter(Boolean);
+    let currentPath = "";
+    let parent: FolderTreeNode<T> | null = null;
+
+    for (const part of parts) {
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+      const node = getOrCreateNode(currentPath, part);
+      node.count += 1;
+
+      if (!parent && !roots.includes(node)) roots.push(node);
+      if (parent && !parent.children.includes(node)) parent.children.push(node);
+      parent = node;
+    }
+
+    const targetNode = parent || getOrCreateNode(DEFAULT_DOCUMENT_FOLDER, DEFAULT_DOCUMENT_FOLDER);
+    if (!parent && !roots.includes(targetNode)) roots.push(targetNode);
+    targetNode.items.push(item);
   }
 
-  return Array.from(grouped.entries())
-    .map(([path, folderItems]) => ({
-      path,
-      label: formatFolderLabel(path),
-      items: folderItems,
-      needsReview: path === DEFAULT_DOCUMENT_FOLDER,
-    }))
-    .sort((a, b) => {
+  const sortNodes = (treeNodes: FolderTreeNode<T>[]) => {
+    treeNodes.sort((a, b) => {
       if (a.path === DEFAULT_DOCUMENT_FOLDER) return 1;
       if (b.path === DEFAULT_DOCUMENT_FOLDER) return -1;
       return a.label.localeCompare(b.label);
     });
+    for (const node of treeNodes) {
+      node.children = sortNodes(node.children);
+    }
+    return treeNodes;
+  };
+
+  return sortNodes(roots);
 }
 
-function getPopLibraryFolder(item: LibraryItem) {
-  const path = normalizeFolderPath(item.category);
-  const parts = path.split("/").filter(Boolean);
-  const last = parts[parts.length - 1] || "";
-  const code = item.code || "";
-
-  if (parts.length > 3 && code && last.toLowerCase().startsWith(code.toLowerCase())) {
-    return parts.slice(0, -1).join("/");
-  }
-
-  return path;
-}
-
-function getPopCanonicalFolder(document: CanonicalDocument) {
-  const path = normalizeFolderPath(document.category);
-  const parts = path.split("/").filter(Boolean);
-  const last = parts[parts.length - 1] || "";
-  const code = document.code || "";
-
-  if (parts.length > 3 && code && last.toLowerCase().startsWith(code.toLowerCase())) {
-    return parts.slice(0, -1).join("/");
-  }
-
-  return path;
+function collectFolderTreeKeys<T>(scope: string, nodes: FolderTreeNode<T>[]) {
+  const keys: string[] = [];
+  const visit = (node: FolderTreeNode<T>) => {
+    keys.push(folderKey(scope, node.path));
+    node.children.forEach(visit);
+  };
+  nodes.forEach(visit);
+  return keys;
 }
 
 function folderKey(scope: string, folderPath: string) {
@@ -293,13 +320,14 @@ export default function BibliotecaPopsPage() {
   const [canonicalSendingId, setCanonicalSendingId] = useState<string | null>(null);
   const [chunkingDocumentId, setChunkingDocumentId] = useState<string | null>(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [editingLibraryItemId, setEditingLibraryItemId] = useState<string | null>(null);
   const [showQaArtifacts, setShowQaArtifacts] = useState(false);
   const [popsError, setPopsError] = useState<string | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [canonicalError, setCanonicalError] = useState<string | null>(null);
 
   const userRole = (session?.user as { role?: string } | undefined)?.role;
-  const canManageCanonicalContent = userRole === "ADMIN" || userRole === "RT";
+  const canManageCanonicalContent = userRole === "SUPER_ADMIN" || userRole === "ADMIN" || userRole === "RT";
   const selectedCanonicalChunkIds = selectedCanonicalChunks.map((chunk) => chunk.id);
   const selectedRetrievalLogIds = new Set(
     selectedCanonicalChunks.map((chunk) => chunk.retrievalLogId).filter(Boolean)
@@ -413,8 +441,8 @@ export default function BibliotecaPopsPage() {
     grouped["Outros"] = otherPops.sort((a, b) => a.codigo.localeCompare(b.codigo));
   }
 
-  const groupedLibraryItems = groupByFolder(filteredLibraryItems, getPopLibraryFolder);
-  const groupedCanonicalDocuments = groupByFolder(filteredCanonicalDocuments, getPopCanonicalFolder);
+  const libraryItemTree = buildFolderTree(filteredLibraryItems, (item) => item.category);
+  const canonicalDocumentTree = buildFolderTree(filteredCanonicalDocuments, (document) => document.category);
 
   const toggleFolder = (key: string) => {
     setOpenFolders((prev) => {
@@ -431,8 +459,8 @@ export default function BibliotecaPopsPage() {
   const expandAll = () =>
     setOpenFolders(
       new Set([
-        ...groupedLibraryItems.map((group) => folderKey("library", group.path)),
-        ...groupedCanonicalDocuments.map((group) => folderKey("canonical", group.path)),
+        ...collectFolderTreeKeys("library", libraryItemTree),
+        ...collectFolderTreeKeys("canonical", canonicalDocumentTree),
         ...Object.keys(grouped).map((setor) => folderKey("pop", setor)),
       ])
     );
@@ -745,6 +773,293 @@ export default function BibliotecaPopsPage() {
       </div>
     ) : null;
 
+  const renderLibraryFolderNode = (node: FolderTreeNode<LibraryItem>, depth = 0) => {
+    const key = folderKey("library", node.path);
+    const isOpen = openFolders.has(key);
+
+    return (
+      <div key={key} className="overflow-hidden border-t first:border-t-0">
+        <button
+          type="button"
+          onClick={() => toggleFolder(key)}
+          className="flex w-full items-center gap-3 py-3 pr-4 text-left transition-colors hover:bg-gray-50"
+          style={{ paddingLeft: `${16 + depth * 20}px` }}
+        >
+          <ChevronRight
+            className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-90" : ""}`}
+          />
+          {isOpen ? (
+            <FolderOpen className="h-4 w-4 text-amber-500" />
+          ) : (
+            <FolderClosed className="h-4 w-4 text-amber-500" />
+          )}
+          <span className="flex-1 truncate text-sm font-medium text-gray-900">{node.label}</span>
+          {node.needsReview && <Badge variant="outline">Revisar</Badge>}
+          <Badge variant="secondary">{node.count}</Badge>
+        </button>
+
+        {isOpen && (
+          <div className="bg-white">
+            {node.children.map((child) => renderLibraryFolderNode(child, depth + 1))}
+            {node.items.length > 0 && (
+              <div className="divide-y bg-gray-50">
+                {node.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3 bg-white py-3 pr-4"
+                    style={{ paddingLeft: `${52 + depth * 20}px` }}
+                  >
+                    <Library className="h-4 w-4 flex-shrink-0 text-teal-600" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {item.code ? `${item.code} - ` : ""}
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {item.type} · {formatFolderLabel(item.category)} · {item.version || "sem versão"}
+                      </p>
+                      {(canonicalByLibraryItemId.has(item.id) || activeCanonicalJobBySourceId.has(item.id)) && (
+                        <p className="mt-1 text-xs text-teal-700">Já preparado para consulta</p>
+                      )}
+                    </div>
+                    {canManageCanonicalContent && (
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingLibraryItemId(item.id);
+                            setDocumentDialogOpen(true);
+                          }}
+                        >
+                          <FileText className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSendToCanonicalLibrary(item)}
+                          disabled={
+                            canonicalSendingId === item.id ||
+                            canonicalByLibraryItemId.has(item.id) ||
+                            activeCanonicalJobBySourceId.has(item.id)
+                          }
+                        >
+                          <Library className="h-4 w-4 mr-1" />
+                          Preparar para consulta
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleGenerateDraft(item)}
+                          disabled={generatingId === item.id}
+                        >
+                          <Wand2 className="h-4 w-4 mr-1" />
+                          Minuta simples
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCanonicalDocumentCard = (document: CanonicalDocument) => {
+    const job = canonicalJobs.find((item) => item.canonicalDocumentId === document.id);
+    const isViewingChunks = selectedCanonicalDocumentId === document.id;
+
+    return (
+      <div key={document.id} className="rounded-lg border bg-white px-4 py-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Library className="h-4 w-4 flex-shrink-0 text-teal-600" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">
+              {document.code ? `${document.code} - ` : ""}
+              {document.title}
+            </p>
+            <p className="text-xs text-gray-500">
+              {document.kind} · {document.sourceType} · {document.version || "sem versão"} ·{" "}
+              {formatFolderLabel(document.category)} · atualizado em{" "}
+              {format(new Date(document.updatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary">{formatCanonicalStatus(document.status)}</Badge>
+            {job && <Badge variant="outline">{formatCanonicalJobStatus(job.status)}</Badge>}
+            {canManageCanonicalContent && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleGenerateCanonicalChunks(document)}
+                disabled={chunkingDocumentId === document.id}
+              >
+                <FileText className="h-4 w-4 mr-1" />
+                {chunkingDocumentId === document.id ? "Preparando..." : "Preparar trechos"}
+              </Button>
+            )}
+            <Button size="sm" variant="outline" onClick={() => handleViewChunks(document.id)}>
+              <Eye className="h-4 w-4 mr-1" />
+              {isViewingChunks ? "Ocultar trechos" : "Ver trechos"}
+            </Button>
+          </div>
+        </div>
+
+        {isViewingChunks && (
+          <div className="mt-4 rounded-md border bg-gray-50 p-3">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar texto nos trechos..."
+                  value={chunkSearch}
+                  onChange={(event) => setChunkSearch(event.target.value)}
+                  className="pl-10"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      fetchCanonicalChunks(document.id);
+                    }
+                  }}
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => fetchCanonicalChunks(document.id)}
+                disabled={chunksLoading}
+              >
+                Buscar
+              </Button>
+            </div>
+
+            {selectedCanonicalChunksCta && <div className="mt-3">{selectedCanonicalChunksCta}</div>}
+
+            {!canManageCanonicalContent && (
+              <div className="mt-3 rounded-md border bg-white p-3 text-sm text-gray-600">
+                A criação de minuta POP está disponível apenas para Administradores e Responsáveis Técnicos.
+              </div>
+            )}
+
+            {chunksError && (
+              <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {chunksError}
+              </div>
+            )}
+
+            {chunksLoading && canonicalChunks.length === 0 ? (
+              <div className="mt-4 flex justify-center py-6">
+                <LoadingSpinner />
+              </div>
+            ) : canonicalChunks.length === 0 && !chunksError ? (
+              <div className="mt-3 rounded-md border bg-white p-4 text-sm text-gray-500">
+                Nenhum trecho encontrado para este documento.
+              </div>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {canonicalChunks.map((chunk) => (
+                  <div key={chunk.id} className="rounded-md border bg-white p-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex gap-3">
+                        {canManageCanonicalContent && (
+                          <Checkbox
+                            checked={isCanonicalChunkSelected(chunk.id)}
+                            onCheckedChange={(checked) =>
+                              toggleCanonicalChunkSelection(
+                                {
+                                  id: chunk.id,
+                                  chunkIndex: chunk.chunkIndex,
+                                  documentTitle: document.title,
+                                  documentCode: document.code,
+                                  heading: chunk.heading,
+                                  text: chunk.text,
+                                  retrievalLogId: null,
+                                },
+                                checked === true
+                              )
+                            }
+                            aria-label={`Selecionar trecho ${chunk.chunkIndex + 1}`}
+                            className="mt-1"
+                          />
+                        )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline">Trecho {chunk.chunkIndex + 1}</Badge>
+                          <Badge variant="secondary">{formatSemanticRole(chunk.semanticRole)}</Badge>
+                          <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
+                        </div>
+                      </div>
+                      <span className="font-mono text-[11px] text-gray-400">
+                        {chunk.sourceHash.slice(0, 12)}
+                      </span>
+                    </div>
+                    {chunk.heading && (
+                      <p className="mt-2 text-sm font-medium text-gray-800">{chunk.heading}</p>
+                    )}
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                      {chunk.text.length > 700 ? `${chunk.text.slice(0, 700)}...` : chunk.text}
+                    </p>
+                  </div>
+                ))}
+                {chunksNextCursor !== null && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => fetchCanonicalChunks(document.id, { cursor: chunksNextCursor, append: true })}
+                    disabled={chunksLoading}
+                  >
+                    Carregar mais trechos
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCanonicalFolderNode = (node: FolderTreeNode<CanonicalDocument>, depth = 0) => {
+    const key = folderKey("canonical", node.path);
+    const isOpen = openFolders.has(key);
+
+    return (
+      <div key={key} className="overflow-hidden border-t first:border-t-0">
+        <button
+          type="button"
+          onClick={() => toggleFolder(key)}
+          className="flex w-full items-center gap-3 py-3 pr-4 text-left transition-colors hover:bg-gray-50"
+          style={{ paddingLeft: `${16 + depth * 20}px` }}
+        >
+          <ChevronRight
+            className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-90" : ""}`}
+          />
+          {isOpen ? (
+            <FolderOpen className="h-4 w-4 text-amber-500" />
+          ) : (
+            <FolderClosed className="h-4 w-4 text-amber-500" />
+          )}
+          <span className="flex-1 truncate text-sm font-medium text-gray-900">{node.label}</span>
+          {node.needsReview && <Badge variant="outline">Revisar</Badge>}
+          <Badge variant="secondary">{node.count}</Badge>
+        </button>
+
+        {isOpen && (
+          <div className="bg-white">
+            {node.children.map((child) => renderCanonicalFolderNode(child, depth + 1))}
+            {node.items.length > 0 && (
+              <div className="space-y-2 border-t bg-gray-50 p-3">
+                {node.items.map((document) => renderCanonicalDocumentCard(document))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -754,8 +1069,12 @@ export default function BibliotecaPopsPage() {
 
       <DocumentLibraryItemDialog
         open={documentDialogOpen}
-        onOpenChange={setDocumentDialogOpen}
+        onOpenChange={(open) => {
+          setDocumentDialogOpen(open);
+          if (!open) setEditingLibraryItemId(null);
+        }}
         onSuccess={fetchPops}
+        editingItemId={editingLibraryItemId}
       />
 
       <CanonicalPopDraftDialog
@@ -965,76 +1284,9 @@ export default function BibliotecaPopsPage() {
       {filteredLibraryItems.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">Acervo de POPs</h3>
-          {groupedLibraryItems.map((group) => {
-            const key = folderKey("library", group.path);
-            const isOpen = openFolders.has(key);
-
-            return (
-              <div key={key} className="overflow-hidden rounded-lg border bg-white">
-                <button
-                  type="button"
-                  onClick={() => toggleFolder(key)}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
-                >
-                  <ChevronRight
-                    className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-90" : ""}`}
-                  />
-                  <FolderClosed className="h-4 w-4 text-amber-500" />
-                  <span className="flex-1 truncate text-sm font-medium text-gray-900">{group.label}</span>
-                  {group.needsReview && <Badge variant="outline">Revisar</Badge>}
-                  <Badge variant="secondary">{group.items.length}</Badge>
-                </button>
-
-                {isOpen && (
-                  <div className="divide-y border-t">
-                    {group.items.map((item) => (
-                      <div key={item.id} className="flex items-center gap-3 bg-white px-4 py-3 pl-10">
-                        <Library className="h-4 w-4 flex-shrink-0 text-teal-600" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">
-                            {item.code ? `${item.code} - ` : ""}
-                            {item.title}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {item.type} · {formatFolderLabel(item.category)} · {item.version || "sem versão"}
-                          </p>
-                          {(canonicalByLibraryItemId.has(item.id) || activeCanonicalJobBySourceId.has(item.id)) && (
-                            <p className="mt-1 text-xs text-teal-700">Já preparado para consulta</p>
-                          )}
-                        </div>
-                        {canManageCanonicalContent && (
-                          <div className="flex flex-wrap justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleSendToCanonicalLibrary(item)}
-                              disabled={
-                                canonicalSendingId === item.id ||
-                                canonicalByLibraryItemId.has(item.id) ||
-                                activeCanonicalJobBySourceId.has(item.id)
-                              }
-                            >
-                              <Library className="h-4 w-4 mr-1" />
-                              Preparar para consulta
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleGenerateDraft(item)}
-                              disabled={generatingId === item.id}
-                            >
-                              <Wand2 className="h-4 w-4 mr-1" />
-                              Minuta simples
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          <div className="overflow-hidden rounded-lg border bg-white">
+            {libraryItemTree.map((node) => renderLibraryFolderNode(node))}
+          </div>
         </div>
       )}
 
@@ -1045,183 +1297,8 @@ export default function BibliotecaPopsPage() {
             Nenhum POP preparado para consulta.
           </Card>
         ) : (
-          <div className="space-y-2">
-            {groupedCanonicalDocuments.map((group) => {
-              const key = folderKey("canonical", group.path);
-              const isOpen = openFolders.has(key);
-              return (
-                <div key={key} className="overflow-hidden rounded-lg border bg-white">
-                  <button
-                    type="button"
-                    onClick={() => toggleFolder(key)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
-                  >
-                    <ChevronRight
-                      className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? "rotate-90" : ""}`}
-                    />
-                    <FolderOpen className="h-4 w-4 text-amber-500" />
-                    <span className="flex-1 truncate text-sm font-medium text-gray-900">{group.label}</span>
-                    {group.needsReview && <Badge variant="outline">Revisar</Badge>}
-                    <Badge variant="secondary">{group.items.length}</Badge>
-                  </button>
-
-                  {isOpen && (
-                    <div className="space-y-2 border-t bg-gray-50 p-3">
-                      {group.items.map((document) => {
-                        const job = canonicalJobs.find((item) => item.canonicalDocumentId === document.id);
-                        const isViewingChunks = selectedCanonicalDocumentId === document.id;
-                        return (
-                          <div key={document.id} className="rounded-lg border bg-white px-4 py-3">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                              <Library className="h-4 w-4 flex-shrink-0 text-teal-600" />
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium">
-                                  {document.code ? `${document.code} - ` : ""}
-                                  {document.title}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {document.kind} · {document.sourceType} · {document.version || "sem versão"} ·{" "}
-                                  {formatFolderLabel(document.category)} · atualizado em{" "}
-                                  {format(new Date(document.updatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                                </p>
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                <Badge variant="secondary">{formatCanonicalStatus(document.status)}</Badge>
-                                {job && <Badge variant="outline">{formatCanonicalJobStatus(job.status)}</Badge>}
-                                {canManageCanonicalContent && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleGenerateCanonicalChunks(document)}
-                                    disabled={chunkingDocumentId === document.id}
-                                  >
-                                    <FileText className="h-4 w-4 mr-1" />
-                                    {chunkingDocumentId === document.id ? "Preparando..." : "Preparar trechos"}
-                                  </Button>
-                                )}
-                                <Button size="sm" variant="outline" onClick={() => handleViewChunks(document.id)}>
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  {isViewingChunks ? "Ocultar trechos" : "Ver trechos"}
-                                </Button>
-                              </div>
-                            </div>
-
-                            {isViewingChunks && (
-                              <div className="mt-4 rounded-md border bg-gray-50 p-3">
-                                <div className="flex flex-col gap-2 sm:flex-row">
-                                  <div className="relative flex-1">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <Input
-                                      placeholder="Buscar texto nos trechos..."
-                                      value={chunkSearch}
-                                      onChange={(event) => setChunkSearch(event.target.value)}
-                                      className="pl-10"
-                                      onKeyDown={(event) => {
-                                        if (event.key === "Enter") {
-                                          fetchCanonicalChunks(document.id);
-                                        }
-                                      }}
-                                    />
-                                  </div>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => fetchCanonicalChunks(document.id)}
-                                    disabled={chunksLoading}
-                                  >
-                                    Buscar
-                                  </Button>
-                                </div>
-
-                                {selectedCanonicalChunksCta && <div className="mt-3">{selectedCanonicalChunksCta}</div>}
-
-                                {!canManageCanonicalContent && (
-                                  <div className="mt-3 rounded-md border bg-white p-3 text-sm text-gray-600">
-                                    A criação de minuta POP está disponível apenas para Administradores e Responsáveis Técnicos.
-                                  </div>
-                                )}
-
-                                {chunksError && (
-                                  <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                                    {chunksError}
-                                  </div>
-                                )}
-
-                                {chunksLoading && canonicalChunks.length === 0 ? (
-                                  <div className="mt-4 flex justify-center py-6">
-                                    <LoadingSpinner />
-                                  </div>
-                                ) : canonicalChunks.length === 0 && !chunksError ? (
-                                  <div className="mt-3 rounded-md border bg-white p-4 text-sm text-gray-500">
-                                    Nenhum trecho encontrado para este documento.
-                                  </div>
-                                ) : (
-                                  <div className="mt-3 space-y-2">
-                                    {canonicalChunks.map((chunk) => (
-                                      <div key={chunk.id} className="rounded-md border bg-white p-3">
-                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                          <div className="flex gap-3">
-                                            {canManageCanonicalContent && (
-                                              <Checkbox
-                                                checked={isCanonicalChunkSelected(chunk.id)}
-                                                onCheckedChange={(checked) =>
-                                                  toggleCanonicalChunkSelection(
-                                                    {
-                                                      id: chunk.id,
-                                                      chunkIndex: chunk.chunkIndex,
-                                                      documentTitle: document.title,
-                                                      documentCode: document.code,
-                                                      heading: chunk.heading,
-                                                      text: chunk.text,
-                                                      retrievalLogId: null,
-                                                    },
-                                                    checked === true
-                                                  )
-                                                }
-                                                aria-label={`Selecionar trecho ${chunk.chunkIndex + 1}`}
-                                                className="mt-1"
-                                              />
-                                            )}
-                                            <div className="flex flex-wrap items-center gap-2">
-                                              <Badge variant="outline">Trecho {chunk.chunkIndex + 1}</Badge>
-                                              <Badge variant="secondary">{formatSemanticRole(chunk.semanticRole)}</Badge>
-                                              <span className="text-xs text-gray-500">{chunk.tokenEstimate} tokens estimados</span>
-                                            </div>
-                                          </div>
-                                          <span className="font-mono text-[11px] text-gray-400">
-                                            {chunk.sourceHash.slice(0, 12)}
-                                          </span>
-                                        </div>
-                                        {chunk.heading && (
-                                          <p className="mt-2 text-sm font-medium text-gray-800">{chunk.heading}</p>
-                                        )}
-                                        <p className="mt-2 text-sm leading-6 text-gray-600">
-                                          {chunk.text.length > 700 ? `${chunk.text.slice(0, 700)}...` : chunk.text}
-                                        </p>
-                                      </div>
-                                    ))}
-                                    {chunksNextCursor !== null && (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => fetchCanonicalChunks(document.id, { cursor: chunksNextCursor, append: true })}
-                                        disabled={chunksLoading}
-                                      >
-                                        Carregar mais trechos
-                                      </Button>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          <div className="overflow-hidden rounded-lg border bg-white">
+            {canonicalDocumentTree.map((node) => renderCanonicalFolderNode(node))}
           </div>
         )}
       </div>
