@@ -7,6 +7,10 @@ export const POP_LIBRARY_FOLDER_OPTIONS = [
   "Biblioteca de POPs/Acervo Drogarias/Recebimento e Armazenamento",
   "Biblioteca de POPs/Acervo Drogarias/Servicos Farmaceuticos",
   "Biblioteca de POPs/Acervo Drogarias/Higiene e Limpeza",
+  "Biblioteca de POPs/POPs para Farmacias de Manipulacao",
+  "Biblioteca de POPs/POPs para Farmacias de Manipulacao/POPs",
+  "Biblioteca de POPs/POPs para Farmacias de Manipulacao/Controle de Qualidade",
+  "Biblioteca de POPs/POPs para Farmacias de Manipulacao/Manual de Boas Praticas",
   "Biblioteca de POPs/Acervo LGPD/Farmacias de Manipulacao",
   "Biblioteca de POPs/Acervo Geral/Conteudo Modular",
   "Biblioteca de POPs/Gerados sob demanda/Rascunhos",
@@ -20,7 +24,11 @@ export const RQ_MBP_FOLDER_OPTIONS = [
   "RQ's e MBP/Acervo Drogarias/Anexos",
   "RQ's e MBP/Acervo Manipulacao/MBP",
   "RQ's e MBP/Acervo Manipulacao/RQs",
-  "RQ's e MBP/Acervo Manipulacao/Anexos",
+  "RQ''s e MBP/Acervo Manipulacao/Anexos",
+  "RQ''s e MBP/Manual de Boas Praticas de Manipulacao",
+  "RQ''s e MBP/Manual de Boas Praticas de Manipulacao/Material de apoio",
+  "RQ''s e MBP/Controle de Qualidade",
+  "RQ''s e MBP/Controle de Qualidade/Material de apoio",
   "RQ's e MBP/Acervo Geral/Indice",
   "RQ's e MBP/Acervo Geral/Conteudo Modular",
   "RQ's e MBP/Registros da Qualidade/Formularios",
@@ -66,6 +74,11 @@ export const LEGACY_DOCUMENT_FOLDER_OPTIONS = [
   "LGPD/Farmacias de Manipulacao",
 ] as const;
 
+export const TRAINING_CERTIFICATION_FOLDER_PREFIXES = [
+  "RQ's e MBP/Manual de Boas Praticas de Manipulacao",
+  "RQ's e MBP/Controle de Qualidade",
+] as const;
+
 export const DOCUMENT_FOLDER_OPTIONS = [
   ...POP_LIBRARY_FOLDER_OPTIONS,
   ...RQ_MBP_FOLDER_OPTIONS,
@@ -82,7 +95,13 @@ export function normalizeFolderPath(path?: string | null) {
 }
 
 export function formatFolderLabel(path?: string | null) {
-  return normalizeFolderPath(path).replace(/\//g, " / ");
+  return normalizeFolderPath(path)
+    .split("/")
+    .map((part) => {
+      if (part === "Acervo Manipulacao") return "POPs para Farmacias de Manipulacao";
+      return part;
+    })
+    .join(" / ");
 }
 
 export function isPopLibraryFolder(path?: string | null) {
@@ -99,5 +118,12 @@ export function isRqMbpFolder(path?: string | null) {
   return (
     normalized.startsWith("RQ's e MBP/") ||
     normalized.startsWith("Farmacia de Manipulacao/")
+  );
+}
+
+export function requiresTrainingCertification(path?: string | null) {
+  const normalized = normalizeFolderPath(path);
+  return TRAINING_CERTIFICATION_FOLDER_PREFIXES.some(
+    (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`)
   );
 }
