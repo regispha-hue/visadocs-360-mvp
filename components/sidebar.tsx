@@ -16,6 +16,7 @@ import {
   Shield,
   ClipboardList,
   AlertTriangle,
+  Microscope,
   ChevronDown,
   ChevronRight,
   Library,
@@ -62,6 +63,11 @@ const farmaciaNavItems: NavItem[] = [
     label: "Não Conformidades",
     icon: AlertTriangle,
     roles: ["ADMIN", "RT"],
+  },
+  {
+    href: "/dashboard/controle-qualidade",
+    label: "Controle de Qualidade",
+    icon: Microscope,
   },
   {
     href: "/dashboard/treinamentos",
@@ -299,5 +305,6 @@ export function Sidebar() {
     </>
   );
 }
+
 
 
