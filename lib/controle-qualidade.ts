@@ -45,7 +45,7 @@ export const CQ_TRAIL_MODULES = [
   },
   {
     code: "CQ-M07",
-    title: "Não Conformidades, CAPA e Desvios",
+    title: "Não Conformidades, CAPA (Ação Corretiva e Preventiva) e Desvios",
     workload: "1h",
     tracks: ["Técnica", "Gestão"],
     category: "Controle de Qualidade/Treinamentos/BPM e Controle de Qualidade/Módulo 7",
