@@ -42,7 +42,7 @@ type NcItem = {
 const STATUS_LABELS: Record<string, string> = {
   ABERTA: "Aberta",
   EM_INVESTIGACAO: "Em investigação",
-  CAPA_PLANEJADA: "CAPA planejada",
+  CAPA_PLANEJADA: "CAPA (Ação Corretiva e Preventiva) planejada",
   EM_IMPLEMENTACAO: "Em implementação",
   FECHADA: "Fechada",
   CANCELADA: "Cancelada",
@@ -218,10 +218,10 @@ export default function NaoConformidadesPage() {
 
     if (selected.status === "EM_INVESTIGACAO") {
       return (
-        <ActionBox title="Planejar CAPA">
+        <ActionBox title="Planejar CAPA (Ação Corretiva e Preventiva)">
           <Textarea value={actionText} onChange={(event) => setActionText(event.target.value)} placeholder="Ação corretiva/preventiva, responsável e evidências esperadas..." />
           <Input type="date" value={actionDate} onChange={(event) => setActionDate(event.target.value)} />
-          <Button onClick={() => runAction("planejar-capa", { planoAcao: actionText, prazoImplementacao: actionDate })}>Planejar CAPA</Button>
+          <Button onClick={() => runAction("planejar-capa", { planoAcao: actionText, prazoImplementacao: actionDate })}>Planejar CAPA (Ação Corretiva e Preventiva)</Button>
         </ActionBox>
       );
     }
@@ -244,7 +244,7 @@ export default function NaoConformidadesPage() {
     if (selected.status === "EM_IMPLEMENTACAO" && !selected.verificacaoEfetividade) {
       return (
         <ActionBox title="Verificar efetividade">
-          <Textarea value={actionText} onChange={(event) => setActionText(event.target.value)} placeholder="Evidências de efetividade da CAPA..." />
+          <Textarea value={actionText} onChange={(event) => setActionText(event.target.value)} placeholder="Evidências de efetividade da CAPA (Ação Corretiva e Preventiva)..." />
           <Button onClick={() => runAction("verificar", { verificacaoEfetividade: actionText })}>Registrar efetividade</Button>
         </ActionBox>
       );
@@ -277,8 +277,8 @@ export default function NaoConformidadesPage() {
     <div className="container mx-auto space-y-6 p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Não Conformidades e CAPA</h1>
-          <p className="text-muted-foreground">Abertura, investigação, plano CAPA, efetividade e fechamento com trilha auditável.</p>
+          <h1 className="text-3xl font-bold">Não Conformidades e CAPA (Ação Corretiva e Preventiva)</h1>
+          <p className="text-muted-foreground">Abertura, investigação, plano CAPA (Ação Corretiva e Preventiva), efetividade e fechamento com trilha auditável.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -392,7 +392,7 @@ export default function NaoConformidadesPage() {
         <Card>
           <CardContent className="space-y-4 p-4">
             {!selected ? (
-              <div className="py-16 text-center text-muted-foreground">Selecione uma NC para ver o fluxo CAPA.</div>
+              <div className="py-16 text-center text-muted-foreground">Selecione uma NC para ver o fluxo CAPA (Ação Corretiva e Preventiva).</div>
             ) : (
               <>
                 <div className="space-y-2">
@@ -415,7 +415,7 @@ export default function NaoConformidadesPage() {
 
                 {selected.pop && <Info label="POP vinculado" value={`${selected.pop.codigo} - ${selected.pop.titulo}`} />}
                 {selected.causaRaiz && <Info label="Causa raiz" value={selected.causaRaiz} />}
-                {selected.planoAcao && <Info label="Plano CAPA" value={selected.planoAcao} />}
+                {selected.planoAcao && <Info label="Plano CAPA (Ação Corretiva e Preventiva)" value={selected.planoAcao} />}
                 {selected.verificacaoEfetividade && <Info label="Efetividade" value={selected.verificacaoEfetividade} />}
 
                 {renderActionPanel()}
