@@ -93,11 +93,11 @@ export async function planCapa({ request, params, user }: ActionContext) {
   if (loaded.response) return loaded.response;
   const { item, tenantId } = loaded;
   if (item.status !== NC_STATUS.EM_INVESTIGACAO) return transitionError(item.status, NC_STATUS.EM_INVESTIGACAO);
-  if (!item.causaRaiz) return badRequest("Investigue a causa raiz antes de planejar CAPA");
+  if (!item.causaRaiz) return badRequest("Investigue a causa raiz antes de planejar CAPA (Ação Corretiva e Preventiva)");
 
   const body = await request.json();
   const planoAcao = normalizeText(body.planoAcao);
-  if (!planoAcao) return badRequest("Informe o plano de ação CAPA");
+  if (!planoAcao) return badRequest("Informe o plano de ação CAPA (Ação Corretiva e Preventiva)");
 
   const prazoImplementacao = body.prazoImplementacao ? new Date(body.prazoImplementacao) : null;
   if (!prazoImplementacao || Number.isNaN(prazoImplementacao.getTime())) {
