@@ -15,6 +15,7 @@ import {
   X,
   Shield,
   ClipboardList,
+  AlertTriangle,
   ChevronDown,
   ChevronRight,
   Library,
@@ -55,6 +56,12 @@ const farmaciaNavItems: NavItem[] = [
     href: "/dashboard/documentos",
     label: "RQ's e MBP",
     icon: ClipboardList,
+  },
+  {
+    href: "/dashboard/nao-conformidades",
+    label: "Não Conformidades",
+    icon: AlertTriangle,
+    roles: ["ADMIN", "RT"],
   },
   {
     href: "/dashboard/treinamentos",
@@ -292,4 +299,5 @@ export function Sidebar() {
     </>
   );
 }
+
 
