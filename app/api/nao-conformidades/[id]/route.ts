@@ -34,7 +34,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             id: true,
             descricao: true,
             severidade: true,
-            status: true,
           },
         },
       },
