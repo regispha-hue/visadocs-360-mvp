@@ -5,7 +5,7 @@ import { forbidden, getCurrentUser, requireTenantId, unauthorized } from "@/lib/
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorized();
@@ -15,8 +15,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const { tenantId, response } = requireTenantId(user, searchParams.get("tenantId"));
     if (response) return response;
 
+    const { id } = await params;
     const item = await prisma.naoConformidade.findFirst({
-      where: { id: params.id, tenantId: tenantId! },
+      where: { id, tenantId: tenantId! },
       include: {
         pop: {
           select: {
