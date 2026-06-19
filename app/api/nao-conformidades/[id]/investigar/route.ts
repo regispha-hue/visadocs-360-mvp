@@ -3,8 +3,8 @@ import { investigateNc } from "../_actions";
 
 export const dynamic = "force-dynamic";
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   if (!user) return unauthorized();
-  return investigateNc({ request, params, user });
+  return investigateNc({ request, params: await params, user });
 }
