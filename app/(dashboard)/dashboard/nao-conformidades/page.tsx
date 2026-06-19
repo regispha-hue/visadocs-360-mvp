@@ -305,7 +305,7 @@ export default function NaoConformidadesPage() {
                 <Select value={form.origem} onValueChange={(value) => setForm({ ...form, origem: value })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {ORIGENS.map((value) => <SelectItem key={value} value={value}>{value.replaceAll("_", " ")}</SelectItem>)}
+                    {ORIGENS.map((value) => <SelectItem key={value} value={value}>{value.replace(/_/g, " ")}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Input placeholder="Setor" value={form.setor} onChange={(event) => setForm({ ...form, setor: event.target.value })} />
@@ -378,7 +378,7 @@ export default function NaoConformidadesPage() {
                           {isOverdue(item) && <Badge variant="destructive">Vencida</Badge>}
                         </div>
                         <p className="mt-1 font-medium">{item.titulo}</p>
-                        <p className="text-sm text-muted-foreground">{item.origem?.replaceAll("_", " ")} {item.pop ? `- ${item.pop.codigo}` : ""}</p>
+                        <p className="text-sm text-muted-foreground">{item.origem?.replace(/_/g, " ")} {item.pop ? `- ${item.pop.codigo}` : ""}</p>
                       </div>
                       <div className="text-sm text-muted-foreground">Prazo: {formatDate(item.prazoCorrecao)}</div>
                     </div>
@@ -409,7 +409,7 @@ export default function NaoConformidadesPage() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <Info label="Gravidade" value={gravidadeLabel(selected.severidade)} />
                   <Info label="Prazo" value={formatDate(selected.prazoCorrecao)} />
-                  <Info label="Origem" value={selected.origem?.replaceAll("_", " ") || "-"} />
+                  <Info label="Origem" value={selected.origem?.replace(/_/g, " ") || "-"} />
                   <Info label="Setor" value={selected.setor || "-"} />
                 </div>
 
