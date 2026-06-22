@@ -23,6 +23,7 @@ import {
   Bot,
   Settings,
   BarChart3,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,22 @@ const farmaciaNavItems: NavItem[] = [
     href: "/dashboard/treinamentos",
     label: "Treinamentos",
     icon: GraduationCap,
+  },
+  {
+    href: "/dashboard/minha-trilha",
+    label: "Minha Trilha",
+    icon: GraduationCap,
+  },
+  {
+    href: "/dashboard/minha-pasta",
+    label: "Minha Pasta",
+    icon: FolderOpen,
+  },
+  {
+    href: "/dashboard/pasta-central",
+    label: "Pasta Central",
+    icon: ClipboardList,
+    roles: ["ADMIN", "RT"],
   },
   {
     href: "/dashboard/colaboradores",
