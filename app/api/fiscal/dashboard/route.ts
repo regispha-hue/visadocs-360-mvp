@@ -23,16 +23,16 @@ export async function GET(request: Request) {
     }),
     prisma.naoConformidade.findMany({
       where: { tenantId: tenantId! },
-      select: { status: true, createdAt: true, dataConclusao: true },
+      select: { status: true, createdAt: true, dataFechamento: true },
     }),
   ]);
 
   const abertas = naoConformidades.filter((item) => item.status !== "CONCLUIDA" && item.status !== "FECHADA");
-  const fechadasComPrazo = naoConformidades.filter((item) => item.dataConclusao);
+  const fechadasComPrazo = naoConformidades.filter((item) => item.dataFechamento);
   const mediaResolucaoDias = fechadasComPrazo.length
     ? Math.round(
         fechadasComPrazo.reduce((sum, item) => {
-          return sum + ((item.dataConclusao!.getTime() - item.createdAt.getTime()) / 86400000);
+          return sum + ((item.dataFechamento!.getTime() - item.createdAt.getTime()) / 86400000);
         }, 0) / fechadasComPrazo.length
       )
     : null;
