@@ -82,7 +82,7 @@ function getProgressColor(pct: number) {
 function getProgressBadge(pct: number) {
   if (pct >= 80) return { variant: "success" as const, label: "Excelente" };
   if (pct >= 50) return { variant: "warning" as const, label: "Em progresso" };
-  return { variant: "destructive" as const, label: "Aten\u00e7\u00e3o" };
+  return { variant: "destructive" as const, label: "Atenção" };
 }
 
 export default function ProgressoPage() {
@@ -121,7 +121,7 @@ export default function ProgressoPage() {
   if (!resumo) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>Nenhum dado de progresso dispon\u00edvel.</p>
+        <p>Nenhum dado de progresso disponível.</p>
       </div>
     );
   }
@@ -137,8 +137,8 @@ export default function ProgressoPage() {
   return (
     <div>
       <PageHeader
-        title="Progresso LMS"
-        description="Acompanhamento do aprendizado e capacita\u00e7\u00e3o dos colaboradores"
+        title="Aprendizagem do Usuário"
+        description="Acompanhe treinamentos, quizzes e conclusão da aprendizagem dos colaboradores"
       />
 
       {/* Summary Cards */}
@@ -155,7 +155,7 @@ export default function ProgressoPage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {resumo.colabsCompletos} com 100% conclu\u00eddo
+              {resumo.colabsCompletos} com 100% concluído
             </p>
           </CardContent>
         </Card>
@@ -164,7 +164,7 @@ export default function ProgressoPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Taxa de Conclus\u00e3o</p>
+                <p className="text-sm text-muted-foreground">Taxa de Conclusão</p>
                 <p className="text-3xl font-bold">{resumo.taxaConclusao}%</p>
               </div>
               <div className="p-3 rounded-full bg-emerald-50">
@@ -181,7 +181,7 @@ export default function ProgressoPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">M\u00e9dia Geral Quiz</p>
+                <p className="text-sm text-muted-foreground">Média Geral Quiz</p>
                 <p className="text-3xl font-bold">{resumo.mediaGeralQuiz}%</p>
               </div>
               <div className="p-3 rounded-full bg-blue-50">
@@ -189,7 +189,7 @@ export default function ProgressoPage() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Nota m\u00e9dia das avalia\u00e7\u00f5es aprovadas
+              Nota média das avaliações aprovadas
             </p>
           </CardContent>
         </Card>
@@ -229,7 +229,7 @@ export default function ProgressoPage() {
                   <XAxis type="number" domain={[0, 100]} unit="%" />
                   <YAxis dataKey="name" type="category" width={160} tick={{ fontSize: 11 }} />
                   <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Conclus\u00e3o"]}
+                    formatter={(value: number) => [`${value}%`, "Conclusão"]}
                     labelFormatter={(label: string, payload: any[]) => {
                       const item = payload?.[0]?.payload;
                       return item?.fullName ?? label;
@@ -299,9 +299,9 @@ export default function ProgressoPage() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-2 font-medium">Colaborador</th>
-                    <th className="text-left py-3 px-2 font-medium">Fun\u00e7\u00e3o</th>
-                    <th className="text-center py-3 px-2 font-medium">POPs Conclu\u00eddos</th>
-                    <th className="text-center py-3 px-2 font-medium">M\u00e9dia Quiz</th>
+                    <th className="text-left py-3 px-2 font-medium">Função</th>
+                    <th className="text-center py-3 px-2 font-medium">POPs Concluídos</th>
+                    <th className="text-center py-3 px-2 font-medium">Média Quiz</th>
                     <th className="text-left py-3 px-2 font-medium min-w-[200px]">Progresso</th>
                     <th className="text-center py-3 px-2 font-medium">Status</th>
                   </tr>
@@ -330,7 +330,7 @@ export default function ProgressoPage() {
                               {colab.mediaQuiz}%
                             </span>
                           ) : (
-                            <span className="text-muted-foreground">\u2014</span>
+                            <span className="text-muted-foreground">—</span>
                           )}
                         </td>
                         <td className="py-3 px-2">
