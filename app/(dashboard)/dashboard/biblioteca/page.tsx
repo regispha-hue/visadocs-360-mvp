@@ -532,6 +532,35 @@ export default function BibliotecaPopsPage() {
     }
   }
 
+  async function handlePrintLibraryItem(item: LibraryItem, tipo: "final" | "editavel") {
+    const actionId = `${item.id}:${tipo}`;
+    setDownloadingId(actionId);
+    try {
+      const res = await fetch(`/api/biblioteca/${item.id}/imprimir`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Erro ao gerar arquivo" }));
+        throw new Error(err.error || "Erro ao gerar arquivo");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const extension = tipo === "editavel" ? "docx" : "pdf";
+      a.href = url;
+      a.download = `${item.code ? `${item.code} - ` : ""}${item.title}.${extension}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success(tipo === "editavel" ? "Versão editável gerada" : "Versão final gerada");
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao gerar impressão controlada");
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
   async function handleGenerateDraft(item: LibraryItem) {
     setGeneratingId(item.id);
     try {
@@ -855,6 +884,28 @@ export default function BibliotecaPopsPage() {
                       {(canonicalByLibraryItemId.has(item.id) || activeCanonicalJobBySourceId.has(item.id)) && (
                         <p className="mt-1 text-xs text-teal-700">Já preparado para consulta</p>
                       )}
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePrintLibraryItem(item, "final")}
+                        disabled={downloadingId === `${item.id}:final`}
+                        title="Gerar versão final PDF"
+                      >
+                        <Printer className="h-4 w-4 mr-1" />
+                        PDF
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePrintLibraryItem(item, "editavel")}
+                        disabled={downloadingId === `${item.id}:editavel`}
+                        title="Gerar versão editável DOCX"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        DOCX
+                      </Button>
                     </div>
                     {canManageCanonicalContent && (
                       <div className="flex flex-wrap justify-end gap-2">
