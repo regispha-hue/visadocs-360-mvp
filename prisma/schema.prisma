@@ -62,6 +62,9 @@ model Tenant {
   canonicalChunks                  CanonicalChunk[]
   ragRetrievalLogs                 RagRetrievalLog[]
   assistedPopDraftCanonicalSources AssistedPopDraftCanonicalSource[]
+  documentoImpressaoLogs           DocumentoImpressaoLog[]
+  certificados                     Certificado[]
+  alertasTreinamento               AlertaTreinamento[]
 }
 
 model Pop {
@@ -173,11 +176,28 @@ model DocumentaryLibraryItem {
   updatedAt          DateTime                 @updatedAt
   draftSources       AssistedPopDraftSource[]
   canonicalDocuments CanonicalDocument[]
+  impressaoLogs      DocumentoImpressaoLog[]
 
   @@index([tenantId, status])
   @@index([tenantId, type])
   @@index([tenantId, category])
   @@index([tenantId, sourcePopId])
+}
+
+model DocumentoImpressaoLog {
+  id          String                 @id @default(cuid())
+  documentoId String
+  documento   DocumentaryLibraryItem @relation(fields: [documentoId], references: [id])
+  usuarioId   String
+  usuarioNome String?
+  tipo        String
+  tenantId    String
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id])
+  criadoEm    DateTime               @default(now())
+
+  @@index([tenantId, documentoId])
+  @@index([tenantId, criadoEm])
+  @@index([tenantId, usuarioId])
 }
 
 model AssistedPopDraft {
@@ -489,7 +509,47 @@ model TentativaQuiz {
   totalQuestoes   Int?
   respostasData   Json?
   respostas       Resposta[]
+  certificados    Certificado[]
   createdAt       DateTime    @default(now())
+}
+
+model Certificado {
+  id              String         @id @default(cuid())
+  usuarioId       String
+  usuarioNome     String?
+  colaboradorId   String?
+  colaboradorNome String?
+  treinamentoId   String
+  tentativaId      String?
+  tentativa        TentativaQuiz? @relation(fields: [tentativaId], references: [id])
+  arquivoUrl      String
+  codigoValidacao String?
+  dataEmissao     DateTime       @default(now())
+  validade        DateTime?
+  tenantId        String
+  tenant          Tenant         @relation(fields: [tenantId], references: [id])
+  criadoEm        DateTime       @default(now())
+
+  @@unique([tenantId, treinamentoId])
+  @@index([tenantId, usuarioId])
+  @@index([tenantId, colaboradorId])
+  @@index([tenantId, validade])
+}
+
+model AlertaTreinamento {
+  id             String   @id @default(cuid())
+  usuarioId      String
+  treinamentoId  String
+  tipo           String
+  lido           Boolean  @default(false)
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  criadoEm       DateTime @default(now())
+
+  @@unique([usuarioId, treinamentoId, tipo])
+  @@index([tenantId, usuarioId, lido])
+  @@index([tenantId, tipo])
+  @@index([tenantId, criadoEm])
 }
 
 model Resposta {
