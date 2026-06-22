@@ -68,16 +68,17 @@ export default function TreinamentosPage() {
 
   const handleComplete = async (treinamento: Treinamento) => {
     try {
-      const res = await fetch(`/api/treinamentos/${treinamento.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "CONCLUIDO" }),
+      const res = await fetch(`/api/treinamentos/${treinamento.id}/concluir`, {
+        method: "POST",
       });
-      if (!res.ok) throw new Error();
-      toast.success("Treinamento marcado como concluído!");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Erro ao concluir treinamento" }));
+        throw new Error(err.error || "Erro ao concluir treinamento");
+      }
+      toast.success("Treinamento concluído e certificado gerado!");
       fetchTreinamentos();
-    } catch (error) {
-      toast.error("Erro ao atualizar treinamento");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao atualizar treinamento");
     }
   };
 
