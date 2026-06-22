@@ -1,88 +1,88 @@
-# VISADOCS - Gestão de POPs e Treinamentos para Farmácias de Manipulação
+# VISADOCS 360 MVP
+
+SaaS B2B multi-tenant para gestao documental, POPs, treinamentos, evidencias de qualidade e apoio operacional para farmacias.
+
+## Estado atual
+
+Producao atualizada em 2026-06-22 no commit `50248d39cdbb3271dac1f487ae006df87431aa00`.
+
+Implementacoes ativas documentadas:
+
+- [Mapa das implementacoes ativas](docs/active-implementation-map.md)
+- [Higiene do repositorio](docs/repository-hygiene.md)
+- [Runbook de deploy e migracoes](docs/production-deploy-and-migration-runbook.md)
+- [Politica de posicionamento regulatorio](docs/regulatory-positioning-policy.md)
 
 ## Sobre
 
-VISADOCS é um SaaS B2B multi-tenant para farmácias de manipulação, focado em:
-- **Gestão de POPs** (Procedimentos Operacionais Padrão)
-- **Treinamentos internos** com rastreabilidade
-- **Quizzes e registros internos de treinamento** em PDF
-- **Gestão de Matérias-Primas, Lotes e Fornecedores**
-- **VISA Assistente** (assistente documental para apoio à consulta interna)
+VISADOCS 360 e uma plataforma auxiliar para:
+
+- Gestao de POPs e documentos controlados
+- Biblioteca documental com acervo hierarquico, busca e trilha RAG/canonica
+- Treinamentos internos, quizzes, certificados e rastreabilidade
+- RQ's, MBP, anexos e Controle de Qualidade
+- Nao Conformidades e CAPA (Acao Corretiva e Preventiva)
+- Impressao controlada de documentos editaveis da biblioteca
+- Alertas, fiscalizacao interna, pasta central de gestao e evidencias
+- VISA Assistente e geracao assistida de POPs com revisao do RT/Admin
 
 ## Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
+- **Framework:** Next.js 15 App Router
 - **Database:** PostgreSQL + Prisma ORM
-- **Auth:** NextAuth.js (multi-tenant, role-based)
+- **Auth:** NextAuth.js multi-tenant com controle por papeis
 - **UI:** Tailwind CSS + Shadcn/Radix UI
 - **Charts:** Recharts
-- **Storage:** AWS S3
-- **PDF:** geração de documentos em revisão para independência de fornecedor
-- **DOCX:** docx library
+- **Storage:** AWS S3 ou adaptador equivalente configurado
+- **Documentos:** PDF/DOCX com adaptadores internos e trilha de auditoria
 
-## Módulos
+## Modulos principais
 
-| Módulo | Descrição |
-|--------|-----------|
-| Dashboard | Métricas gerais da farmácia |
-| POPs | 162 POPs organizados em 12 setores |
-| Biblioteca | Visualização em pastas/accordion |
-| Treinamentos | Registro e acompanhamento |
-| Quizzes | Avaliações vinculadas a POPs |
-| Registros de treinamento | Registros internos em PDF com QR Code |
-| Colaboradores | Gestão com "Pasta Pessoal" |
-| Documentos | 74 documentos (RQs, MBP, Anexos) |
-| Progresso LMS | Analytics por setor e colaborador |
-| Matérias-Primas | Fichas técnicas e especificações |
-| Lotes | Controle de qualidade e rastreabilidade |
-| Fornecedores | Cadastro e qualificação |
-| Relatórios | Métricas e gráficos |
-| VISA Assistente | Chatbot IA legislação |
+| Modulo | Status |
+|---|---|
+| Dashboard | Ativo |
+| POPs | Ativo |
+| Biblioteca de POPs | Ativo, com pastas/subpastas e documentos editaveis |
+| RQ's e MBP | Ativo, organizado por categorias documentais |
+| Controle de Qualidade | Ativo como trilha propria com treinamentos e quizzes |
+| Treinamentos | Ativo, com conclusao, quiz e certificados |
+| Colaboradores | Ativo, com Minha Pasta e Minha Trilha |
+| Progresso LMS | Ativo |
+| Relatorios | Ativo |
+| Nao Conformidades / CAPA | Ativo |
+| VISA Assistente | Ativo como assistente interno documental |
 
-## Roles
+## Papeis
 
-- `SUPER_ADMIN` - Administrador global
-- `ADMIN_FARMACIA` - Administrador da farmácia
-- `RT` - Responsável Técnico
-- `ANALISTA_CQ` - Analista de Controle de Qualidade
-- `OPERADOR` - Operador
+- `SUPER_ADMIN` - Administracao global
+- `ADMIN` - Administracao da farmacia/tenant
+- `RT` - Responsavel Tecnico
+- `OPERADOR` - Operacao/colaborador
 
 ## Setup
 
 ```bash
-# Instalar dependências
 yarn install
-
-# Configurar variáveis de ambiente
 cp .env.example .env
-# Preencher DATABASE_URL, NEXTAUTH_SECRET, etc.
-
-# Gerar Prisma client
 yarn prisma generate
-
-# Aplicar schema ao banco
-yarn prisma db push
-
-# Rodar seed (opcional)
-npx ts-node scripts/seed-pops-lista-mestra.ts
-
-# Desenvolvimento
+yarn prisma migrate dev
 yarn dev
 ```
 
 ## Deploy
 
-Deploy atual em revisão de portabilidade, conforme política interna de independência de fornecedores.
+Deploy em Vercel com migracoes Prisma aplicadas por `prisma migrate deploy`.
 
+Para producao, consulte `docs/production-deploy-and-migration-runbook.md` antes de executar alteracoes de schema.
 
-## Posicionamento regulatório
+## Posicionamento regulatorio
 
-O VISADOCS 360 é uma ferramenta auxiliar para gestão documental, treinamentos internos e organização de evidências de qualidade.
+O VISADOCS 360 e uma ferramenta auxiliar para gestao documental, treinamentos internos e organizacao de evidencias de qualidade.
 
-A plataforma não certifica conformidade sanitária, não representa aprovação institucional da Anvisa e não substitui a revisão, adaptação e aprovação do Responsável Técnico.
+A plataforma nao certifica conformidade sanitaria, nao representa aprovacao institucional da Anvisa e nao substitui a revisao, adaptacao e aprovacao do Responsavel Tecnico.
 
-Diretriz interna aplicável: `docs/regulatory-positioning-policy.md`.
+Diretriz interna aplicavel: `docs/regulatory-positioning-policy.md`.
 
-## Licença
+## Licenca
 
-Proprietário - VISADOCS © 2026
+Proprietario - VISADOCS (c) 2026
