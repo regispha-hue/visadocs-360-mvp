@@ -104,7 +104,7 @@ const farmaciaNavItems: NavItem[] = [
   },
   {
     href: "/dashboard/progresso",
-    label: "Progresso LMS",
+    label: "Aprendizagem do Usuário",
     icon: BarChart3,
     roles: ["ADMIN", "OPERADOR"],
   },
