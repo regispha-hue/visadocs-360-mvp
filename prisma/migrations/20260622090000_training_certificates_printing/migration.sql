@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS "AlertaTreinamento" (
   "usuarioId" TEXT NOT NULL,
   "treinamentoId" TEXT NOT NULL,
   "tipo" TEXT NOT NULL,
+  "mensagem" TEXT,
   "lido" BOOLEAN NOT NULL DEFAULT false,
   "tenantId" TEXT NOT NULL,
   "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
