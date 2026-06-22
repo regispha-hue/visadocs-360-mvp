@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     }),
     prisma.naoConformidade.findMany({
       where: { tenantId: tenantId!, ...periodo },
-      select: { id: true, codigo: true, titulo: true, status: true, createdAt: true, dataConclusao: true },
+      select: { id: true, codigo: true, titulo: true, status: true, createdAt: true, dataFechamento: true },
       orderBy: { createdAt: "desc" },
       take: 300,
     }),
