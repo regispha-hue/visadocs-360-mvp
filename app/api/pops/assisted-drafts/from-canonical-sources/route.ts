@@ -85,6 +85,9 @@ function buildCanonicalDraftContent({
     "",
     "## Aviso regulatório",
     "Esta é uma minuta auxiliar para revisão do Responsável Técnico. Não representa POP vigente, validação oficial, conformidade sanitária automática ou aprovação institucional.",
+    "",
+    "## Limites de uso da IA",
+    "A assistência automatizada apenas organiza e resume fontes canônicas selecionadas no VISADOCS. Ela não interpreta normas, não emite parecer regulatório, não substitui consulta técnica especializada e não dispensa aprovação formal do Responsável Técnico antes de qualquer uso operacional.",
   ].join("\n");
 }
 
@@ -243,6 +246,8 @@ export async function POST(request: Request) {
         retrievalLogId: retrievalLog?.id || null,
         sourceCount: chunks.length,
         reviewRequired: true,
+        regulatoryGuardrail:
+          "Minuta auxiliar. IA não interpreta normas nem substitui aprovação formal do Responsável Técnico.",
       },
     });
 

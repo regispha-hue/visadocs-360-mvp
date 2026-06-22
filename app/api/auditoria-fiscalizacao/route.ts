@@ -77,109 +77,74 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleGerarQRCode(tenantId: string) {
-  try {
-    // Verificar se já existe auditoria ativa
-    const auditoriaAtiva = await prisma.auditoriaFiscalizacao.findFirst({
-      where: {
-        tenantId,
-        status: "ATIVO",
-        dataExpiracao: {
-          gt: new Date()
-        }
-      }
-    });
-
-    if (auditoriaAtiva) {
-      return NextResponse.json({
-        success: true,
-        auditoria: auditoriaAtiva,
-        qrCode: auditoriaAtiva.qrCode,
-        codigoAcesso: auditoriaAtiva.codigoAcesso
-      });
-    }
-
-    // Gerar nova auditoria
-    const qrCodeData = `VISADOCS-AUDITORIA-${tenantId}-${Date.now()}`;
-    const qrCodeBuffer = await QRCode.toBuffer(qrCodeData);
-    const qrCodeBase64 = qrCodeBuffer.toString('base64');
-
-    // Gerar código de acesso alternativo
-    const codigoAcesso = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    // Coletar dados da farmácia
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: tenantId },
-      select: {
-        nome: true,
-        cnpj: true,
-        responsavel: true
-      }
-    });
-
-    // Gerar Master List de POPs
-    const masterListPOPs = await gerarMasterListPOPs(tenantId);
-
-    // Gerar lista de registros internos de treinamento
-    const certificados = await gerarListaCertificados(tenantId);
-
-    // Gerar cronograma de validades
-    const cronogramaValidades = await gerarCronogramaValidades(tenantId);
-
-    // Criar auditoria
-    const auditoria = await prisma.auditoriaFiscalizacao.create({
-      data: {
-        tenantId,
-        qrCode: qrCodeData,
-        codigoAcesso,
-        status: "ATIVO",
-        dataGeracao: new Date(),
-        dataExpiracao: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
-        responsaveis: [
-          tenant?.responsavel || "Responsável Técnico",
-          "Farmacêutico Responsável"
-        ],
-        masterListPOPs,
-        certificados,
-        cronogramaValidades
-      }
-    });
-
-    await createAuditLog({
-      action: AUDIT_ACTIONS.POP_CREATED,
-      entity: "AuditoriaFiscalizacao",
-      entityId: auditoria.id,
-      userId: "system",
-      userName: "Sistema",
+  const auditoriaAtiva = await prisma.auditoriaFiscalizacao.findFirst({
+    where: {
       tenantId,
-      details: { qrCode: qrCodeData, codigoAcesso }
-    });
-
-    return NextResponse.json({
-      success: true,
-      auditoria,
-      qrCode: qrCodeData,
-      qrCodeImage: `data:image/png;base64,${qrCodeBase64}`,
-      codigoAcesso
-    });
-
-  } catch (error) {
-    // Fallback simulado
-    const mockAuditoria = {
-      id: "audit_mock_001",
-      qrCode: "VISADOCS-AUDITORIA-default-" + Date.now(),
-      codigoAcesso: "ABC123",
       status: "ATIVO",
-      dataGeracao: new Date(),
-      dataExpiracao: new Date(Date.now() + 24 * 60 * 60 * 1000)
-    };
+      dataExpiracao: {
+        gt: new Date()
+      }
+    }
+  });
 
+  if (auditoriaAtiva) {
     return NextResponse.json({
       success: true,
-      auditoria: mockAuditoria,
-      qrCode: mockAuditoria.qrCode,
-      codigoAcesso: mockAuditoria.codigoAcesso
+      auditoria: auditoriaAtiva,
+      qrCode: auditoriaAtiva.qrCode,
+      codigoAcesso: auditoriaAtiva.codigoAcesso
     });
   }
+
+  const qrCodeData = `VISADOCS-AUDITORIA-${tenantId}-${crypto.randomUUID()}`;
+  const qrCodeBuffer = await QRCode.toBuffer(qrCodeData);
+  const qrCodeBase64 = qrCodeBuffer.toString("base64");
+  const codigoAcesso = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: {
+      nome: true,
+      cnpj: true,
+      responsavel: true
+    }
+  });
+
+  const auditoria = await prisma.auditoriaFiscalizacao.create({
+    data: {
+      tenantId,
+      qrCode: qrCodeData,
+      codigoAcesso,
+      status: "ATIVO",
+      dataGeracao: new Date(),
+      dataExpiracao: new Date(Date.now() + 2 * 60 * 60 * 1000),
+      responsaveis: [
+        tenant?.responsavel || "Responsável Técnico",
+        "Farmacêutico Responsável"
+      ],
+      masterListPOPs: await gerarMasterListPOPs(tenantId),
+      certificados: await gerarListaCertificados(tenantId),
+      cronogramaValidades: await gerarCronogramaValidades(tenantId)
+    }
+  });
+
+  await createAuditLog({
+    action: AUDIT_ACTIONS.POP_CREATED,
+    entity: "AuditoriaFiscalizacao",
+    entityId: auditoria.id,
+    userId: "system",
+    userName: "Sistema",
+    tenantId,
+    details: { qrCode: qrCodeData, codigoAcesso, validadeHoras: 2 }
+  });
+
+  return NextResponse.json({
+    success: true,
+    auditoria,
+    qrCode: qrCodeData,
+    qrCodeImage: `data:image/png;base64,${qrCodeBase64}`,
+    codigoAcesso
+  });
 }
 
 async function handleAcessoAuditoria(qrCodeOrCodigo: string | null, tenantId: string) {
@@ -187,120 +152,56 @@ async function handleAcessoAuditoria(qrCodeOrCodigo: string | null, tenantId: st
     return NextResponse.json({ error: "QR Code ou código de acesso obrigatório" }, { status: 400 });
   }
 
-  try {
-    const auditoria = await prisma.auditoriaFiscalizacao.findFirst({
-      where: {
-        tenantId,
-        OR: [
-          { qrCode: qrCodeOrCodigo },
-          { codigoAcesso: qrCodeOrCodigo }
-        ],
-        status: "ATIVO",
-        dataExpiracao: {
-          gt: new Date()
-        }
+  const auditoria = await prisma.auditoriaFiscalizacao.findFirst({
+    where: {
+      tenantId,
+      OR: [
+        { qrCode: qrCodeOrCodigo },
+        { codigoAcesso: qrCodeOrCodigo }
+      ],
+      status: "ATIVO",
+      dataExpiracao: {
+        gt: new Date()
       }
-    });
-
-    if (!auditoria) {
-      return NextResponse.json({ error: "Auditoria não encontrada ou expirada" }, { status: 404 });
+    },
+    include: {
+      tenant: {
+        select: { nome: true, cnpj: true, responsavel: true }
+      }
     }
+  });
 
-    // Registrar acesso
-    const acessos = auditoria.acessos ? JSON.parse(auditoria.acessos as string) : [];
-    acessos.push({
-      data: new Date().toISOString(),
-      tipo: qrCodeOrCodigo.length > 10 ? "QR_CODE" : "CODIGO_ACESSO",
-      ip: "FISCAL" // Em produção, capturar IP real
-    });
-
-    await prisma.auditoriaFiscalizacao.update({
-      where: { id: auditoria.id },
-      data: {
-        acessos: JSON.stringify(acessos)
-      }
-    });
-
-    return NextResponse.json({
-      success: true,
-      auditoria: {
-        id: auditoria.id,
-        tenant: {
-          nome: "Farmácia Exemplo",
-          cnpj: "12.345.678/0001-99",
-          responsavel: "Dr. João Silva"
-        },
-        masterListPOPs: auditoria.masterListPOPs,
-        certificados: auditoria.certificados,
-        cronogramaValidades: auditoria.cronogramaValidades,
-        dataGeracao: auditoria.dataGeracao,
-        dataExpiracao: auditoria.dataExpiracao,
-        acessos: acessos
-      }
-    });
-
-  } catch (error) {
-    // Fallback simulado
-    const mockData = {
-      success: true,
-      auditoria: {
-        id: "audit_mock_001",
-        tenant: {
-          nome: "Farmácia Exemplo",
-          cnpj: "12.345.678/0001-99",
-          responsavel: "Dr. João Silva"
-        },
-        masterListPOPs: [
-          {
-            codigo: "POP.001",
-            titulo: "Recebimento de Matérias-Primas",
-            versao: "1.0",
-            status: "ATIVO",
-            dataValidade: "2026-04-21",
-            responsavel: "Farmacêutico RT"
-          },
-          {
-            codigo: "POP.002",
-            titulo: "Armazenamento de Matérias-Primas",
-            versao: "1.0",
-            status: "ATIVO",
-            dataValidade: "2026-04-21",
-            responsavel: "Farmacêutico RT"
-          }
-        ],
-        certificados: [
-          {
-            colaborador: "Maria Silva",
-            funcao: "Farmacêutica",
-            pop: "POP.001",
-            dataTreinamento: "2026-03-15",
-            status: "VALIDO",
-            validade: "2027-03-15"
-          }
-        ],
-        cronogramaValidades: [
-          {
-            documento: "POP.001",
-            tipo: "POP",
-            dataValidade: "2026-04-21",
-            diasParaVencer: 0,
-            status: "VENCE_HOJE"
-          }
-        ],
-        dataGeracao: new Date(),
-        dataExpiracao: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        acessos: [
-          {
-            data: new Date().toISOString(),
-            tipo: "QR_CODE",
-            ip: "FISCAL"
-          }
-        ]
-      }
-    };
-
-    return NextResponse.json(mockData);
+  if (!auditoria) {
+    return NextResponse.json({ error: "Auditoria não encontrada ou expirada" }, { status: 404 });
   }
+
+  const acessos = parseJsonArray(auditoria.acessos);
+  acessos.push({
+    data: new Date().toISOString(),
+    tipo: qrCodeOrCodigo.length > 10 ? "QR_CODE" : "CODIGO_ACESSO",
+    ip: "FISCAL"
+  });
+
+  await prisma.auditoriaFiscalizacao.update({
+    where: { id: auditoria.id },
+    data: {
+      acessos: JSON.stringify(acessos)
+    }
+  });
+
+  return NextResponse.json({
+    success: true,
+    auditoria: {
+      id: auditoria.id,
+      tenant: auditoria.tenant,
+      masterListPOPs: auditoria.masterListPOPs,
+      certificados: auditoria.certificados,
+      cronogramaValidades: auditoria.cronogramaValidades,
+      dataGeracao: auditoria.dataGeracao,
+      dataExpiracao: auditoria.dataExpiracao,
+      acessos: acessos
+    }
+  });
 }
 
 async function handleMasterList(tenantId: string) {
@@ -349,7 +250,7 @@ async function handleStatusAuditoria(tenantId: string) {
         qrCode: auditoria.qrCode,
         codigoAcesso: auditoria.codigoAcesso,
         dataExpiracao: auditoria.dataExpiracao,
-        acessos: auditoria.acessos ? JSON.parse(auditoria.acessos as string) : []
+        acessos: parseJsonArray(auditoria.acessos)
       } : null
     });
   } catch (error) {
@@ -358,7 +259,8 @@ async function handleStatusAuditoria(tenantId: string) {
 }
 
 async function handleCriarAuditoria(data: any, tenantId: string, user: any) {
-  const { validadeHoras = 24, responsaveis } = data;
+  const validadeHoras = Math.min(Math.max(Number(data.validadeHoras || 2), 1), 24);
+  const { responsaveis } = data;
 
   try {
     // Verificar se já existe auditoria ativa
@@ -380,8 +282,8 @@ async function handleCriarAuditoria(data: any, tenantId: string, user: any) {
     }
 
     // Gerar nova auditoria
-    const qrCodeData = `VISADOCS-AUDITORIA-${tenantId}-${Date.now()}`;
-    const codigoAcesso = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const qrCodeData = `VISADOCS-AUDITORIA-${tenantId}-${crypto.randomUUID()}`;
+    const codigoAcesso = crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
 
     const auditoria = await prisma.auditoriaFiscalizacao.create({
       data: {
@@ -432,7 +334,7 @@ async function handleRegistrarAcesso(data: any, tenantId: string) {
       return NextResponse.json({ error: "Auditoria não encontrada" }, { status: 404 });
     }
 
-    const acessos = auditoria.acessos ? JSON.parse(auditoria.acessos as string) : [];
+    const acessos = parseJsonArray(auditoria.acessos);
     acessos.push({
       data: new Date().toISOString(),
       tipo: tipo || "MANUAL",
@@ -489,182 +391,144 @@ async function handleAtualizarDados(data: any, tenantId: string) {
 
 // Funções auxiliares
 async function gerarMasterListPOPs(tenantId: string): Promise<any> {
-  try {
-    const pops = await prisma.pop.findMany({
-      where: { 
-        tenantId,
-        status: "ATIVO"
-      },
-      select: {
-        codigo: true,
-        titulo: true,
-        versao: true,
-        status: true,
-        validadeAnos: true,
-        validadoEm: true,
-        validadoPor: true,
-        setor: true,
-        implantadoEm: true,
-        implantadoPor: true
-      },
-      orderBy: { codigo: 'asc' }
-    });
+  const pops = await prisma.pop.findMany({
+    where: {
+      tenantId,
+      status: "ATIVO"
+    },
+    select: {
+      codigo: true,
+      titulo: true,
+      versao: true,
+      status: true,
+      validadeAnos: true,
+      validadoEm: true,
+      validadoPor: true,
+      setor: true,
+      implantadoEm: true,
+      implantadoPor: true
+    },
+    orderBy: { codigo: "asc" }
+  });
 
-    return pops.map((pop: any) => ({
-      codigo: pop.codigo,
-      titulo: pop.titulo,
-      versao: pop.versao,
-      status: pop.status,
-      dataValidade: pop.validadoEm ? 
-        new Date(pop.validadoEm.getTime() + (pop.validadeAnos || 2) * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-        null,
-      responsavel: pop.validadoPor || "Não definido",
-      setor: pop.setor,
-      implantadoEm: pop.implantadoEm?.toISOString().split('T')[0],
-      implantadoPor: pop.implantadoPor
-    }));
-  } catch (error) {
-    // Fallback simulado
-    return [
-      {
-        codigo: "POP.001",
-        titulo: "Recebimento de Matérias-Primas",
-        versao: "1.0",
-        status: "ATIVO",
-        dataValidade: "2026-04-21",
-        responsavel: "Farmacêutico RT",
-        setor: "Recebimento"
-      }
-    ];
-  }
+  return pops.map((pop: any) => ({
+    codigo: pop.codigo,
+    titulo: pop.titulo,
+    versao: pop.versao,
+    status: pop.status,
+    dataValidade: pop.validadoEm ?
+      new Date(pop.validadoEm.getTime() + (pop.validadeAnos || 2) * 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] :
+      null,
+    responsavel: pop.validadoPor || "Não definido",
+    setor: pop.setor,
+    implantadoEm: pop.implantadoEm?.toISOString().split("T")[0],
+    implantadoPor: pop.implantadoPor
+  }));
 }
 
 async function gerarListaCertificados(tenantId: string): Promise<any> {
-  try {
-    const treinamentos = await prisma.treinamento.findMany({
-      where: { 
-        tenantId,
-        status: "CONCLUIDO"
-      },
-      include: {
-        colaborador: {
-          select: {
-            nome: true,
-            funcao: true
-          }
-        },
-        pop: {
-          select: {
-            codigo: true,
-            titulo: true
-          }
+  const treinamentos = await prisma.treinamento.findMany({
+    where: {
+      tenantId,
+      status: "CONCLUIDO"
+    },
+    include: {
+      colaborador: {
+        select: {
+          nome: true,
+          funcao: true
         }
       },
-      orderBy: { dataTreinamento: 'desc' }
-    });
-
-    return treinamentos.map((treinamento: any) => ({
-      colaborador: treinamento.colaborador.nome,
-      funcao: treinamento.colaborador.funcao,
-      pop: treinamento.pop.codigo,
-      popTitulo: treinamento.pop.titulo,
-      dataTreinamento: treinamento.dataTreinamento.toISOString().split('T')[0],
-      status: treinamento.aprovadoQuiz ? "VALIDO" : "PENDENTE",
-      validade: new Date(treinamento.dataTreinamento.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      instrutor: treinamento.instrutor,
-      notaQuiz: treinamento.notaQuiz
-    }));
-  } catch (error) {
-    // Fallback simulado
-    return [
-      {
-        colaborador: "Maria Silva",
-        funcao: "Farmacêutica",
-        pop: "POP.001",
-        popTitulo: "Recebimento de Matérias-Primas",
-        dataTreinamento: "2026-03-15",
-        status: "VALIDO",
-        validade: "2027-03-15",
-        instrutor: "Dr. João Silva",
-        notaQuiz: 85
+      pop: {
+        select: {
+          codigo: true,
+          titulo: true
+        }
       }
-    ];
-  }
+    },
+    orderBy: { dataTreinamento: "desc" }
+  });
+
+  return treinamentos.map((treinamento: any) => ({
+    colaborador: treinamento.colaborador.nome,
+    funcao: treinamento.colaborador.funcao,
+    pop: treinamento.pop.codigo,
+    popTitulo: treinamento.pop.titulo,
+    dataTreinamento: treinamento.dataTreinamento.toISOString().split("T")[0],
+    status: treinamento.aprovadoQuiz ? "VALIDO" : "PENDENTE",
+    validade: new Date(treinamento.dataTreinamento.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    instrutor: treinamento.instrutor,
+    notaQuiz: treinamento.notaQuiz
+  }));
 }
 
 async function gerarCronogramaValidades(tenantId: string): Promise<any> {
-  try {
-    const pops = await prisma.pop.findMany({
-      where: { tenantId },
-      select: {
-        codigo: true,
-        titulo: true,
-        validadoEm: true,
-        validadeAnos: true,
-        status: true
+  const pops = await prisma.pop.findMany({
+    where: { tenantId },
+    select: {
+      codigo: true,
+      titulo: true,
+      validadoEm: true,
+      validadeAnos: true,
+      status: true
+    }
+  });
+
+  const treinamentos = await prisma.treinamento.findMany({
+    where: { tenantId },
+    include: {
+      colaborador: {
+        select: { nome: true }
+      },
+      pop: {
+        select: { codigo: true }
       }
-    });
+    }
+  });
 
-    const treinamentos = await prisma.treinamento.findMany({
-      where: { tenantId },
-      include: {
-        colaborador: {
-          select: { nome: true }
-        },
-        pop: {
-          select: { codigo: true }
-        }
-      }
-    });
+  const validades: any[] = [];
 
-    const validades: any[] = [];
-
-    // Validades de POPs
-    pops.forEach((pop: any) => {
-      if (pop.validadoEm) {
-        const dataValidade = new Date(pop.validadoEm.getTime() + (pop.validadeAnos || 2) * 365 * 24 * 60 * 60 * 1000);
-        const diasParaVencer = Math.floor((dataValidade.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
-        
-        validades.push({
-          documento: pop.codigo,
-          tipo: "POP",
-          titulo: pop.titulo,
-          dataValidade: dataValidade.toISOString().split('T')[0],
-          diasParaVencer,
-          status: diasParaVencer <= 0 ? "VENCIDO" : diasParaVencer <= 30 ? "VENCENDO" : "VALIDO"
-        });
-      }
-    });
-
-    // Validades de registros internos de treinamento
-    treinamentos.forEach((treinamento: any) => {
-      const dataValidade = new Date(treinamento.dataTreinamento.getTime() + 365 * 24 * 60 * 60 * 1000);
+  pops.forEach((pop: any) => {
+    if (pop.validadoEm) {
+      const dataValidade = new Date(pop.validadoEm.getTime() + (pop.validadeAnos || 2) * 365 * 24 * 60 * 60 * 1000);
       const diasParaVencer = Math.floor((dataValidade.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
-      
+
       validades.push({
-        documento: `CERT-${treinamento.colaborador.nome}-${treinamento.pop.codigo}`,
-        tipo: "REGISTRO_INTERNO",
-        titulo: `Registro interno ${treinamento.pop.codigo}`,
-        colaborador: treinamento.colaborador.nome,
-        dataValidade: dataValidade.toISOString().split('T')[0],
+        documento: pop.codigo,
+        tipo: "POP",
+        titulo: pop.titulo,
+        dataValidade: dataValidade.toISOString().split("T")[0],
         diasParaVencer,
         status: diasParaVencer <= 0 ? "VENCIDO" : diasParaVencer <= 30 ? "VENCENDO" : "VALIDO"
       });
+    }
+  });
+
+  treinamentos.forEach((treinamento: any) => {
+    const dataValidade = new Date(treinamento.dataTreinamento.getTime() + 365 * 24 * 60 * 60 * 1000);
+    const diasParaVencer = Math.floor((dataValidade.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+
+    validades.push({
+      documento: `CERT-${treinamento.colaborador.nome}-${treinamento.pop.codigo}`,
+      tipo: "REGISTRO_INTERNO",
+      titulo: `Registro interno ${treinamento.pop.codigo}`,
+      colaborador: treinamento.colaborador.nome,
+      dataValidade: dataValidade.toISOString().split("T")[0],
+      diasParaVencer,
+      status: diasParaVencer <= 0 ? "VENCIDO" : diasParaVencer <= 30 ? "VENCENDO" : "VALIDO"
     });
+  });
 
-    return validades.sort((a: any, b: any) => a.diasParaVencer - b.diasParaVencer);
+  return validades.sort((a: any, b: any) => a.diasParaVencer - b.diasParaVencer);
+}
 
-  } catch (error) {
-    // Fallback simulado
-    return [
-      {
-        documento: "POP.001",
-        tipo: "POP",
-        titulo: "Recebimento de Matérias-Primas",
-        dataValidade: "2026-04-21",
-        diasParaVencer: 0,
-        status: "VENCE_HOJE"
-      }
-    ];
+function parseJsonArray(value: unknown): any[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string" || !value.trim()) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
 }

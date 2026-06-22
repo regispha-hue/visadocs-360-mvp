@@ -12,6 +12,7 @@ import {
 } from "@/lib/nao-conformidades";
 import type { GuardUser } from "@/lib/auth-guards";
 import { badRequest, forbidden, requireTenantId } from "@/lib/auth-guards";
+import { generateTrainingAlertsForUser } from "@/lib/alertas-treinamento";
 
 type ActionContext = {
   request: Request;
@@ -241,6 +242,11 @@ export async function closeNc({ request, params, user }: ActionContext) {
 
   const body = await request.json().catch(() => ({}));
   const userName = user.name || user.email || "Usuário";
+  const sugestaoTreinamento = Boolean(body.sugestaoTreinamento);
+  const sugestaoRevisaoPop = Boolean(body.sugestaoRevisaoPop);
+  const trainingResult = sugestaoTreinamento
+    ? await createMandatoryTrainingsFromNc({ item, tenantId, userName })
+    : { created: 0, skipped: 0, reason: "not_requested" };
   const updated = await prisma.naoConformidade.update({
     where: { id: item.id },
     data: {
@@ -249,14 +255,17 @@ export async function closeNc({ request, params, user }: ActionContext) {
       fechadoPorNome: userName,
       dataFechamento: new Date(),
       observacaoFechamento: normalizeText(body.observacaoFechamento) || item.observacaoFechamento,
-      sugestaoTreinamento: Boolean(body.sugestaoTreinamento),
-      sugestaoRevisaoPop: Boolean(body.sugestaoRevisaoPop),
+      sugestaoTreinamento,
+      sugestaoRevisaoPop,
       historico: appendTimeline(item.historico, {
         action: "FECHAMENTO",
         statusFrom: item.status,
         statusTo: NC_STATUS.FECHADA,
         userId: user.id,
         userName,
+        metadata: {
+          treinamentoObrigatorio: trainingResult,
+        },
       }),
     },
   });
@@ -271,10 +280,108 @@ export async function closeNc({ request, params, user }: ActionContext) {
     details: {
       sugestaoTreinamento: updated.sugestaoTreinamento,
       sugestaoRevisaoPop: updated.sugestaoRevisaoPop,
+      treinamentoObrigatorio: trainingResult,
     },
   });
 
   return NextResponse.json({ success: true, item: updated });
+}
+
+async function createMandatoryTrainingsFromNc({
+  item,
+  tenantId,
+  userName,
+}: {
+  item: {
+    id: string;
+    codigo: string;
+    popId: string | null;
+    colaboradorId: string | null;
+  };
+  tenantId: string;
+  userName: string;
+}) {
+  if (!item.popId) {
+    return { created: 0, skipped: 0, reason: "missing_pop" };
+  }
+
+  const pop = await prisma.pop.findFirst({
+    where: { id: item.popId, tenantId },
+    select: { id: true, codigo: true, titulo: true, versao: true },
+  });
+  if (!pop) {
+    return { created: 0, skipped: 0, reason: "pop_not_found" };
+  }
+
+  const approvedVersion = await prisma.approvedPopVersion.findFirst({
+    where: { popId: pop.id, tenantId, status: "CURRENT" },
+    orderBy: { approvedAt: "desc" },
+    select: { id: true, code: true, title: true, version: true },
+  });
+
+  const colaboradores = await prisma.colaborador.findMany({
+    where: {
+      tenantId,
+      status: "ATIVO",
+      ...(item.colaboradorId ? { id: item.colaboradorId } : {}),
+    },
+    select: { id: true, nome: true, email: true },
+    take: item.colaboradorId ? 1 : 500,
+  });
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const colaborador of colaboradores) {
+    const existing = await prisma.treinamento.findFirst({
+      where: {
+        tenantId,
+        popId: pop.id,
+        colaboradorId: colaborador.id,
+        status: { not: "CONCLUIDO" },
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      skipped += 1;
+      continue;
+    }
+
+    const treinamento = await prisma.treinamento.create({
+      data: {
+        popId: pop.id,
+        approvedPopVersionId: approvedVersion?.id || null,
+        popCodigoSnapshot: approvedVersion?.code || pop.codigo,
+        popTituloSnapshot: approvedVersion?.title || pop.titulo,
+        popVersaoSnapshot: approvedVersion?.version || pop.versao,
+        colaboradorId: colaborador.id,
+        dataTreinamento: new Date(),
+        instrutor: userName,
+        observacoes: `Treinamento obrigatório gerado automaticamente pela NC ${item.codigo}.`,
+        status: "PENDENTE",
+        tenantId,
+      },
+    });
+
+    created += 1;
+
+    if (colaborador.email) {
+      const targetUser = await prisma.user.findFirst({
+        where: { tenantId, email: colaborador.email },
+        select: { id: true },
+      });
+      if (targetUser) {
+        await generateTrainingAlertsForUser({
+          tenantId,
+          usuarioId: targetUser.id,
+          colaboradorId: colaborador.id,
+        });
+      }
+    }
+  }
+
+  return { created, skipped, reason: created > 0 ? "created" : "no_new_training", popId: pop.id };
 }
 
 export async function cancelNc({ request, params, user }: ActionContext) {
