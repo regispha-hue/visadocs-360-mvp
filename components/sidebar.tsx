@@ -46,7 +46,7 @@ const farmaciaNavItems: NavItem[] = [
   },
   {
     href: "/dashboard/pops",
-    label: "POPs",
+    label: "Criar POP",
     icon: FileText,
   },
   {
@@ -72,17 +72,17 @@ const farmaciaNavItems: NavItem[] = [
   },
   {
     href: "/dashboard/treinamentos",
-    label: "Treinamentos",
+    label: "Iniciar Treinamento",
     icon: GraduationCap,
   },
   {
     href: "/dashboard/minha-trilha",
-    label: "Minha Trilha",
+    label: "Minha Trilha de Treinamentos",
     icon: GraduationCap,
   },
   {
     href: "/dashboard/minha-pasta",
-    label: "Minha Pasta",
+    label: "Documentos e Certificados do Colaborador",
     icon: FolderOpen,
   },
   {
@@ -95,6 +95,7 @@ const farmaciaNavItems: NavItem[] = [
     href: "/dashboard/colaboradores",
     label: "Colaboradores",
     icon: Users,
+    roles: ["ADMIN"],
   },
   {
     href: "/dashboard/usuarios",
@@ -106,18 +107,19 @@ const farmaciaNavItems: NavItem[] = [
     href: "/dashboard/progresso",
     label: "Aprendizagem do Usuário",
     icon: BarChart3,
-    roles: ["ADMIN", "OPERADOR"],
+    roles: ["ADMIN"],
   },
   {
     href: "/dashboard/relatorios",
     label: "Relatórios",
     icon: ClipboardList,
-    roles: ["ADMIN", "OPERADOR"],
+    roles: ["ADMIN"],
   },
   {
     href: "/dashboard/assistente",
     label: "VISA Assistente",
     icon: Bot,
+    roles: ["ADMIN"],
   },
 ];
 

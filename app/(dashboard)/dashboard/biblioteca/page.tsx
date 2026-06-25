@@ -1369,8 +1369,12 @@ export default function BibliotecaPopsPage() {
       {filteredLibraryItems.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">Acervo de POPs</h3>
-          <div className="overflow-hidden rounded-lg border bg-white">
-            {libraryItemTree.map((node) => renderLibraryFolderNode(node))}
+          <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+            {libraryItemTree.map((node) => (
+              <div key={node.path} className="overflow-hidden rounded-lg border bg-white">
+                {renderLibraryFolderNode(node)}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -1382,8 +1386,12 @@ export default function BibliotecaPopsPage() {
             Nenhum POP preparado para consulta.
           </Card>
         ) : (
-          <div className="overflow-hidden rounded-lg border bg-white">
-            {canonicalDocumentTree.map((node) => renderCanonicalFolderNode(node))}
+          <div className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+            {canonicalDocumentTree.map((node) => (
+              <div key={node.path} className="overflow-hidden rounded-lg border bg-white">
+                {renderCanonicalFolderNode(node)}
+              </div>
+            ))}
           </div>
         )}
       </div>
