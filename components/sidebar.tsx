@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import type { UserRole } from "@prisma/client";
+type UserRole = "SUPER_ADMIN" | "ADMIN" | "RT" | "OPERADOR" | "COLABORADOR";
 
 interface NavItem {
   href: string;
