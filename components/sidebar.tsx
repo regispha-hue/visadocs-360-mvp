@@ -187,7 +187,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-4">
         <ul className="space-y-1">
           {filteredNavItems.map((item) => {
-                        const isActive =
+            const isActive =
               pathname === item.href ||
               (item.href !== "/dashboard" &&
                 item.href !== "/admin" &&
