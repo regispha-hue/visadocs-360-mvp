@@ -27,8 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-// @ts-ignore
-import { UserRole } from "@prisma/client";
+import type { UserRole } from "@prisma/client";
 
 interface NavItem {
   href: string;
@@ -188,7 +187,11 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-4">
         <ul className="space-y-1">
           {filteredNavItems.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                        const isActive =
+              pathname === item.href ||
+              (item.href !== "/dashboard" &&
+                item.href !== "/admin" &&
+                pathname?.startsWith(item.href + "/"));
             const isExpanded = expandedItems.includes(item.href);
             const Icon = item.icon;
 
