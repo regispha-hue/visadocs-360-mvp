@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/alertas-treinamento",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/anvisa-radar",
+      "schedule": "0 8 * * *"
     }
   ]
 }

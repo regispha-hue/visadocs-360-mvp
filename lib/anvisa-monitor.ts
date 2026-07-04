@@ -1,11 +1,16 @@
-// @ts-nocheck
 /**
- * Inteligência Regulatória Ativa - Vigia ANVISA
- * Worker para monitorar atualizações regulatórias e gerar alertas proativos
+ * Inteligencia Regulatoria Ativa - Radar ANVISA.
+ *
+ * Coleta candidatos em fontes oficiais, analisa impacto provavel nos POPs do
+ * tenant e gera alertas para revisao humana do RT/administrador. A rotina nao
+ * altera POPs automaticamente.
  */
 
+import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
-import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { AUDIT_ACTIONS, createAuditLog } from "@/lib/audit";
+
+type TipoAtualizacao = "NOVA_NORMA" | "ALTERACAO" | "REVOGACAO" | "ORIENTACAO";
 
 interface ANVISANorma {
   numero: string;
@@ -22,12 +27,242 @@ interface ANVISANorma {
 }
 
 interface AtualizacaoDetectada {
-  tipo: "NOVA_NORMA" | "ALTERACAO" | "REVOGACAO" | "ORIENTACAO";
+  tipo: TipoAtualizacao;
   norma: ANVISANorma;
   descricao: string;
-  detalhes?: any;
+  detalhes?: Record<string, unknown>;
   impactoPOPs: string[];
   acoesNecessarias: string[];
+}
+
+interface FonteRegulatoria {
+  nome: string;
+  url: string;
+  orgao: "ANVISA" | "DOU";
+}
+
+interface MonitorResult {
+  fontesConsultadas: number;
+  atualizacoesDetectadas: number;
+  tenantsProcessados: number;
+  normasCriadasOuAtualizadas: number;
+  alertasCriados: number;
+  errosFonte: Array<{ fonte: string; erro: string }>;
+}
+
+const FONTES_OFICIAIS: FonteRegulatoria[] = [
+  {
+    nome: "ANVISA - Noticias",
+    orgao: "ANVISA",
+    url: "https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa",
+  },
+  {
+    nome: "ANVISA - Legislacao e regulamentacao",
+    orgao: "ANVISA",
+    url: "https://www.gov.br/anvisa/pt-br/assuntos/regulamentacao/legislacao",
+  },
+  {
+    nome: "Diario Oficial da Uniao - busca ANVISA farmacia manipulacao",
+    orgao: "DOU",
+    url: "https://www.in.gov.br/consulta/-/buscar/dou?q=ANVISA%20farmacia%20manipulacao%20RDC",
+  },
+];
+
+const TERMOS_REGULATORIOS = [
+  "anvisa",
+  "rdc",
+  "resolucao",
+  "resolução",
+  "instrucao normativa",
+  "instrução normativa",
+  "farmacia",
+  "farmácia",
+  "manipulacao",
+  "manipulação",
+  "boas praticas",
+  "boas práticas",
+  "controle de qualidade",
+  "calibracao",
+  "calibração",
+  "temperatura",
+  "umidade",
+  "agua purificada",
+  "água purificada",
+  "saneantes",
+  "medicamentos",
+  "substancias controladas",
+  "substâncias controladas",
+  "farmacopeia",
+  "farmacopeia brasileira",
+];
+
+const CATEGORIAS_POR_TERMO: Array<{ termos: string[]; categoria: string; popHints: string[]; acoes: string[] }> = [
+  {
+    termos: ["manipulacao", "manipulação", "boas praticas", "boas práticas", "rdc 67"],
+    categoria: "Boas Praticas de Manipulacao",
+    popHints: ["manipulacao", "manipulação", "boas praticas", "boas práticas", "recebimento", "armazenamento"],
+    acoes: ["Avaliar impacto nos POPs de manipulacao", "Verificar necessidade de revisao do MBP"],
+  },
+  {
+    termos: ["controle de qualidade", "validacao", "validação", "laudo", "calibracao", "calibração"],
+    categoria: "Controle de Qualidade",
+    popHints: ["controle de qualidade", "validacao", "validação", "calibracao", "calibração", "laudo"],
+    acoes: ["Avaliar POPs de controle de qualidade", "Confirmar registros, criterios e evidencias exigidas"],
+  },
+  {
+    termos: ["temperatura", "umidade", "monitoramento ambiental", "geladeira", "refrigerador"],
+    categoria: "Monitoramento Ambiental",
+    popHints: ["temperatura", "umidade", "limpeza", "monitoramento", "ambiente"],
+    acoes: ["Conferir controles periodicos de temperatura/umidade", "Avaliar necessidade de tarefa recorrente"],
+  },
+  {
+    termos: ["substancias controladas", "substâncias controladas", "portaria 344", "antimicrobiano", "receita"],
+    categoria: "Controlados e Prescricao",
+    popHints: ["controlad", "antimicrobiano", "receita", "dispensacao", "dispensação"],
+    acoes: ["Revisar POPs de receitas e controlados", "Checar registros obrigatorios e livros aplicaveis"],
+  },
+  {
+    termos: ["agua purificada", "água purificada", "agua potavel", "água potável"],
+    categoria: "Agua Farmaceutica",
+    popHints: ["agua", "água", "purificacao", "purificação", "barrilete", "destilador"],
+    acoes: ["Avaliar POPs de agua potavel/purificada", "Verificar periodicidade dos registros de limpeza e ensaios"],
+  },
+];
+
+function normalizarTexto(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function hashCurto(value: string) {
+  return crypto.createHash("sha256").update(value).digest("hex").slice(0, 16).toUpperCase();
+}
+
+function limparHtml(value: string) {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizarUrl(href: string, baseUrl: string) {
+  try {
+    return new URL(href, baseUrl).toString();
+  } catch {
+    return null;
+  }
+}
+
+function extrairLinks(html: string, fonte: FonteRegulatoria) {
+  const links: Array<{ titulo: string; url: string; fonte: FonteRegulatoria }> = [];
+  const anchorRegex = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = anchorRegex.exec(html))) {
+    const url = normalizarUrl(match[1], fonte.url);
+    if (!url) continue;
+
+    const titulo = limparHtml(match[2]);
+    if (!titulo || titulo.length < 8) continue;
+
+    const textoBusca = normalizarTexto(`${titulo} ${url}`);
+    if (!TERMOS_REGULATORIOS.some((termo) => textoBusca.includes(normalizarTexto(termo)))) continue;
+
+    links.push({ titulo: titulo.slice(0, 280), url, fonte });
+  }
+
+  return links;
+}
+
+function classificarAtualizacao(titulo: string): TipoAtualizacao {
+  const texto = normalizarTexto(titulo);
+  if (texto.includes("revoga") || texto.includes("revogacao")) return "REVOGACAO";
+  if (texto.includes("altera") || texto.includes("alteracao")) return "ALTERACAO";
+  if (texto.includes("orienta") || texto.includes("guia") || texto.includes("perguntas")) return "ORIENTACAO";
+  return "NOVA_NORMA";
+}
+
+function extrairTipoENumero(titulo: string, url: string) {
+  const texto = `${titulo} ${url}`;
+  const match = texto.match(/\b(RDC|IN|Instrucao Normativa|Instrução Normativa|Portaria|Resolucao|Resolução)\s*(?:n[ºo.]*)?\s*([0-9]{1,5})(?:[./-]([0-9]{4}))?/i);
+  if (!match) {
+    return {
+      tipo: "ATO",
+      numero: `ANVISA-${hashCurto(`${titulo}|${url}`)}`,
+    };
+  }
+
+  const tipo = match[1]
+    .replace(/Instrução Normativa/i, "IN")
+    .replace(/Instrucao Normativa/i, "IN")
+    .replace(/Resolução/i, "RDC")
+    .replace(/Resolucao/i, "RDC")
+    .toUpperCase();
+
+  return {
+    tipo,
+    numero: match[3] ? `${tipo} ${match[2]}/${match[3]}` : `${tipo} ${match[2]}`,
+  };
+}
+
+function classificarCategoriasEAcoes(titulo: string, url: string) {
+  const texto = normalizarTexto(`${titulo} ${url}`);
+  const categorias = new Set<string>();
+  const popHints = new Set<string>();
+  const acoes = new Set<string>();
+
+  for (const regra of CATEGORIAS_POR_TERMO) {
+    if (regra.termos.some((termo) => texto.includes(normalizarTexto(termo)))) {
+      categorias.add(regra.categoria);
+      regra.popHints.forEach((hint) => popHints.add(hint));
+      regra.acoes.forEach((acao) => acoes.add(acao));
+    }
+  }
+
+  if (!categorias.size) {
+    categorias.add("Regulatorio Farmaceutico");
+    acoes.add("Triar relevancia regulatoria para a farmacia");
+  }
+
+  acoes.add("Submeter a avaliacao do RT antes de alterar POPs ou treinamentos");
+
+  return {
+    categorias: Array.from(categorias),
+    popHints: Array.from(popHints),
+    acoes: Array.from(acoes),
+  };
+}
+
+async function buscarHtmlComTimeout(url: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "user-agent": "VISADOCS-360-Regulatory-Radar/1.0 (+https://visadocs-360-mvp.vercel.app)",
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 class ANVISAMonitor {
@@ -44,385 +279,327 @@ class ANVISAMonitor {
     return ANVISAMonitor.instance;
   }
 
-  /**
-   * Inicia o monitoramento automático
-   */
-  async iniciarMonitoramento(intervaloMinutos: number = 60): Promise<void> {
-    if (this.isRunning) {
-      console.log("Monitor ANVISA já está em execução");
-      return;
-    }
-
-    console.log(`Iniciando monitor ANVISA - Intervalo: ${intervaloMinutos} minutos`);
-    this.isRunning = true;
-
-    // Executa imediatamente na primeira vez
-    await this.execututarMonitoramento();
-
-    // Configura execução periódica
-    this.intervalo = setInterval(
-      () => this.execututarMonitoramento(),
-      intervaloMinutos * 60 * 1000
-    );
+  async executarAgora(): Promise<MonitorResult> {
+    return this.executarMonitoramento();
   }
 
-  /**
-   * Para o monitoramento
-   */
+  async iniciarMonitoramento(intervaloMinutos: number = 60): Promise<void> {
+    if (this.isRunning) return;
+
+    this.isRunning = true;
+    await this.executarMonitoramento();
+    this.intervalo = setInterval(() => {
+      this.executarMonitoramento().catch((error) => {
+        console.error("Erro no monitor ANVISA:", error);
+      });
+    }, intervaloMinutos * 60 * 1000);
+  }
+
   pararMonitoramento(): void {
     if (this.intervalo) {
       clearInterval(this.intervalo);
       this.intervalo = null;
     }
     this.isRunning = false;
-    console.log("Monitor ANVISA parado");
   }
 
-  /**
-   * Executa ciclo completo de monitoramento
-   */
-  private async execututarMonitoramento(): Promise<void> {
-    try {
-      console.log("Executando ciclo de monitoramento ANVISA...");
-      
-      // 1. Buscar atualizações recentes
-      const atualizacoes = await this.buscarAtualizacoesRecentes();
-      
-      // 2. Analisar impacto nos POPs
-      const impactos = await this.analisarImpactoPOPs(atualizacoes);
-      
-      // 3. Gerar alertas para tenants
-      await this.gerarAlertasTenants(impactos);
-      
-      // 4. Atualizar base de normas
-      await this.atualizarBaseNormas(atualizacoes);
-      
-      console.log(`Ciclo concluído: ${atualizacoes.length} atualizações processadas`);
-      
-    } catch (error) {
-      console.error("Erro no ciclo de monitoramento:", error);
-    }
+  private async executarMonitoramento(): Promise<MonitorResult> {
+    const result: MonitorResult = {
+      fontesConsultadas: 0,
+      atualizacoesDetectadas: 0,
+      tenantsProcessados: 0,
+      normasCriadasOuAtualizadas: 0,
+      alertasCriados: 0,
+      errosFonte: [],
+    };
+
+    const atualizacoes = await this.buscarAtualizacoesRecentes(result);
+    result.atualizacoesDetectadas = atualizacoes.length;
+
+    const impactos = await this.analisarImpactoPOPs(atualizacoes);
+    result.tenantsProcessados = new Set(impactos.map((impacto) => impacto.tenantId)).size;
+
+    const alertas = await this.gerarAlertasTenants(impactos);
+    result.alertasCriados = alertas.alertasCriados;
+    result.normasCriadasOuAtualizadas = alertas.normasCriadasOuAtualizadas;
+
+    return result;
   }
 
-  /**
-   * Busca atualizações recentes da ANVISA
-   */
-  private async buscarAtualizacoesRecentes(): Promise<AtualizacaoDetectada[]> {
-    // Simulação de busca de dados da ANVISA
-    // Em produção, integrar com API oficial ou web scraping
-    const atualizacoes: AtualizacaoDetectada[] = [
-      {
-        tipo: "ALTERACAO",
-        norma: {
-          numero: "RDC 67/2007",
-          titulo: "Boas Práticas de Manipulação",
-          tipo: "RDC",
-          orgao: "ANVISA",
-          dataPublicacao: new Date("2007-10-08"),
-          dataVigencia: new Date("2007-11-08"),
-          ementa: "Dispõe sobre Boas Práticas de Manipulação",
-          categorias: ["Manipulação", "Qualidade", "Segurança"],
-          aplicabilidade: ["Farmácias", "Distribuidoras"]
-        },
-        descricao: "Nova exigência para manipulação de hormônios e substâncias controladas",
-        detalhes: {
-          secoesAlteradas: ["Art. 31", "Art. 33", "Art. 45"],
-          novasExigencias: [
-            "Paramentação específica para hormônios",
-            "Controle ambiental rigoroso",
-            "Registro de cadeia de custódia"
-          ]
-        },
-        impactoPOPs: ["POP.012", "POP.013", "POP.014", "POP.015"],
-        acoesNecessarias: [
-          "Revisar POPs de manipulação",
-          "Atualizar procedimentos de paramentação",
-          "Implementar novos controles"
-        ]
-      },
-      {
-        tipo: "NOVA_NORMA",
-        norma: {
-          numero: "RDC 888/2024",
-          titulo: "Validação de Métodos Analíticos",
-          tipo: "RDC",
-          orgao: "ANVISA",
-          dataPublicacao: new Date("2024-04-15"),
-          dataVigencia: new Date("2024-06-01"),
-          ementa: "Estabelece requisitos para validação de métodos analíticos",
-          categorias: ["Controle de Qualidade", "Validação"],
-          aplicabilidade: ["Farmácias", "Laboratórios"]
-        },
-        descricao: "Nova norma sobre validação de métodos analíticos em farmácias de manipulação",
-        detalhes: {
-          requisitosPrincipais: [
-            "Validação de todos os métodos",
-            "Documentação completa",
-            "Revalidação periódica"
-          ]
-        },
-        impactoPOPs: ["POP.021", "POP.022", "POP.023", "POP.024"],
-        acoesNecessarias: [
-          "Criar POPs de validação",
-          "Implementar protocolos",
-          "Treinar equipe técnica"
-        ]
-      }
-    ];
+  private async buscarAtualizacoesRecentes(result: MonitorResult): Promise<AtualizacaoDetectada[]> {
+    const candidatos = new Map<string, AtualizacaoDetectada>();
 
-    return atualizacoes;
-  }
+    for (const fonte of FONTES_OFICIAIS) {
+      try {
+        const html = await buscarHtmlComTimeout(fonte.url);
+        result.fontesConsultadas += 1;
 
-  /**
-   * Analisa impacto das atualizações nos POPs existentes
-   */
-  private async analisarImpactoPOPs(atualizacoes: AtualizacaoDetectada[]): Promise<any[]> {
-    const impactos: any[] = [];
+        for (const link of extrairLinks(html, fonte)) {
+          const id = hashCurto(`${link.titulo}|${link.url}`);
+          if (candidatos.has(id)) continue;
 
-    for (const atualizacao of atualizacoes) {
-      // Para cada tenant, verificar POPs afetados
-      const tenants = await prisma.tenant.findMany({
-        where: { status: "ATIVO" },
-        select: { id: true, nome: true }
-      });
+          const { tipo, numero } = extrairTipoENumero(link.titulo, link.url);
+          const classificacao = classificarCategoriasEAcoes(link.titulo, link.url);
+          const tipoAtualizacao = classificarAtualizacao(link.titulo);
 
-      for (const tenant of tenants) {
-        // Buscar POPs do tenant
-        const pops = await prisma.pop.findMany({
-          where: { 
-            tenantId: tenant.id,
-            codigo: { in: atualizacao.impactoPOPs }
-          },
-          select: { id: true, codigo: true, titulo: true, setor: true }
-        });
-
-        if (pops.length > 0) {
-          impactos.push({
-            tenantId: tenant.id,
-            tenantNome: tenant.nome,
-            atualizacao,
-            popsAfetados: pops,
-            severidade: this.calcularSeveridade(atualizacao, pops.length),
-            prioridade: this.calcularPrioridade(atualizacao)
+          candidatos.set(id, {
+            tipo: tipoAtualizacao,
+            norma: {
+              numero,
+              titulo: link.titulo,
+              tipo,
+              orgao: fonte.orgao,
+              dataPublicacao: new Date(),
+              ementa: `Candidato regulatorio coletado em ${fonte.nome}. Revisao humana obrigatoria antes de qualquer alteracao operacional.`,
+              conteudo: link.titulo,
+              urlOficial: link.url,
+              categorias: classificacao.categorias,
+              aplicabilidade: ["Farmacias", "Farmacias de manipulacao"],
+            },
+            descricao: `${tipoAtualizacao.replace("_", " ")} detectada em fonte oficial: ${link.titulo}`,
+            detalhes: {
+              fonte: fonte.nome,
+              url: link.url,
+              coleta: "HTTP oficial",
+              revisaoHumanaObrigatoria: true,
+              popHints: classificacao.popHints,
+            },
+            impactoPOPs: [],
+            acoesNecessarias: classificacao.acoes,
           });
         }
+      } catch (error) {
+        result.errosFonte.push({
+          fonte: fonte.nome,
+          erro: error instanceof Error ? error.message : "Erro desconhecido",
+        });
+      }
+    }
+
+    return Array.from(candidatos.values()).slice(0, 25);
+  }
+
+  private async analisarImpactoPOPs(atualizacoes: AtualizacaoDetectada[]) {
+    const impactos: Array<{
+      tenantId: string;
+      tenantNome: string;
+      atualizacao: AtualizacaoDetectada;
+      popsAfetados: Array<{ id: string; codigo: string; titulo: string; setor: string | null }>;
+      severidade: number;
+      prioridade: number;
+    }> = [];
+
+    if (!atualizacoes.length) return impactos;
+
+    const tenants = await prisma.tenant.findMany({
+      where: { status: "ATIVO" },
+      select: { id: true, nome: true },
+    });
+
+    for (const tenant of tenants) {
+      for (const atualizacao of atualizacoes) {
+        const hints = ((atualizacao.detalhes?.popHints as string[] | undefined) || []).slice(0, 8);
+        const orFilters = hints.flatMap((hint) => [
+          { titulo: { contains: hint, mode: "insensitive" as const } },
+          { descricao: { contains: hint, mode: "insensitive" as const } },
+          { conteudo: { contains: hint, mode: "insensitive" as const } },
+          { setor: { contains: hint, mode: "insensitive" as const } },
+        ]);
+
+        const popsAfetados = orFilters.length
+          ? await prisma.pop.findMany({
+              where: {
+                tenantId: tenant.id,
+                status: "ATIVO",
+                OR: orFilters,
+              },
+              select: { id: true, codigo: true, titulo: true, setor: true },
+              take: 20,
+            })
+          : [];
+
+        atualizacao.impactoPOPs = popsAfetados.map((pop) => pop.codigo);
+
+        impactos.push({
+          tenantId: tenant.id,
+          tenantNome: tenant.nome,
+          atualizacao,
+          popsAfetados,
+          severidade: this.calcularSeveridade(atualizacao, popsAfetados.length),
+          prioridade: this.calcularPrioridade(atualizacao),
+        });
       }
     }
 
     return impactos;
   }
 
-  /**
-   * Gera alertas automáticos para os tenants
-   */
-  private async gerarAlertasTenants(impactos: any[]): Promise<void> {
+  private async gerarAlertasTenants(
+    impactos: Awaited<ReturnType<ANVISAMonitor["analisarImpactoPOPs"]>>
+  ): Promise<{ normasCriadasOuAtualizadas: number; alertasCriados: number }> {
+    let normasCriadasOuAtualizadas = 0;
+    let alertasCriados = 0;
+
     for (const impacto of impactos) {
-      // Verificar se alerta já existe
-      const alertaExistente = await prisma.alertaNorma.findFirst({
-        where: {
-          tenantId: impacto.tenantId,
-          normaNumero: impacto.atualizacao.norma.numero,
-          status: "NOVO"
-        }
+      const codigoNorma = `RADAR-ANVISA-${hashCurto(`${impacto.atualizacao.norma.numero}|${impacto.atualizacao.norma.urlOficial || ""}`)}`;
+
+      const normaExistente = await prisma.norma.findFirst({
+        where: { tenantId: impacto.tenantId, codigo: codigoNorma },
+        select: { id: true },
       });
 
-      if (!alertaExistente) {
-        // Criar nova norma se não existir
-        let norma = await prisma.normaRegulatoria.findFirst({
-          where: { numero: impacto.atualizacao.norma.numero }
-        });
-
-        if (!norma) {
-          norma = await prisma.normaRegulatoria.create({
+      const norma = normaExistente
+        ? await prisma.norma.update({
+            where: { id: normaExistente.id },
             data: {
               numero: impacto.atualizacao.norma.numero,
               titulo: impacto.atualizacao.norma.titulo,
+              descricao: this.montarDescricaoNorma(impacto),
               tipo: impacto.atualizacao.norma.tipo,
-              orgao: impacto.atualizacao.norma.orgao,
-              status: "ATIVA",
-              dataPublicacao: impacto.atualizacao.norma.dataPublicacao,
-              dataVigencia: impacto.atualizacao.norma.dataVigencia,
-              ementa: impacto.atualizacao.norma.ementa,
-              categorias: impacto.atualizacao.norma.categorias,
-              aplicabilidade: impacto.atualizacao.norma.aplicabilidade,
-              popsImpactados: impacto.atualizacao.impactoPOPs,
-              nivelImpacto: impacto.severidade,
-              complexidade: this.calcularComplexidade(impacto.atualizacao)
-            }
+              dataAtualizacao: new Date(),
+            },
+          })
+        : await prisma.norma.create({
+            data: {
+              tenantId: impacto.tenantId,
+              codigo: codigoNorma,
+              numero: impacto.atualizacao.norma.numero,
+              titulo: impacto.atualizacao.norma.titulo,
+              descricao: this.montarDescricaoNorma(impacto),
+              tipo: impacto.atualizacao.norma.tipo,
+              versao: "RADAR",
+              dataAtualizacao: new Date(),
+            },
           });
-        }
 
-        // Criar atualização
-        const atualizacaoDB = await prisma.atualizacaoNorma.create({
-          data: {
-            normaId: norma.id,
-            tipo: impacto.atualizacao.tipo,
-            descricao: impacto.atualizacao.descricao,
-            detalhes: impacto.atualizacao.detalhes,
-            dataDeteccao: new Date(),
-            dataPublicacao: impacto.atualizacao.norma.dataPublicacao,
-            impactoPOPs: impacto.atualizacao.impactoPOPs,
-            acoesNecessarias: impacto.atualizacao.acoesNecessarias,
-            status: "COMUNICADA",
-            detectadoPor: "Sistema IA"
-          }
-        });
+      normasCriadasOuAtualizadas += 1;
 
-        // Criar alerta
-        await prisma.alertaNorma.create({
-          data: {
-            normaId: norma.id,
-            atualizacaoId: atualizacaoDB.id,
-            tenantId: impacto.tenantId,
-            titulo: `ATUALIZAÇÃO CRÍTICA: ${impacto.atualizacao.norma.numero}`,
-            mensagem: impacto.atualizacao.descricao,
-            tipo: impacto.prioridade >= 4 ? "CRÍTICO" : "ALERTA",
-            prioridade: impacto.prioridade,
-            popsAfetados: impacto.atualizacao.impactoPOPs,
-            setoresAfetados: impacto.popsAfetados.map((pop: any) => pop.setor),
-            impactoOperacional: `${impacto.popsAfetados.length} POPs precisam de atualização`,
-            acoesRecomendadas: impacto.atualizacao.acoesNecessarias,
-            prazoAcao: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
-            status: "NOVO",
-            notificadoPor: "Sistema IA"
-          }
-        });
-
-        // Criar auditoria log
-        await createAuditLog({
-          action: AUDIT_ACTIONS.POP_CREATED,
-          entity: "AlertaNorma",
-          entityId: atualizacaoDB.id,
-          userId: "system",
-          userName: "Sistema IA",
+      const alertaAberto = await prisma.alertaNorma.findFirst({
+        where: {
           tenantId: impacto.tenantId,
-          details: {
-            norma: impacto.atualizacao.norma.numero,
-            tipo: impacto.atualizacao.tipo,
-            popsAfetados: impacto.popsAfetados.length
-          }
-        });
-
-        console.log(`Alerta gerado para tenant ${impacto.tenantNome}: ${impacto.atualizacao.norma.numero}`);
-      }
-    }
-  }
-
-  /**
-   * Atualiza base de normas com novas informações
-   */
-  private async atualizarBaseNormas(atualizacoes: AtualizacaoDetectada[]): Promise<void> {
-    for (const atualizacao of atualizacoes) {
-      await prisma.normaRegulatoria.upsert({
-        where: { numero: atualizacao.norma.numero },
-        update: {
-          titulo: atualizacao.norma.titulo,
-          status: "ATUALIZADA",
-          updatedAt: new Date()
+          normaId: norma.id,
+          status: { in: ["NOVO", "PENDENTE", "EM_ANALISE"] },
         },
-        create: {
-          numero: atualizacao.norma.numero,
-          titulo: atualizacao.norma.titulo,
-          tipo: atualizacao.norma.tipo,
-          orgao: atualizacao.norma.orgao,
-          status: "ATIVA",
-          dataPublicacao: atualizacao.norma.dataPublicacao,
-          dataVigencia: atualizacao.norma.dataVigencia,
-          ementa: atualizacao.norma.ementa,
-          categorias: atualizacao.norma.categorias,
-          aplicabilidade: atualizacao.norma.aplicabilidade,
-          popsImpactados: atualizacao.impactoPOPs,
-          nivelImpacto: this.calcularSeveridade(atualizacao, 5),
-          complexidade: this.calcularComplexidade(atualizacao)
-        }
+      });
+
+      if (alertaAberto) continue;
+
+      const alerta = await prisma.alertaNorma.create({
+        data: {
+          tenantId: impacto.tenantId,
+          normaId: norma.id,
+          tipo: impacto.prioridade >= 4 ? "RADAR_ANVISA_CRITICO" : "RADAR_ANVISA",
+          severidade: this.severidadeTexto(impacto.severidade),
+          prioridade: impacto.prioridade,
+          descricao: this.montarDescricaoAlerta(impacto),
+          status: "NOVO",
+          dataAlerta: new Date(),
+        },
+      });
+
+      alertasCriados += 1;
+
+      await createAuditLog({
+        action: AUDIT_ACTIONS.LIBRARY_ITEM_CREATED,
+        entity: "AlertaNorma",
+        entityId: alerta.id,
+        userId: "system",
+        userName: "Radar ANVISA",
+        tenantId: impacto.tenantId,
+        details: {
+          norma: impacto.atualizacao.norma.numero,
+          fonte: impacto.atualizacao.norma.urlOficial,
+          popsAfetados: impacto.popsAfetados.map((pop) => pop.codigo),
+          revisaoHumanaObrigatoria: true,
+        },
       });
     }
+
+    return { normasCriadasOuAtualizadas, alertasCriados };
   }
 
-  /**
-   * Calcula severidade do impacto
-   */
+  private montarDescricaoNorma(impacto: {
+    atualizacao: AtualizacaoDetectada;
+    popsAfetados: Array<{ codigo: string; titulo: string; setor: string | null }>;
+    prioridade: number;
+  }) {
+    const norma = impacto.atualizacao.norma;
+    return [
+      impacto.atualizacao.descricao,
+      norma.ementa,
+      `Fonte oficial: ${norma.urlOficial || "nao informada"}`,
+      `Categorias: ${norma.categorias.join(", ")}`,
+      `POPs localizados para triagem: ${
+        impacto.popsAfetados.length
+          ? impacto.popsAfetados.map((pop) => `${pop.codigo} - ${pop.titulo}`).join("; ")
+          : "nenhum POP localizado automaticamente"
+      }`,
+      `Acoes sugeridas: ${impacto.atualizacao.acoesNecessarias.join("; ")}`,
+      "A IA/radar apenas sugere triagem. RT ou administrador deve revisar e aprovar antes de qualquer mudanca.",
+    ].join("\n");
+  }
+
+  private montarDescricaoAlerta(impacto: {
+    atualizacao: AtualizacaoDetectada;
+    popsAfetados: Array<{ codigo: string; titulo: string; setor: string | null }>;
+    prioridade: number;
+  }) {
+    const pops = impacto.popsAfetados.map((pop) => pop.codigo).join(", ") || "sem correspondencia automatica";
+    return [
+      `${impacto.atualizacao.norma.numero}: ${impacto.atualizacao.norma.titulo}`,
+      impacto.atualizacao.descricao,
+      `POPs para triagem: ${pops}.`,
+      `Acoes recomendadas: ${impacto.atualizacao.acoesNecessarias.join("; ")}.`,
+      `Fonte: ${impacto.atualizacao.norma.urlOficial || "nao informada"}.`,
+      "Revisao humana obrigatoria pelo RT/administrador antes de atualizar POPs ou treinamentos.",
+    ].join("\n");
+  }
+
   private calcularSeveridade(atualizacao: AtualizacaoDetectada, numPOPs: number): number {
     let base = 1;
-    
-    // Tipo de atualização
     if (atualizacao.tipo === "NOVA_NORMA") base += 2;
     if (atualizacao.tipo === "ALTERACAO") base += 1;
     if (atualizacao.tipo === "REVOGACAO") base += 3;
-    
-    // Número de POPs afetados
     base += Math.min(numPOPs, 3);
-    
-    // Categorias críticas
-    if (atualizacao.norma.categorias.includes("Segurança")) base += 2;
-    if (atualizacao.norma.categorias.includes("Qualidade")) base += 1;
-    
+    if (atualizacao.norma.categorias.some((categoria) => normalizarTexto(categoria).includes("qualidade"))) base += 1;
+    if (atualizacao.norma.categorias.some((categoria) => normalizarTexto(categoria).includes("control"))) base += 1;
     return Math.min(base, 5);
   }
 
-  /**
-   * Calcula prioridade de ação
-   */
   private calcularPrioridade(atualizacao: AtualizacaoDetectada): number {
     let prioridade = 1;
-    
     if (atualizacao.tipo === "NOVA_NORMA") prioridade += 3;
     if (atualizacao.tipo === "ALTERACAO") prioridade += 2;
     if (atualizacao.tipo === "REVOGACAO") prioridade += 4;
-    
-    // Prazo de vigência curto aumenta prioridade
-    if (atualizacao.norma.dataVigencia) {
-      const diasParaVigencia = Math.floor(
-        (atualizacao.norma.dataVigencia.getTime() - Date.now()) / (24 * 60 * 60 * 1000)
-      );
-      if (diasParaVigencia < 30) prioridade += 2;
-      if (diasParaVigencia < 7) prioridade += 3;
-    }
-    
+    if (atualizacao.norma.categorias.length >= 2) prioridade += 1;
     return Math.min(prioridade, 5);
   }
 
-  /**
-   * Calcula complexidade de implementação
-   */
-  private calcularComplexidade(atualizacao: AtualizacaoDetectada): number {
-    let complexidade = 1;
-    
-    // Número de POPs afetados
-    complexidade += Math.min(atualizacao.impactoPOPs.length, 3);
-    
-    // Número de ações necessárias
-    complexidade += Math.min(atualizacao.acoesNecessarias.length, 2);
-    
-    // Detalhes da atualização
-    if (atualizacao.detalhes?.secoesAlteradas) {
-      complexidade += Math.min(atualizacao.detalhes.secoesAlteradas.length, 2);
-    }
-    
-    return Math.min(complexidade, 5);
+  private severidadeTexto(score: number) {
+    if (score >= 5) return "CRITICA";
+    if (score >= 4) return "ALTA";
+    if (score >= 3) return "MEDIA";
+    return "BAIXA";
   }
 
-  /**
-   * Verifica status do monitoramento
-   */
   getStatus(): { isRunning: boolean; proximaExecucao?: Date } {
     return {
       isRunning: this.isRunning,
-      proximaExecucao: this.intervalo ? new Date(Date.now() + 60 * 60 * 1000) : undefined
+      proximaExecucao: this.intervalo ? new Date(Date.now() + 60 * 60 * 1000) : undefined,
     };
   }
 }
 
-// Export singleton
 export const anvisaMonitor = ANVISAMonitor.getInstance();
 
-// Função para iniciar monitoramento (chamada pelo servidor)
-export async function iniciarMonitoramentoANVISA(): Promise<void> {
-  await anvisaMonitor.iniciarMonitoramento(60); // 60 minutos
+export async function executarRadarANVISA(): Promise<MonitorResult> {
+  return anvisaMonitor.executarAgora();
 }
 
-// Função para parar monitoramento
+export async function iniciarMonitoramentoANVISA(): Promise<void> {
+  await anvisaMonitor.iniciarMonitoramento(60);
+}
+
 export function pararMonitoramentoANVISA(): void {
   anvisaMonitor.pararMonitoramento();
 }
-
