@@ -97,21 +97,24 @@ export default function ColaboradoresPage() {
       key: "actions",
       header: "Ações",
       render: (item: Colaborador) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" asChild>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild aria-label={`Visualizar colaborador ${item.nome}`}>
             <Link href={`/dashboard/colaboradores/${item?.id}`}>
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4 mr-2" />
+              Visualizar
             </Link>
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
+            aria-label={`Editar colaborador ${item.nome}`}
             onClick={() => {
               setEditingColaborador(item);
               setDialogOpen(true);
             }}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-4 w-4 mr-2" />
+            Editar
           </Button>
         </div>
       ),
@@ -184,3 +187,4 @@ export default function ColaboradoresPage() {
     </div>
   );
 }
+

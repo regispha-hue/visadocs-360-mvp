@@ -152,25 +152,27 @@ export default function MateriasPrimasPage() {
       key: "actions",
       header: "Ações",
       render: (item: MateriaPrima) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => router.push(`/dashboard/materias-primas/${item.id}`)}
-            title="Visualizar"
+            aria-label={`Visualizar matéria-prima ${item.nome}`}
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-4 w-4 mr-2" />
+            Visualizar
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => {
               setEditingMp(item);
               setDialogOpen(true);
             }}
-            title="Editar"
+            aria-label={`Editar matéria-prima ${item.nome}`}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-4 w-4 mr-2" />
+            Editar
           </Button>
           <Button
             variant="ghost"
@@ -180,6 +182,7 @@ export default function MateriasPrimasPage() {
               setDeleteDialogOpen(true);
             }}
             title="Excluir"
+            aria-label={`Excluir matéria-prima ${item.nome}`}
             className="text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
@@ -273,3 +276,4 @@ export default function MateriasPrimasPage() {
     </div>
   );
 }
+

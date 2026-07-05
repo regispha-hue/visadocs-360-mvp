@@ -24,6 +24,7 @@ export async function GET(request: Request) {
     const setor = searchParams.get("setor");
     const status = searchParams.get("status");
     const search = searchParams.get("search");
+    const fase = searchParams.get("fase");
     const tenantIdParam = searchParams.get("tenantId"); // For super admin
 
     const tenantId = user.role === "SUPER_ADMIN" ? tenantIdParam : user.tenantId;
@@ -34,7 +35,12 @@ export async function GET(request: Request) {
 
     const where: any = { tenantId };
     if (setor) where.setor = setor;
-    if (status) where.status = status;
+    if (fase === "minuta") {
+      const minutaStatuses = ["RASCUNHO", "EM_REVISAO", "REJEITADO"];
+      where.status = status && minutaStatuses.includes(status) ? status : { in: minutaStatuses };
+    } else if (status) {
+      where.status = status;
+    }
     if (search) {
       where.OR = [
         { codigo: { contains: search, mode: "insensitive" } },
@@ -150,3 +156,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Erro ao criar POP" }, { status: 500 });
   }
 }
+

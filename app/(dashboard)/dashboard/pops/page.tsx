@@ -1,21 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Plus, Eye, Edit, Archive, Download } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Plus, Eye, Edit, Download, Info, X, Search, FolderOpen, Folder } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import toast from "react-hot-toast";
-import Link from "next/link";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { SETORES, STATUS_POP_LABELS } from "@/lib/types";
+import { SETORES } from "@/lib/types";
 import { PopFormDialog } from "./_components/pop-form-dialog";
-import { getFileUrl } from "@/lib/s3";
 
 interface Pop {
   id: string;
@@ -31,6 +30,8 @@ interface Pop {
   createdAt: string;
 }
 
+const WORKFLOW_STATUSES = ["RASCUNHO", "EM_REVISAO", "REJEITADO"];
+
 const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondary"; label: string }> = {
   RASCUNHO: { variant: "secondary", label: "Rascunho" },
   EM_REVISAO: { variant: "warning", label: "Em revisão pelo RT" },
@@ -42,21 +43,28 @@ const STATUS_BADGES: Record<string, { variant: "success" | "warning" | "secondar
   ARQUIVADO: { variant: "warning", label: "Arquivado" },
 };
 
+const STATUS_FOLDERS = [
+  { status: "RASCUNHO", label: "Rascunhos" },
+  { status: "EM_REVISAO", label: "Em revisão pelo RT" },
+  { status: "REJEITADO", label: "Rejeitados" },
+];
+
 export default function PopsPage() {
-  const router = useRouter();
   const [pops, setPops] = useState<Pop[]>([]);
   const [loading, setLoading] = useState(true);
   const [setorFilter, setSetorFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPop, setEditingPop] = useState<Pop | null>(null);
+  const [tutorialDismissed, setTutorialDismissed] = useState(false);
 
   const fetchPops = async () => {
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ fase: "minuta" });
       if (setorFilter && setorFilter !== "all") params.append("setor", setorFilter);
       if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
-      
+
       const res = await fetch(`/api/pops?${params.toString()}`);
       const data = await res.json();
       if (data?.pops) {
@@ -72,6 +80,15 @@ export default function PopsPage() {
   useEffect(() => {
     fetchPops();
   }, [setorFilter, statusFilter]);
+
+  useEffect(() => {
+    setTutorialDismissed(localStorage.getItem("visadocs_pops_tutorial_dismissed") === "true");
+  }, []);
+
+  const dismissTutorial = () => {
+    localStorage.setItem("visadocs_pops_tutorial_dismissed", "true");
+    setTutorialDismissed(true);
+  };
 
   const handleDownload = async (pop: Pop) => {
     if (!pop?.arquivoUrl) {
@@ -92,90 +109,64 @@ export default function PopsPage() {
     }
   };
 
-  const handleStatusChange = async (pop: Pop, newStatus: string) => {
-    try {
-      const res = await fetch(`/api/pops/${pop.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success("Status atualizado!");
-      fetchPops();
-    } catch (error) {
-      toast.error("Erro ao atualizar status");
-    }
-  };
+  const filteredPops = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
 
-  const columns = [
-    {
-      key: "codigo",
-      header: "Código",
-      render: (item: Pop) => (
-        <span className="font-mono font-medium text-teal-600">{item?.codigo ?? "N/A"}</span>
-      ),
-    },
-    {
-      key: "titulo",
-      header: "Título",
-      render: (item: Pop) => (
-        <div className="max-w-[300px]">
-          <p className="font-medium truncate">{item?.titulo ?? "N/A"}</p>
-          <p className="text-sm text-muted-foreground">{item?.responsavel ?? "N/A"}</p>
-        </div>
-      ),
-    },
-    {
-      key: "setor",
-      header: "Setor",
-    },
-    {
-      key: "versao",
-      header: "Versão",
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (item: Pop) => {
-        const badge = STATUS_BADGES[item?.status] ?? { variant: "secondary", label: item?.status };
-        return <Badge variant={badge.variant}>{badge.label}</Badge>;
-      },
-    },
-    {
-      key: "dataRevisao",
-      header: "Revisão",
-      render: (item: Pop) =>
-        item?.dataRevisao ? format(new Date(item.dataRevisao), "dd/MM/yyyy", { locale: ptBR }) : "N/A",
-    },
-    {
-      key: "actions",
-      header: "Ações",
-      render: (item: Pop) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={`/dashboard/pops/${item?.id}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setEditingPop(item);
-              setDialogOpen(true);
-            }}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          {item?.arquivoUrl && (
-            <Button variant="ghost" size="icon" onClick={() => handleDownload(item)}>
-              <Download className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      ),
-    },
-  ];
+    return (pops ?? [])
+      .filter((pop) => WORKFLOW_STATUSES.includes(pop.status))
+      .filter((pop) => {
+        if (!normalizedSearch) return true;
+        return [pop.codigo, pop.titulo, pop.setor, pop.responsavel]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedSearch));
+      });
+  }, [pops, search]);
+
+  const groupedBySetor = useMemo(() => {
+    return filteredPops.reduce<Record<string, Pop[]>>((acc, pop) => {
+      const setor = pop.setor || "Sem setor definido";
+      acc[setor] = acc[setor] || [];
+      acc[setor].push(pop);
+      return acc;
+    }, {});
+  }, [filteredPops]);
+
+  const sortedSetores = Object.keys(groupedBySetor).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const openSetores = search ? sortedSetores.map((setor) => `setor-${setor}`) : undefined;
+
+  const renderActions = (item: Pop) => (
+    <div className="flex flex-wrap gap-2">
+      <Button variant="outline" size="sm" asChild aria-label={`Visualizar POP ${item.codigo}`}>
+        <Link href={`/dashboard/pops/${item.id}`}>
+          <Eye className="h-4 w-4 mr-2" />
+          Visualizar POP
+        </Link>
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        aria-label={`Editar POP ${item.codigo}`}
+        onClick={() => {
+          setEditingPop(item);
+          setDialogOpen(true);
+        }}
+      >
+        <Edit className="h-4 w-4 mr-2" />
+        Editar POP
+      </Button>
+      {item?.arquivoUrl && (
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Baixar arquivo"
+          aria-label={`Baixar arquivo do POP ${item.codigo}`}
+          onClick={() => handleDownload(item)}
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
 
   if (loading) {
     return (
@@ -188,8 +179,8 @@ export default function PopsPage() {
   return (
     <div>
       <PageHeader
-        title="POPs"
-        description="Gerencie minutas, versões aprovadas pelo RT e registros operacionais de POP"
+        title="Criar POP"
+        description="Área de trabalho para minutas, revisões e POPs sob demanda antes da publicação oficial"
       >
         <Button onClick={() => { setEditingPop(null); setDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />
@@ -197,9 +188,27 @@ export default function PopsPage() {
         </Button>
       </PageHeader>
 
-      <div className="flex gap-4 mb-6">
+      {!tutorialDismissed && (
+        <div className="mb-6 flex gap-3 rounded-md border border-teal-200 bg-teal-50 p-4 text-sm text-teal-950">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" />
+          <p className="leading-relaxed">
+            Nesta área você cria a minuta dos POPs que precisar gerar sob demanda. Após a aprovação da minuta pelo Responsável Técnico (RT), o POP é automaticamente incorporado à sua Biblioteca de POPs oficiais e disponibilizado na trilha de treinamento dos colaboradores/operadores. Enquanto o POP estiver em elaboração ou revisão, ele permanece listado aqui; assim que for aprovado e publicado, sai desta lista de trabalho e passa a viver na Biblioteca.
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="-mr-2 -mt-2 h-7 w-7 shrink-0 text-teal-800 hover:bg-teal-100"
+            aria-label="Ocultar aviso"
+            onClick={dismissTutorial}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      <div className="mb-6 grid gap-4 lg:grid-cols-[180px_220px_minmax(260px,480px)]">
         <Select value={setorFilter} onValueChange={setSetorFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger>
             <SelectValue placeholder="Filtrar por setor" />
           </SelectTrigger>
           <SelectContent>
@@ -211,30 +220,90 @@ export default function PopsPage() {
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar por status" />
+          <SelectTrigger>
+            <SelectValue placeholder="Filtrar por fase da minuta" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
+            <SelectItem value="all">Todas as fases da minuta</SelectItem>
             <SelectItem value="RASCUNHO">Rascunho</SelectItem>
             <SelectItem value="EM_REVISAO">Em revisão pelo RT</SelectItem>
             <SelectItem value="REJEITADO">Rejeitado pelo RT</SelectItem>
-            <SelectItem value="APROVADO">Aprovado pelo RT</SelectItem>
-            <SelectItem value="VIGENTE">Vigente</SelectItem>
-            <SelectItem value="OBSOLETO">Obsoleto</SelectItem>
-            <SelectItem value="ATIVO">Ativo</SelectItem>
-            <SelectItem value="ARQUIVADO">Arquivado</SelectItem>
           </SelectContent>
         </Select>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por código, título, setor ou responsável..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
 
-      <DataTable
-        data={pops}
-        columns={columns}
-        searchKey="titulo"
-        searchPlaceholder="Buscar por título..."
-        emptyMessage="Nenhum POP encontrado"
-      />
+      {sortedSetores.length === 0 ? (
+        <div className="rounded-md border p-10 text-center text-muted-foreground">
+          Nenhuma minuta de POP encontrada nesta fase de criação/revisão.
+        </div>
+      ) : (
+        <Accordion type="multiple" defaultValue={openSetores} className="space-y-3">
+          {sortedSetores.map((setor) => {
+            const setorPops = groupedBySetor[setor];
+            return (
+              <AccordionItem key={setor} value={`setor-${setor}`} className="rounded-md border px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-3 text-left">
+                    <FolderOpen className="h-5 w-5 text-amber-500" />
+                    <div>
+                      <p className="font-semibold">{setor}</p>
+                      <p className="text-xs text-muted-foreground">{setorPops.length} POP(s) em criação ou revisão</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-4">
+                  {STATUS_FOLDERS.map(({ status, label }) => {
+                    const statusPops = setorPops.filter((pop) => pop.status === status);
+                    if (statusPops.length === 0) return null;
+
+                    return (
+                      <div key={status} className="rounded-md border bg-muted/20">
+                        <div className="flex items-center gap-2 border-b px-4 py-3">
+                          <Folder className="h-4 w-4 text-amber-500" />
+                          <span className="font-medium">{label}</span>
+                          <Badge variant="secondary">{statusPops.length}</Badge>
+                        </div>
+                        <div className="divide-y">
+                          {statusPops.map((item) => {
+                            const badge = STATUS_BADGES[item.status] ?? { variant: "secondary", label: item.status };
+                            return (
+                              <div key={item.id} className="grid gap-3 px-4 py-4 xl:grid-cols-[130px_minmax(260px,1fr)_110px_120px_minmax(260px,auto)] xl:items-center">
+                                <span className="font-mono font-medium text-teal-600">{item.codigo ?? "N/A"}</span>
+                                <div>
+                                  <p className="font-medium">{item.titulo ?? "N/A"}</p>
+                                  <p className="text-sm text-muted-foreground">{item.responsavel ?? "N/A"}</p>
+                                </div>
+                                <span className="text-sm">Versão {item.versao ?? "N/A"}</span>
+                                <span className="text-sm">
+                                  {item.dataRevisao ? format(new Date(item.dataRevisao), "dd/MM/yyyy", { locale: ptBR }) : "N/A"}
+                                </span>
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <Badge variant={badge.variant}>{badge.label}</Badge>
+                                  {renderActions(item)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      )}
 
       <PopFormDialog
         open={dialogOpen}

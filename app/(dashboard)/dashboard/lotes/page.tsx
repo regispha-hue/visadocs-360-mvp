@@ -182,25 +182,27 @@ export default function LotesPage() {
       key: "actions",
       header: "Ações",
       render: (item: Lote) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => router.push(`/dashboard/lotes/${item.id}`)}
-            title="Visualizar"
+            aria-label={`Visualizar lote ${item.numeroLote}`}
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-4 w-4 mr-2" />
+            Visualizar
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => {
               setEditingLote(item);
               setDialogOpen(true);
             }}
-            title="Editar"
+            aria-label={`Editar lote ${item.numeroLote}`}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-4 w-4 mr-2" />
+            Editar
           </Button>
           <Button
             variant="ghost"
@@ -210,6 +212,7 @@ export default function LotesPage() {
               setDeleteDialogOpen(true);
             }}
             title="Excluir"
+            aria-label={`Excluir lote ${item.numeroLote}`}
             className="text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
@@ -303,3 +306,4 @@ export default function LotesPage() {
     </div>
   );
 }
+
