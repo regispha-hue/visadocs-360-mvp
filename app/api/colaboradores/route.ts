@@ -85,6 +85,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
     }
 
+    const nomeNormalizado = String(nome).trim();
+    const nomePareceCodigo = /^[A-Z0-9-]{6,}$/.test(nomeNormalizado) || /^QA[-\s]/i.test(nomeNormalizado);
+    const nomeLegivel = nomeNormalizado.split(/\s+/).length >= 2 || nomeNormalizado.length >= 8;
+    if (nomePareceCodigo || !nomeLegivel) {
+      return NextResponse.json({ error: "Informe um nome completo legível, não um código interno" }, { status: 400 });
+    }
+
     const tenantId = data.tenantId || user.tenantId;
 
     // Hash CPF for storage and comparison
@@ -108,7 +115,7 @@ export async function POST(request: Request) {
 
     const colaborador = await prisma.colaborador.create({
       data: {
-        nome,
+        nome: nomeNormalizado,
         cpfHash,
         cpfMasked,
         funcao,
@@ -126,7 +133,7 @@ export async function POST(request: Request) {
       userId: user.id,
       userName: user.name,
       tenantId,
-      details: { nome, funcao, setor },
+      details: { nome: nomeNormalizado, funcao, setor },
     });
 
     return NextResponse.json({ success: true, colaborador: serializeColaborador(colaborador) });
@@ -135,3 +142,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Erro ao criar colaborador" }, { status: 500 });
   }
 }
+

@@ -84,11 +84,20 @@ export async function PATCH(
     }
 
     const data = await request.json();
+    let nomeNormalizado: string | undefined;
+    if (data.nome !== undefined) {
+      nomeNormalizado = String(data.nome).trim();
+      const nomePareceCodigo = /^[A-Z0-9-]{6,}$/.test(nomeNormalizado) || /^QA[-\s]/i.test(nomeNormalizado);
+      const nomeLegivel = nomeNormalizado.split(/\s+/).length >= 2 || nomeNormalizado.length >= 8;
+      if (nomePareceCodigo || !nomeLegivel) {
+        return NextResponse.json({ error: "Informe um nome completo legível, não um código interno" }, { status: 400 });
+      }
+    }
 
     const updatedColaborador = await prisma.colaborador.update({
       where: { id: id },
       data: {
-        ...(data.nome && { nome: data.nome }),
+        ...(nomeNormalizado && { nome: nomeNormalizado }),
         ...(data.funcao && { funcao: data.funcao }),
         ...(data.setor && { setor: data.setor }),
         ...(data.dataAdmissao && { dataAdmissao: new Date(data.dataAdmissao) }),
@@ -113,3 +122,4 @@ export async function PATCH(
     return NextResponse.json({ error: "Erro ao atualizar colaborador" }, { status: 500 });
   }
 }
+

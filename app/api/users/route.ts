@@ -9,7 +9,10 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 const createUserSchema = z.object({
-  name: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  name: z.string().trim().min(2, "Nome deve ter pelo menos 2 caracteres").refine((value) => {
+    if (/^[A-Z0-9-]{6,}$/.test(value) || /^QA[-\s]/i.test(value)) return false;
+    return value.split(/\s+/).length >= 2 || value.length >= 8;
+  }, "Informe um nome completo legível, não um código interno"),
   email: z.string().trim().email("Email inválido"),
   role: z.enum(["ADMIN", "RT", "OPERADOR"]),
   tenantId: z.string().trim().min(1).optional(),
@@ -121,3 +124,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Erro ao criar usuário" }, { status: 500 });
   }
 }
+

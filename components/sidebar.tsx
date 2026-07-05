@@ -140,6 +140,18 @@ const superAdminNavItems: NavItem[] = [
   },
 ];
 
+function getDisplayName(name?: string | null) {
+  const trimmed = name?.trim();
+  if (!trimmed) return "Usuário";
+
+  const looksLikeCode =
+    /^[A-Z0-9-]{6,}$/.test(trimmed) ||
+    /^QA[-\s]/i.test(trimmed) ||
+    /\b(P0C|P1C|P2C|RT UI|SANDBOX)\b/i.test(trimmed);
+
+  return looksLikeCode ? "Usuário" : trimmed;
+}
+
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
@@ -147,6 +159,8 @@ export function Sidebar() {
   const { data: session } = useSession() || {};
 
   const user = session?.user as any;
+  const displayName = getDisplayName(user?.name);
+  const userInitial = displayName.charAt(0).toUpperCase();
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
   const navItems = isSuperAdmin ? superAdminNavItems : farmaciaNavItems;
 
@@ -260,10 +274,24 @@ export function Sidebar() {
 
       <div className="border-t p-4">
         <div className="mb-4 rounded-lg bg-muted p-3">
-          <p className="text-sm font-medium truncate">{user?.name}</p>
-          <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+          <div className="mb-3 flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-600 text-sm font-semibold text-white">
+              {userInitial}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Usuário</p>
+              <p className="truncate text-sm font-semibold" title={displayName}>{displayName}</p>
+            </div>
+          </div>
+          <div className="border-t pt-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">E-mail logado</p>
+            <p className="truncate text-xs text-muted-foreground" title={user?.email}>{user?.email ?? "E-mail não informado"}</p>
+          </div>
           {user?.tenantName && (
-            <p className="text-xs text-teal-600 mt-1 truncate">{user.tenantName}</p>
+            <div className="mt-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Farmácia</p>
+              <p className="truncate text-xs text-teal-600" title={user.tenantName}>{user.tenantName}</p>
+            </div>
           )}
         </div>
         <div className="flex gap-2">
@@ -327,6 +355,7 @@ export function Sidebar() {
     </>
   );
 }
+
 
 
 

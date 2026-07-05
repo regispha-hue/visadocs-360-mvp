@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 const QA = {
-  tenantName: "QA DEMO VISADOCS 360",
+  tenantName: "Farmácia Demonstração",
   tenantCnpj: "00999999000191",
   adminEmail: "qa.admin.demo@visadocs.local",
   rtEmail: "qa.rt.demo@visadocs.local",
@@ -105,10 +105,10 @@ async function main() {
       where: { id: tenant.id },
       data: {
         nome: QA.tenantName,
-        responsavel: "Dra. Responsavel Tecnica QA",
+        responsavel: "Farmacêutica RT Demo",
         email: "qa.demo@visadocs.local",
         telefone: "(11) 4000-0000",
-        endereco: "Rua QA Demo, 100 - Ambiente Controlado",
+        endereco: "Rua da Demonstração, 100 - Ambiente de Testes",
         status: "ATIVO",
         subscriptionStatus: "ATIVO",
       },
@@ -118,10 +118,10 @@ async function main() {
       data: {
         nome: QA.tenantName,
         cnpj: QA.tenantCnpj,
-        responsavel: "Dra. Responsavel Tecnica QA",
+        responsavel: "Farmacêutica RT Demo",
         email: "qa.demo@visadocs.local",
         telefone: "(11) 4000-0000",
-        endereco: "Rua QA Demo, 100 - Ambiente Controlado",
+        endereco: "Rua da Demonstração, 100 - Ambiente de Testes",
         status: "ATIVO",
         subscriptionStatus: "ATIVO",
       },
@@ -130,25 +130,25 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: QA.adminEmail },
-    update: { name: "QA Admin Demo", password: passwordHash, role: "ADMIN", tenantId: tenant.id },
-    create: { email: QA.adminEmail, name: "QA Admin Demo", password: passwordHash, role: "ADMIN", tenantId: tenant.id },
+    update: { name: "Administrador Demo", password: passwordHash, role: "ADMIN", tenantId: tenant.id },
+    create: { email: QA.adminEmail, name: "Administrador Demo", password: passwordHash, role: "ADMIN", tenantId: tenant.id },
   });
 
   const rt = await prisma.user.upsert({
     where: { email: QA.rtEmail },
-    update: { name: "QA RT Demo", password: passwordHash, role: "RT", tenantId: tenant.id },
-    create: { email: QA.rtEmail, name: "QA RT Demo", password: passwordHash, role: "RT", tenantId: tenant.id },
+    update: { name: "Farmacêutico RT Demo", password: passwordHash, role: "RT", tenantId: tenant.id },
+    create: { email: QA.rtEmail, name: "Farmacêutico RT Demo", password: passwordHash, role: "RT", tenantId: tenant.id },
   });
 
   await prisma.user.upsert({
     where: { email: QA.operadorEmail },
-    update: { name: "QA Operador Demo", password: passwordHash, role: "OPERADOR", tenantId: tenant.id },
-    create: { email: QA.operadorEmail, name: "QA Operador Demo", password: passwordHash, role: "OPERADOR", tenantId: tenant.id },
+    update: { name: "Operador Demo", password: passwordHash, role: "OPERADOR", tenantId: tenant.id },
+    create: { email: QA.operadorEmail, name: "Operador Demo", password: passwordHash, role: "OPERADOR", tenantId: tenant.id },
   });
 
   const colaborador = await prisma.colaborador.create({
     data: {
-      nome: "Colaborador QA Demo",
+      nome: "Colaborador Demo",
       email: "colaborador.qa.demo@visadocs.local",
       funcao: "Manipulador QA",
       setor: "Manipulacao",
@@ -521,3 +521,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
