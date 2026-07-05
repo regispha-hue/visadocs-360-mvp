@@ -141,17 +141,18 @@ export default function FornecedoresPage() {
       key: "actions",
       header: "Ações",
       render: (item: Fornecedor) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => {
               setEditingFornecedor(item);
               setDialogOpen(true);
             }}
-            title="Editar"
+            aria-label={`Editar fornecedor ${item.nome}`}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="h-4 w-4 mr-2" />
+            Editar
           </Button>
           <Button
             variant="ghost"
@@ -161,6 +162,7 @@ export default function FornecedoresPage() {
               setDeleteDialogOpen(true);
             }}
             title="Excluir"
+            aria-label={`Excluir fornecedor ${item.nome}`}
             className="text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
@@ -237,3 +239,4 @@ export default function FornecedoresPage() {
     </div>
   );
 }
+
