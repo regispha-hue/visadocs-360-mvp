@@ -1262,7 +1262,10 @@ export default function BibliotecaPopsPage() {
               </div>
               <p className="mt-1 text-sm leading-6 text-gray-600">
                 {formatAudit
-                  ? ${formatAudit.compliant} de  POPs conferidos seguem o padrão mínimo do modelo enviado.
+                  ? formatAudit.compliant +
+                    " de " +
+                    formatAudit.total +
+                    " POPs conferidos seguem o padrão mínimo do modelo enviado."
                   : formatAuditError}
               </p>
               {formatAudit && formatAudit.unchecked > 0 && (
@@ -1300,7 +1303,7 @@ export default function BibliotecaPopsPage() {
                 {formatAudit.samples.slice(0, 5).map((item) => (
                   <div key={item.id} className="text-xs text-gray-600">
                     <span className="font-medium text-gray-900">
-                      {item.code ? ${item.code} -  : ""}{item.title}
+                      {item.code ? item.code + " - " : ""}{item.title}
                     </span>
                     <span className="block">Pendências: {item.missing.join(", ")}</span>
                   </div>
