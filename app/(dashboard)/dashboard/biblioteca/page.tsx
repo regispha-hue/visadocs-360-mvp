@@ -27,6 +27,8 @@ import {
   Library,
   Wand2,
   FilePlus2,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { SETORES } from "@/lib/types";
 import {
@@ -59,6 +61,22 @@ interface LibraryItem {
   status: string;
   version?: string;
   source?: string | null;
+}
+
+interface FormatAuditSummary {
+  total: number;
+  compliant: number;
+  attention: number;
+  unchecked: number;
+  requiredSections: string[];
+  samples: Array<{
+    id: string;
+    title: string;
+    code?: string | null;
+    category?: string | null;
+    missing: string[];
+  }>;
+  updatedAt: string;
 }
 
 interface CanonicalDocument {
@@ -357,6 +375,9 @@ export default function BibliotecaPopsPage() {
   const [popsError, setPopsError] = useState<string | null>(null);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [canonicalError, setCanonicalError] = useState<string | null>(null);
+  const [formatAudit, setFormatAudit] = useState<FormatAuditSummary | null>(null);
+  const [formatAuditError, setFormatAuditError] = useState<string | null>(null);
+  const [formatAuditLoading, setFormatAuditLoading] = useState(false);
 
   const userRole = (session?.user as { role?: string } | undefined)?.role;
   const canManageCanonicalContent = userRole === "SUPER_ADMIN" || userRole === "ADMIN" || userRole === "RT";
@@ -380,11 +401,13 @@ export default function BibliotecaPopsPage() {
     setPopsError(null);
     setLibraryError(null);
     setCanonicalError(null);
+    setFormatAuditError(null);
 
-    const [popsResult, libraryResult, canonicalResult] = await Promise.allSettled([
+    const [popsResult, libraryResult, canonicalResult, formatAuditResult] = await Promise.allSettled([
       fetch("/api/pops?status=VIGENTE"),
       fetch("/api/document-library?status=ACTIVE"),
       fetch("/api/canonical/ingestion-jobs"),
+      fetch("/api/document-library/format-audit"),
     ]);
 
     if (popsResult.status === "fulfilled" && popsResult.value.ok) {
@@ -413,7 +436,35 @@ export default function BibliotecaPopsPage() {
       setCanonicalError("Não foi possível carregar os documentos preparados para consulta.");
     }
 
+    if (formatAuditResult.status === "fulfilled" && formatAuditResult.value.ok) {
+      const auditData = await formatAuditResult.value.json();
+      setFormatAudit(auditData?.summary || null);
+    } else {
+      setFormatAudit(null);
+      setFormatAuditError("Não foi possível conferir o padrão documental dos POPs.");
+    }
+
     setLoading(false);
+  }
+
+  async function refreshFormatAudit() {
+    setFormatAuditLoading(true);
+    setFormatAuditError(null);
+    try {
+      const response = await fetch("/api/document-library/format-audit");
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(data?.error || "Não foi possível conferir o padrão documental dos POPs.");
+      }
+      setFormatAudit(data?.summary || null);
+      toast.success("Conferência do padrão documental atualizada");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Não foi possível conferir o padrão documental dos POPs.";
+      setFormatAuditError(message);
+    } finally {
+      setFormatAuditLoading(false);
+    }
   }
 
   const popLibraryItems = libraryItems.filter(isPopLibraryItem);
@@ -1171,8 +1222,94 @@ export default function BibliotecaPopsPage() {
       />
 
       <div className="rounded-lg border bg-amber-50 p-3 text-sm text-amber-900">
-        Geração assistida cria apenas minuta auxiliar. Uso operacional depende de revisão e aprovação do Responsável Técnico.
+        A geração assistida usa os documentos preparados para consulta como referência e cria uma minuta rastreável. A minuta não substitui o POP oficial: o uso operacional só ocorre após revisão, ajustes e aprovação do Responsável Técnico.
       </div>
+
+      <Card className="p-4">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">O que existe nesta tela</h3>
+            <p className="mt-1 text-sm leading-6 text-gray-600">
+              Consulte o acervo importado em pastas, os POPs já preparados para busca textual e os POPs vigentes da esteira operacional.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Como consultar POPs</h3>
+            <p className="mt-1 text-sm leading-6 text-gray-600">
+              Use a busca por código, título ou pasta; expanda uma pasta para navegar pela árvore; ou pesquise por termos técnicos nos documentos de referência.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Padrão documental</h3>
+            <p className="mt-1 text-sm leading-6 text-gray-600">
+              A conferência compara os POPs da biblioteca com o modelo: código, objetivo, setor/equipe, glossário e literatura consultada.
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {(formatAudit || formatAuditError) && (
+        <Card className="p-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                {formatAudit && formatAudit.attention === 0 ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                )}
+                <h3 className="text-sm font-semibold text-gray-900">Conferência do formato dos POPs</h3>
+              </div>
+              <p className="mt-1 text-sm leading-6 text-gray-600">
+                {formatAudit
+                  ? `${formatAudit.compliant} de ${formatAudit.total} POPs conferidos seguem o padrão mínimo do modelo enviado.`
+                  : formatAuditError}
+              </p>
+              {formatAudit && formatAudit.unchecked > 0 && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {formatAudit.unchecked} item(ns) sem conteúdo textual suficiente para conferência automática.
+                </p>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formatAudit && (
+                <>
+                  <Badge variant="secondary">{formatAudit.compliant} conformes</Badge>
+                  <Badge variant={formatAudit.attention > 0 ? "outline" : "secondary"}>
+                    {formatAudit.attention} requerem revisão
+                  </Badge>
+                </>
+              )}
+              {canManageCanonicalContent && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshFormatAudit}
+                  disabled={formatAuditLoading}
+                >
+                  {formatAuditLoading ? "Conferindo..." : "Atualizar conferência"}
+                </Button>
+              )}
+            </div>
+          </div>
+          {formatAudit && formatAudit.samples.length > 0 && (
+            <div className="mt-3 rounded-md border bg-gray-50 p-3">
+              <p className="text-xs font-medium text-gray-700">Primeiros itens para revisar</p>
+              <div className="mt-2 space-y-2">
+                {formatAudit.samples.slice(0, 5).map((item) => (
+                  <div key={item.id} className="text-xs text-gray-600">
+                    <span className="font-medium text-gray-900">
+                      {item.code ? `${item.code} - ` : ""}{item.title}
+                    </span>
+                    <span className="block">Pendências: {item.missing.join(", ")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
 
       {(libraryError || popsError) && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
