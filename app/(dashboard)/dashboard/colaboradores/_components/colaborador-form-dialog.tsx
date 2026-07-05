@@ -20,7 +20,10 @@ import { SETORES, FUNCOES, FUNCOES_LABELS } from "@/lib/types";
 import { validateCPF } from "@/lib/validations";
 
 const colaboradorSchema = z.object({
-  nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  nome: z.string().trim().min(3, "Nome deve ter pelo menos 3 caracteres").refine((value) => {
+    if (/^[A-Z0-9-]{6,}$/.test(value) || /^QA[-\s]/i.test(value)) return false;
+    return value.split(/\s+/).length >= 2 || value.length >= 8;
+  }, "Informe um nome completo legível, não um código interno"),
   cpf: z.string().optional(),
   funcao: z.string().min(1, "Função é obrigatória"),
   setor: z.string().min(1, "Setor é obrigatório"),
@@ -145,11 +148,11 @@ export function ColaboradorFormDialog({ open, onOpenChange, colaborador, onSucce
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="nome">Nome Completo</Label>
+            <Label htmlFor="nome">Nome completo</Label>
             <Input
               id="nome"
               {...register("nome")}
-              placeholder="Nome completo"
+              placeholder="Ex.: Colaborador Demo"
             />
             {errors.nome && (
               <p className="text-sm text-red-500 mt-1">{errors.nome.message}</p>
@@ -236,12 +239,12 @@ export function ColaboradorFormDialog({ open, onOpenChange, colaborador, onSucce
           </div>
 
           <div>
-            <Label htmlFor="email">Email (opcional)</Label>
+              <Label htmlFor="email">E-mail de acesso (opcional)</Label>
             <Input
               id="email"
               type="email"
               {...register("email")}
-              placeholder="email@exemplo.com"
+                placeholder="usuario.teste@visadocs.com.br"
             />
             {errors.email && (
               <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
@@ -268,3 +271,4 @@ export function ColaboradorFormDialog({ open, onOpenChange, colaborador, onSucce
     </Dialog>
   );
 }
+

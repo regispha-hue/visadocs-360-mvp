@@ -11,7 +11,7 @@ async function main() {
   const superAdminPassword = await bcrypt.hash("johndoe123", 10);
   const superAdmin = await prisma.user.upsert({
     where: { email: "john@doe.com" },
-    update: {},
+    update: { name: "Super Admin" },
     create: {
       email: "john@doe.com",
       name: "Super Admin",
@@ -25,7 +25,7 @@ async function main() {
   const adminPassword = await bcrypt.hash("Admin@123", 10);
   await prisma.user.upsert({
     where: { email: "admin@visadocs.com" },
-    update: {},
+    update: { name: "Administrador VISADOCS" },
     create: {
       email: "admin@visadocs.com",
       name: "Administrador VISADOCS",
@@ -46,12 +46,12 @@ async function main() {
   if (!farmacia) {
     farmacia = await prisma.tenant.create({
       data: {
-        nome: "Farmacia Exemplo LTDA",
+        nome: "Farmácia Demonstração",
         cnpj: "12345678000199",
-        responsavel: "Dr. Joao Silva",
+        responsavel: "Farmacêutico RT Demo",
         email: "farmacia@exemplo.com",
         telefone: "(11) 99999-9999",
-        endereco: "Rua das Farmacias, 123, Loja A, Centro, Sao Paulo/SP, CEP 01234567",
+        endereco: "Rua da Demonstração, 123, Loja A, Centro, São Paulo/SP, CEP 01234567",
         status: "ATIVO",
         subscriptionStatus: "TRIAL",
         trialEndsAt,
@@ -59,15 +59,24 @@ async function main() {
     });
   }
   console.log("Farmacia created:", farmacia.nome);
+  if (farmacia.nome !== "Farmácia Demonstração") {
+    farmacia = await prisma.tenant.update({
+      where: { id: farmacia.id },
+      data: {
+        nome: "Farmácia Demonstração",
+        responsavel: "Farmacêutico RT Demo",
+      },
+    });
+  }
 
   // Create admin user for farmacia
   const farmaciaAdminPassword = await bcrypt.hash("farmacia123", 10);
   await prisma.user.upsert({
     where: { email: "farmacia@exemplo.com" },
-    update: {},
+    update: { name: "Farmacêutico RT Demo" },
     create: {
       email: "farmacia@exemplo.com",
-      name: "Dr. João Silva",
+      name: "Farmacêutico RT Demo",
       password: farmaciaAdminPassword,
       role: "ADMIN",
       tenantId: farmacia.id,
@@ -197,6 +206,7 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
 
 
 

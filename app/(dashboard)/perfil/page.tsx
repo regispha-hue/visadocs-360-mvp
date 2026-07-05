@@ -12,6 +12,18 @@ import { User, Mail, Building2, Shield, Lock, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { ROLE_LABELS } from "@/lib/types";
 
+function getDisplayName(name?: string | null) {
+  const trimmed = name?.trim();
+  if (!trimmed) return "Usuário";
+
+  const looksLikeCode =
+    /^[A-Z0-9-]{6,}$/.test(trimmed) ||
+    /^QA[-\s]/i.test(trimmed) ||
+    /\b(P0C|P1C|P2C|RT UI|SANDBOX)\b/i.test(trimmed);
+
+  return looksLikeCode ? "Usuário" : trimmed;
+}
+
 export default function PerfilPage() {
   const { data: session } = useSession() || {};
   const [loading, setLoading] = useState(false);
@@ -20,6 +32,7 @@ export default function PerfilPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const user = session?.user as any;
+  const displayName = getDisplayName(user?.name);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +92,7 @@ export default function PerfilPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Nome</p>
-                <p className="font-medium">{user?.name ?? "N/A"}</p>
+                <p className="font-medium" title={displayName}>{displayName}</p>
               </div>
             </div>
 
@@ -179,3 +192,4 @@ export default function PerfilPage() {
     </div>
   );
 }
+

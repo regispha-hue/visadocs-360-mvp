@@ -41,6 +41,12 @@ function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function isFriendlyPersonName(value: string) {
+  const trimmed = value.trim();
+  if (/^[A-Z0-9-]{6,}$/.test(trimmed) || /^QA[-\s]/i.test(trimmed)) return false;
+  return trimmed.split(/\s+/).length >= 2 || trimmed.length >= 8;
+}
+
 export function UserCreateDialog({ open, onOpenChange, tenantId, roles, onSuccess }: UserCreateDialogProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -59,6 +65,10 @@ export function UserCreateDialog({ open, onOpenChange, tenantId, roles, onSucces
     setLoading(true);
 
     try {
+      if (!isFriendlyPersonName(name)) {
+        throw new Error("Informe um nome completo legível, não um código interno.");
+      }
+
       const payload = {
         name,
         email,
@@ -123,24 +133,24 @@ export function UserCreateDialog({ open, onOpenChange, tenantId, roles, onSucces
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="user-name">Nome</Label>
+              <Label htmlFor="user-name">Nome completo</Label>
               <Input
                 id="user-name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Nome completo"
+                placeholder="Ex.: Farmacêutico RT Demo"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="user-email">Email</Label>
+              <Label htmlFor="user-email">E-mail de acesso</Label>
               <Input
                 id="user-email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="email@exemplo.com"
+                placeholder="usuario.teste@visadocs.com.br"
                 required
               />
             </div>
@@ -221,3 +231,4 @@ export function UserCreateDialog({ open, onOpenChange, tenantId, roles, onSucces
     </>
   );
 }
+
