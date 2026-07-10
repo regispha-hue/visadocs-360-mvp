@@ -31,10 +31,10 @@ export default function HomePage() {
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
-            Gestão de POPs e Treinamentos para Farmácias de Manipulação
+            Inteligência regulatória para farmácias de manipulação
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Simplifique a gestão de Procedimentos Operacionais Padrão e controle de treinamentos da sua equipe em uma única plataforma.
+            O software que mantém os POPs sempre atualizados com a ANVISA — e a farmácia sempre pronta para a fiscalização.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
@@ -46,6 +46,41 @@ export default function HomePage() {
             <Button size="lg" variant="outline" asChild>
               <Link href="/login">Já tenho conta</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* A Solução (estilo dark) */}
+      <section className="py-20 px-4 bg-[#0A0F1E]">
+        <div className="max-w-6xl mx-auto">
+          <span className="inline-block rounded-md border border-blue-500/60 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-300">
+            A Solução
+          </span>
+          <h2 className="mt-5 text-3xl md:text-4xl font-bold text-white max-w-3xl">
+            De repositório de documentos a motor de conformidade viva
+          </h2>
+          <p className="mt-3 text-base md:text-lg text-slate-400 max-w-3xl">
+            O VISADOCS conecta POPs, treinamento e regulação num só fluxo — e avisa quando a regra muda.
+          </p>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { n: "1", accent: "bg-teal-400 text-[#0A0F1E]", title: "Radar ANVISA", desc: "Monitora publicações da ANVISA/DOU e alerta quais POPs precisam ser revisados quando a norma muda." },
+              { n: "2", accent: "bg-blue-500 text-white", title: "POPs vivos", desc: "Criação, versionamento e aprovação pelo RT. O POP aprovado entra automático na biblioteca oficial." },
+              { n: "3", accent: "bg-teal-400 text-[#0A0F1E]", title: "Treino que dispara", desc: "Mudou o POP → a equipe é convocada para re-treinar, com quiz e certificado. Trilha por colaborador." },
+              { n: "4", accent: "bg-blue-500 text-white", title: "Pronto p/ fiscalização", desc: "Dashboard de conformidade e dossiê de auditoria gerado em 1 clique. Fim do desespero na visita." },
+            ].map((card) => (
+              <div
+                key={card.n}
+                className="rounded-2xl bg-[#11182E] p-6 border border-white/5 transition-shadow hover:shadow-xl hover:shadow-blue-900/30"
+              >
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl text-lg font-bold ${card.accent}`}>
+                  {card.n}
+                </div>
+                <h3 className="mt-5 text-lg font-bold text-white">{card.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{card.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
