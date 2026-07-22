@@ -6,6 +6,8 @@ import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
+const PUBLIC_FILE_ROLES = ["SUPER_ADMIN", "ADMIN", "RT"];
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -79,6 +81,19 @@ export async function PATCH(
 
     const data = await request.json();
     const oldStatus = lote.status;
+
+    if ((data.certificadoPublic !== undefined || data.laudoPublic !== undefined) && !PUBLIC_FILE_ROLES.includes(user.role)) {
+      return NextResponse.json({ error: "Sem permissão para publicar anexos do lote" }, { status: 403 });
+    }
+
+    if (data.fornecedorId) {
+      const fornecedor = await prisma.fornecedor.findFirst({
+        where: { id: data.fornecedorId, tenantId: lote.tenantId },
+      });
+      if (!fornecedor) {
+        return NextResponse.json({ error: "Fornecedor não encontrado para este tenant" }, { status: 404 });
+      }
+    }
 
     const updatedLote = await prisma.lote.update({
       where: { id: id },

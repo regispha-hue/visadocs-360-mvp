@@ -1,38 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { forbidden, getCurrentUser, requireTenantId, unauthorized } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const user = session.user as any;
-    const tenantId = user.tenantId || "default";
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "OPERADOR", "ANALISTA_CQ"].includes(user.role)) return forbidden();
     
     const { searchParams } = new URL(request.url);
+    const { tenantId, response } = requireTenantId(user, searchParams.get("tenantId"));
+    if (response) return response;
     const action = searchParams.get("action");
 
     switch (action) {
       case "matriz":
-        return await handleMatrizRisco(tenantId);
+        return await handleMatrizRisco(tenantId!);
       case "analise-ia":
-        return await handleAnaliseIA(tenantId);
+        return await handleAnaliseIA(tenantId!);
       case "nao-conformidades":
-        return await handleNaoConformidades(tenantId);
+        return await handleNaoConformidades(tenantId!);
       case "auditorias":
-        return await handleAuditorias(tenantId);
+        return await handleAuditorias(tenantId!);
       case "alertas":
-        return await handleAlertas(tenantId);
+        return await handleAlertas(tenantId!);
       default:
-        return await handleListRiscos(tenantId);
+        return await handleListRiscos(tenantId!);
     }
   } catch (error: any) {
     console.error("Error in risco API:", error);
@@ -42,27 +38,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const user = session.user as any;
-    const tenantId = user.tenantId || "default";
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "ANALISTA_CQ"].includes(user.role)) return forbidden();
     
     const data = await request.json();
+    const { tenantId, response } = requireTenantId(user, data.tenantId);
+    if (response) return response;
     const { action } = data;
 
     switch (action) {
       case "criar-risco":
-        return await handleCriarRisco(data, tenantId, user);
+        return await handleCriarRisco(data, tenantId!, user);
       case "criar-nao-conformidade":
-        return await handleCriarNaoConformidade(data, tenantId, user);
+        return await handleCriarNaoConformidade(data, tenantId!, user);
       case "agendar-auditoria":
-        return await handleAgendarAuditoria(data, tenantId, user);
+        return await handleAgendarAuditoria(data, tenantId!, user);
       case "gerar-matriz-ia":
-        return await handleGerarMatrizIA(data, tenantId);
+        return await handleGerarMatrizIA(data, tenantId!);
       default:
         return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
     }

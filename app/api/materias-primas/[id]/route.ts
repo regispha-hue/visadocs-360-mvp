@@ -6,6 +6,8 @@ import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
+const PUBLIC_FILE_ROLES = ["SUPER_ADMIN", "ADMIN", "RT"];
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -81,6 +83,19 @@ export async function PATCH(
     }
 
     const data = await request.json();
+
+    if (data.certificadoPublic !== undefined && !PUBLIC_FILE_ROLES.includes(user.role)) {
+      return NextResponse.json({ error: "Sem permissão para publicar certificado" }, { status: 403 });
+    }
+
+    if (data.fornecedorId) {
+      const fornecedor = await prisma.fornecedor.findFirst({
+        where: { id: data.fornecedorId, tenantId: materiaPrima.tenantId },
+      });
+      if (!fornecedor) {
+        return NextResponse.json({ error: "Fornecedor não encontrado para este tenant" }, { status: 404 });
+      }
+    }
 
     const updatedMP = await prisma.materiaPrima.update({
       where: { id: id },

@@ -101,6 +101,8 @@ export const documentLibraryItemSchema = z.object({
   status: z.enum(["ACTIVE", "INACTIVE", "ARCHIVED"]).optional(),
   version: z.string().optional().or(z.literal("")),
   content: z.string().optional().or(z.literal("")),
+  fileUrl: z.string().url("URL do arquivo inválida").optional().or(z.literal("")),
+  fileName: z.string().optional().or(z.literal("")),
   source: z.string().optional().or(z.literal("")),
   sourcePopId: z.string().optional().or(z.literal("")),
 });

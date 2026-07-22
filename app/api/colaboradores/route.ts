@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
 import bcrypt from "bcryptjs";
 import { maskCPF } from "@/lib/validations";
+import { requireTenantId } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +93,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Informe um nome completo legível, não um código interno" }, { status: 400 });
     }
 
-    const tenantId = data.tenantId || user.tenantId;
+    const tenantScope = requireTenantId(user, data.tenantId);
+    if (tenantScope.response) return tenantScope.response;
+    const tenantId = tenantScope.tenantId!;
 
     // Hash CPF for storage and comparison
     const cleanCpf = cpf.replace(/[^\d]/g, "");

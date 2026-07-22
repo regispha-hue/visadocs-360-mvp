@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { requireTenantId } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
@@ -85,7 +86,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nome é obrigatório" }, { status: 400 });
     }
 
-    const tenantId = data.tenantId || user.tenantId;
+    const tenantScope = requireTenantId(user, data.tenantId);
+    if (tenantScope.response) return tenantScope.response;
+    const tenantId = tenantScope.tenantId!;
 
     if (cnpj) {
       const existingFornecedor = await prisma.fornecedor.findFirst({

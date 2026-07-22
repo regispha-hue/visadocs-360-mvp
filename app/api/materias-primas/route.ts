@@ -3,8 +3,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { requireTenantId } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
+
+const PUBLIC_FILE_ROLES = ["SUPER_ADMIN", "ADMIN", "RT"];
 
 export async function GET(request: Request) {
   try {
@@ -105,7 +108,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const tenantId = data.tenantId || user.tenantId;
+    const tenantScope = requireTenantId(user, data.tenantId);
+    if (tenantScope.response) return tenantScope.response;
+    const tenantId = tenantScope.tenantId!;
+
+    if (certificadoPublic && !PUBLIC_FILE_ROLES.includes(user.role)) {
+      return NextResponse.json({ error: "Sem permissão para publicar certificado" }, { status: 403 });
+    }
+
+    if (fornecedorId) {
+      const fornecedor = await prisma.fornecedor.findFirst({ where: { id: fornecedorId, tenantId } });
+      if (!fornecedor) {
+        return NextResponse.json({ error: "Fornecedor não encontrado para este tenant" }, { status: 404 });
+      }
+    }
 
     const existingMP = await prisma.materiaPrima.findFirst({
       where: { tenantId, codigo },

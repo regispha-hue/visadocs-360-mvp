@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "./auth-options";
 
-export type GuardRole = "SUPER_ADMIN" | "ADMIN" | "RT" | "OPERADOR" | "COLABORADOR";
+export type GuardRole = "SUPER_ADMIN" | "ADMIN" | "RT" | "OPERADOR" | "COLABORADOR" | "ANALISTA_CQ";
 
 export interface GuardUser {
   id: string;

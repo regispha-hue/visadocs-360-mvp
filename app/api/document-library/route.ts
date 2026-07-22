@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { AUDIT_ACTIONS, createAuditLog, createDocumentLifecycleEvent } from "@/lib/audit";
 import { documentLibraryItemSchema } from "@/lib/validations";
 import { forbidden, getCurrentUser, requireTenantId, unauthorized } from "@/lib/auth-guards";
+import { documentIntegrityMetadata } from "@/lib/integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +76,11 @@ export async function POST(request: Request) {
     if (response) return response;
 
     const data = parsed.data;
+    const integrity = documentIntegrityMetadata({
+      content: data.content,
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+    });
     const item = await prisma.documentaryLibraryItem.create({
       data: {
         tenantId: tenantId!,
@@ -85,6 +91,7 @@ export async function POST(request: Request) {
         status: data.status || "ACTIVE",
         version: data.version || null,
         content: data.content || null,
+        fileUrl: data.fileUrl || null,
         source: data.source || "manual",
         sourcePopId: data.sourcePopId || null,
         createdByUserId: user.id,
@@ -99,7 +106,7 @@ export async function POST(request: Request) {
       userId: user.id,
       userName: user.name || undefined,
       tenantId: tenantId!,
-      details: { type: item.type, status: item.status, version: item.version },
+      details: { type: item.type, status: item.status, version: item.version, integrity },
     });
 
     await createDocumentLifecycleEvent({
@@ -118,6 +125,7 @@ export async function POST(request: Request) {
         category: item.category,
         source: item.source,
         sourcePopId: item.sourcePopId,
+        integrity,
       },
     });
 

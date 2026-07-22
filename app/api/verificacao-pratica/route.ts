@@ -1,38 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { forbidden, getCurrentUser, requireTenantId, unauthorized } from "@/lib/auth-guards";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const user = session.user as any;
-    const tenantId = user.tenantId || "default";
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "OPERADOR", "ANALISTA_CQ"].includes(user.role)) return forbidden();
     
     const { searchParams } = new URL(request.url);
+    const { tenantId, response } = requireTenantId(user, searchParams.get("tenantId"));
+    if (response) return response;
     const action = searchParams.get("action");
     const treinamentoId = searchParams.get("treinamentoId");
     const colaboradorId = searchParams.get("colaboradorId");
 
     switch (action) {
       case "listar":
-        return await handleListarVerificacoes(tenantId);
+        return await handleListarVerificacoes(tenantId!);
       case "detalhes":
-        return await handleDetalhesVerificacao(searchParams.get("id"), tenantId);
+        return await handleDetalhesVerificacao(searchParams.get("id"), tenantId!);
       case "checklist":
         return await handleChecklistPadrao();
       case "historico":
-        return await handleHistoricoColaborador(colaboradorId, tenantId);
+        return await handleHistoricoColaborador(colaboradorId, tenantId!);
       case "pendentes":
-        return await handleVerificacoesPendentes(tenantId);
+        return await handleVerificacoesPendentes(tenantId!);
       default:
         return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
     }
@@ -44,31 +40,28 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const user = session.user as any;
-    const tenantId = user.tenantId || "default";
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+    if (!["SUPER_ADMIN", "ADMIN", "RT", "ANALISTA_CQ"].includes(user.role)) return forbidden();
     
     const data = await request.json();
+    const { tenantId, response } = requireTenantId(user, data.tenantId);
+    if (response) return response;
     const { action } = data;
 
     switch (action) {
       case "agendar":
-        return await handleAgendarVerificacao(data, tenantId, user);
+        return await handleAgendarVerificacao(data, tenantId!, user);
       case "iniciar":
-        return await handleIniciarVerificacao(data, tenantId, user);
+        return await handleIniciarVerificacao(data, tenantId!, user);
       case "concluir":
-        return await handleConcluirVerificacao(data, tenantId, user);
+        return await handleConcluirVerificacao(data, tenantId!, user);
       case "upload-evidencia":
-        return await handleUploadEvidencia(data, tenantId);
+        return await handleUploadEvidencia(data, tenantId!);
       case "avaliar":
-        return await handleAvaliarVerificacao(data, tenantId, user);
+        return await handleAvaliarVerificacao(data, tenantId!, user);
       case "solicitar-retreinamento":
-        return await handleSolicitarRetreinamento(data, tenantId, user);
+        return await handleSolicitarRetreinamento(data, tenantId!, user);
       default:
         return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
     }
@@ -641,6 +634,5 @@ async function handleSolicitarRetreinamento(data: any, tenantId: string, user: a
     return NextResponse.json({ error: "Erro ao solicitar retreinamento" }, { status: 500 });
   }
 }
-
 
 

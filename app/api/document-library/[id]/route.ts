@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { AUDIT_ACTIONS, createAuditLog, createDocumentLifecycleEvent } from "@/lib/audit";
 import { documentLibraryItemSchema } from "@/lib/validations";
 import { forbidden, getCurrentUser, unauthorized } from "@/lib/auth-guards";
+import { documentIntegrityMetadata } from "@/lib/integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         status: true,
         version: true,
         content: true,
+        fileUrl: true,
         source: true,
         sourcePopId: true,
         createdByUserName: true,
@@ -67,6 +69,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const data = parsed.data;
+    const integrity = documentIntegrityMetadata({
+      content: data.content,
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+    });
     const item = await prisma.documentaryLibraryItem.update({
       where: { id },
       data: {
@@ -77,6 +84,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         status: data.status || existing.status,
         version: data.version || null,
         content: data.content || null,
+        fileUrl: data.fileUrl || null,
         source: data.source || existing.source,
         sourcePopId: data.sourcePopId || null,
       },
@@ -95,6 +103,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         statusTo: item.status,
         versionFrom: existing.version,
         versionTo: item.version,
+        integrity,
       },
     });
 
@@ -115,6 +124,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         category: item.category,
         source: item.source,
         sourcePopId: item.sourcePopId,
+        integrity,
       },
     });
 

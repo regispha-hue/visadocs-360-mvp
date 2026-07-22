@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import { prisma } from "@/lib/db";
 import { createAuditLog, AUDIT_ACTIONS } from "@/lib/audit";
+import { forbidden, getCurrentUser, requireTenantId, unauthorized } from "@/lib/auth-guards";
 // @ts-ignore
 import QRCode from "qrcode";
 
@@ -10,33 +9,30 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const user = session.user as any;
-    const tenantId = user.tenantId || "default";
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+    if (!["SUPER_ADMIN", "ADMIN", "RT"].includes(user.role)) return forbidden();
     
     const { searchParams } = new URL(request.url);
+    const { tenantId, response } = requireTenantId(user, searchParams.get("tenantId"));
+    if (response) return response;
     const action = searchParams.get("action");
     const qrCode = searchParams.get("qr");
     const codigoAcesso = searchParams.get("codigo");
 
     switch (action) {
       case "gerar-qrcode":
-        return await handleGerarQRCode(tenantId);
+        return await handleGerarQRCode(tenantId!);
       case "acesso-auditoria":
-        return await handleAcessoAuditoria(qrCode || codigoAcesso, tenantId);
+        return await handleAcessoAuditoria(qrCode || codigoAcesso, tenantId!);
       case "master-list":
-        return await handleMasterList(tenantId);
+        return await handleMasterList(tenantId!);
       case "certificados":
-        return await handleCertificados(tenantId);
+        return await handleCertificados(tenantId!);
       case "validades":
-        return await handleValidades(tenantId);
+        return await handleValidades(tenantId!);
       case "status":
-        return await handleStatusAuditoria(tenantId);
+        return await handleStatusAuditoria(tenantId!);
       default:
         return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
     }
@@ -48,25 +44,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
-
-    const user = session.user as any;
-    const tenantId = user.tenantId || "default";
+    const user = await getCurrentUser();
+    if (!user) return unauthorized();
+    if (!["SUPER_ADMIN", "ADMIN", "RT"].includes(user.role)) return forbidden();
     
     const data = await request.json();
+    const { tenantId, response } = requireTenantId(user, data.tenantId);
+    if (response) return response;
     const { action } = data;
 
     switch (action) {
       case "criar-auditoria":
-        return await handleCriarAuditoria(data, tenantId, user);
+        return await handleCriarAuditoria(data, tenantId!, user);
       case "registrar-acesso":
-        return await handleRegistrarAcesso(data, tenantId);
+        return await handleRegistrarAcesso(data, tenantId!);
       case "atualizar-dados":
-        return await handleAtualizarDados(data, tenantId);
+        return await handleAtualizarDados(data, tenantId!);
       default:
         return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
     }
