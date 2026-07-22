@@ -322,6 +322,29 @@ export default function NaoConformidadesPage() {
         </Dialog>
       </div>
 
+      <div className="rounded-xl border border-amber-100 bg-amber-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-amber-700">
+              Gestão de desvios e ações corretivas
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use esta página para registrar, investigar e fechar não conformidades
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Aqui você abre uma NC quando houver desvio, reclamação, falha operacional, pendência de auditoria ou
+              ocorrência que exija investigação. Depois, acompanhe o fluxo completo: causa raiz, plano CAPA (Ação
+              Corretiva e Preventiva), implementação, verificação de efetividade e fechamento com trilha auditável.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Os cartões mostram total, abertas, críticas e vencidas. Use busca e filtros para localizar uma NC; selecione
+            um registro na lista para ver detalhes, histórico e próximas ações do fluxo CAPA.
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-4">
         <Metric icon={FileWarning} label="Total" value={stats.total} />
         <Metric icon={Clock} label="Abertas" value={stats.abertas} />
@@ -485,3 +508,4 @@ function ActionBox({ title, children }: { title: string; children: React.ReactNo
     </div>
   );
 }
+
