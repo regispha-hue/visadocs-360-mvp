@@ -68,6 +68,29 @@ export default function MinhaTrilhaPage() {
         description="Pendências, treinamentos concluídos e vencimentos de certificados"
       />
 
+      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+              Minha rotina de treinamento
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use esta página para acompanhar seus treinamentos e prazos de certificação
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Aqui você vê quais treinamentos estão pendentes, em andamento, concluídos ou atrasados. A trilha ajuda a
+              priorizar o que precisa ser feito primeiro, acompanhar o avanço da sua capacitação e manter seus certificados
+              atualizados para as rotinas da farmácia.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Observe os cartões de resumo e abra os itens da lista para iniciar ou continuar treinamentos, realizar quizzes
+            e confirmar pendências antes do vencimento.
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-3 md:grid-cols-4">
         <Metric label="Pendentes" value={resumo.pendentes || 0} icon={<Clock className="h-4 w-4" />} />
         <Metric label="Em andamento" value={resumo.andamento || 0} icon={<GraduationCap className="h-4 w-4" />} />
@@ -125,3 +148,4 @@ function Metric({ label, value, icon }: { label: string; value: number; icon: Re
     </Card>
   );
 }
+

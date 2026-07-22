@@ -37,6 +37,29 @@ export default function PastaCentralPage() {
         description="Evidências consolidadas para RT, administração e fiscalização"
       />
 
+      <div className="rounded-xl border border-teal-100 bg-teal-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+              Dossiê executivo da conformidade
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use esta página para consultar evidências consolidadas da farmácia
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              A Pasta Central reúne indicadores e evidências úteis para o RT, administração e fiscalização: POPs vigentes,
+              certificados emitidos, treinamentos concluídos, não conformidades abertas, impressões controladas recentes e
+              registros de apoio à auditoria.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Consulte os cartões para ter uma visão rápida e use as seções abaixo para localizar certificados por colaborador,
+            impressões controladas e ocorrências recentes antes de reuniões, auditorias ou fiscalização.
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-3 md:grid-cols-4">
         <Metric icon={<FileText className="h-4 w-4" />} label="POPs vigentes" value={data.resumo?.popsVigentes || 0} />
         <Metric icon={<Award className="h-4 w-4" />} label="Certificados" value={data.resumo?.certificados || 0} />
@@ -102,3 +125,4 @@ function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; 
     </Card>
   );
 }
+

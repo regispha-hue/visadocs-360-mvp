@@ -262,6 +262,29 @@ export default function TreinamentosPage() {
         </Button>
       </PageHeader>
 
+      <div className="mb-6 rounded-xl border border-teal-100 bg-teal-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+              Gestão de treinamentos obrigatórios
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use esta página para convocar, acompanhar e concluir treinamentos vinculados a POPs
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Esta tela registra treinamentos internos conectados à versão aprovada do POP. Use-a para criar uma nova
+              convocação, acompanhar colaboradores pendentes ou em avaliação, aplicar quiz quando houver prova e concluir
+              treinamentos com geração de evidência e certificado quando aplicável.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Filtre por status, busque por instrutor e use a coluna Ações para visualizar, editar, aplicar prova ou concluir
+            o treinamento conforme a etapa atual.
+          </div>
+        </div>
+      </div>
+
       <div className="flex gap-4 mb-6">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]">
@@ -303,3 +326,4 @@ export default function TreinamentosPage() {
     </div>
   );
 }
+

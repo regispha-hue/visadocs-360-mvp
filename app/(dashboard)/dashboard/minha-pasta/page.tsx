@@ -55,6 +55,29 @@ export default function MinhaPastaPage() {
         description="Certificados e registros pessoais de treinamento"
       />
 
+      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+              Documentos e certificados pessoais
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use esta página para consultar e baixar seus certificados de treinamento
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Esta é a sua pasta individual no VISADOCS. Ela reúne certificados, registros pessoais de treinamento e
+              evidências emitidas após conclusão de trilhas ou quizzes. Use-a para comprovar capacitação, verificar validade
+              dos certificados e acessar seus documentos quando necessário.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Filtre por status para encontrar certificados válidos, vencidos ou pendentes. Abra ou baixe o documento quando
+            precisar apresentar evidência de treinamento.
+          </div>
+        </div>
+      </div>
+
       <Card className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -117,3 +140,4 @@ export default function MinhaPastaPage() {
     </div>
   );
 }
+

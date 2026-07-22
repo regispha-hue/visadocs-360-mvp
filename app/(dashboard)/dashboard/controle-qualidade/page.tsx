@@ -142,6 +142,29 @@ export default function ControleQualidadePage() {
         </Button>
       </div>
 
+      <div className="rounded-xl border border-teal-100 bg-teal-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+              Trilha técnica de controle de qualidade
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use esta página para organizar módulos, acervo, quizzes e evidências de CQ
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Aqui ficam os materiais técnicos de Controle de Qualidade, distribuídos em trilhas por perfil de usuário.
+              Consulte os módulos, confira se cada tema já possui POP e quiz, acesse o acervo técnico e acompanhe as
+              pendências que ainda precisam ser organizadas para fins de conformidade.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Comece pela aba Trilha para ver os módulos por perfil. Use Acervo para localizar materiais, Quizzes para
+            revisar provas e Conformidade para identificar o que ainda precisa de ajuste.
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-5">
         <Metric icon={FileText} label="Acervo CQ" value={data?.compliance.acervo || 0} />
         <Metric icon={BookOpenCheck} label="Módulos" value={data?.compliance.modulos || 0} />
@@ -321,3 +344,4 @@ function Metric({ icon: Icon, label, value }: { icon: typeof Microscope; label: 
     </Card>
   );
 }
+
