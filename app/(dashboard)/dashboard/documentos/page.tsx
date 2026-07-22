@@ -392,6 +392,29 @@ export default function DocumentosPage() {
         description="Registros, manuais e anexos organizados por pastas do acervo documental"
       />
 
+      <div className="mb-8 rounded-xl border border-blue-100 bg-blue-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">
+              Acervo de registros e manuais
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Consulte aqui os documentos de apoio da rotina de qualidade
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Esta página reúne Registros da Qualidade, Manuais de Boas Práticas e anexos usados como evidência,
+              referência operacional e apoio aos POPs. Use a busca para localizar por código, título, pasta ou POP
+              vinculado; depois abra as pastas para visualizar ou editar os documentos permitidos ao ADMIN, RT ou SUPER ADMIN.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como usar</strong>
+            Expanda uma categoria para navegar pela árvore documental, ou use os botões de expandir e recolher para
+            revisar rapidamente todo o acervo.
+          </div>
+        </div>
+      </div>
+
       <DocumentLibraryItemDialog
         open={documentDialogOpen}
         onOpenChange={(open) => {
@@ -533,3 +556,4 @@ export default function DocumentosPage() {
     </div>
   );
 }
+
