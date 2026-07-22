@@ -42,7 +42,10 @@ interface FonteRegulatoria {
 }
 
 interface MonitorResult {
+  modoColeta: "FONTES_OFICIAIS_HTTP";
   fontesConsultadas: number;
+  fontesConfiguradas: number;
+  candidatosColetados: number;
   atualizacoesDetectadas: number;
   tenantsProcessados: number;
   normasCriadasOuAtualizadas: number;
@@ -67,6 +70,27 @@ const FONTES_OFICIAIS: FonteRegulatoria[] = [
     url: "https://www.in.gov.br/consulta/-/buscar/dou?q=ANVISA%20farmacia%20manipulacao%20RDC",
   },
 ];
+
+function resolverFontesOficiais(): FonteRegulatoria[] {
+  const rawSources = process.env.ANVISA_RADAR_SOURCES;
+  if (!rawSources) return FONTES_OFICIAIS;
+
+  try {
+    const parsed = JSON.parse(rawSources) as Array<Partial<FonteRegulatoria>>;
+    const customSources = parsed
+      .filter((source) => source.nome && source.url && (source.orgao === "ANVISA" || source.orgao === "DOU"))
+      .map((source) => ({
+        nome: source.nome!,
+        url: source.url!,
+        orgao: source.orgao!,
+      }));
+
+    return customSources.length ? customSources : FONTES_OFICIAIS;
+  } catch (error) {
+    console.warn("ANVISA_RADAR_SOURCES invalido; usando fontes padrao.", error);
+    return FONTES_OFICIAIS;
+  }
+}
 
 const TERMOS_REGULATORIOS = [
   "anvisa",
@@ -304,8 +328,12 @@ class ANVISAMonitor {
   }
 
   private async executarMonitoramento(): Promise<MonitorResult> {
+    const fontes = resolverFontesOficiais();
     const result: MonitorResult = {
+      modoColeta: "FONTES_OFICIAIS_HTTP",
       fontesConsultadas: 0,
+      fontesConfiguradas: fontes.length,
+      candidatosColetados: 0,
       atualizacoesDetectadas: 0,
       tenantsProcessados: 0,
       normasCriadasOuAtualizadas: 0,
@@ -313,7 +341,7 @@ class ANVISAMonitor {
       errosFonte: [],
     };
 
-    const atualizacoes = await this.buscarAtualizacoesRecentes(result);
+    const atualizacoes = await this.buscarAtualizacoesRecentes(result, fontes);
     result.atualizacoesDetectadas = atualizacoes.length;
 
     const impactos = await this.analisarImpactoPOPs(atualizacoes);
@@ -326,10 +354,13 @@ class ANVISAMonitor {
     return result;
   }
 
-  private async buscarAtualizacoesRecentes(result: MonitorResult): Promise<AtualizacaoDetectada[]> {
+  private async buscarAtualizacoesRecentes(
+    result: MonitorResult,
+    fontes: FonteRegulatoria[]
+  ): Promise<AtualizacaoDetectada[]> {
     const candidatos = new Map<string, AtualizacaoDetectada>();
 
-    for (const fonte of FONTES_OFICIAIS) {
+    for (const fonte of fontes) {
       try {
         const html = await buscarHtmlComTimeout(fonte.url);
         result.fontesConsultadas += 1;
@@ -367,6 +398,7 @@ class ANVISAMonitor {
             impactoPOPs: [],
             acoesNecessarias: classificacao.acoes,
           });
+          result.candidatosColetados += 1;
         }
       } catch (error) {
         result.errosFonte.push({
