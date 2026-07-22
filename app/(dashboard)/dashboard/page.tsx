@@ -85,6 +85,29 @@ export default async function DashboardPage() {
         description={tenant?.nome ?? "Farmácia"}
       />
 
+      <div className="mb-8 rounded-xl border border-teal-100 bg-teal-50/70 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+              Visão geral da conformidade
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-gray-900">
+              Use este painel para acompanhar a rotina documental da farmácia
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+              Aqui você vê, em um só lugar, quantos POPs estão cadastrados e ativos, a situação dos colaboradores,
+              os treinamentos concluídos ou pendentes e a distribuição dos POPs por setor. Use estes indicadores para
+              identificar prioridades antes de revisar documentos, convocar treinamentos ou preparar evidências para fiscalização.
+            </p>
+          </div>
+          <div className="rounded-lg bg-white px-4 py-3 text-sm text-gray-600 shadow-sm md:max-w-xs">
+            <strong className="block text-gray-900">Como interpretar</strong>
+            Números no topo mostram o resumo operacional; os gráficos abaixo ajudam a localizar setores com maior volume
+            documental e treinamentos recentes.
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <StatCard
           title="Total de POPs"
