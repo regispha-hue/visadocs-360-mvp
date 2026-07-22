@@ -3,6 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 
+const INVALID_CREDENTIALS_ERROR = "E-mail ou senha inválidos.";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -13,25 +15,29 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Credenciais inválidas");
+          throw new Error(INVALID_CREDENTIALS_ERROR);
         }
 
+        const email = credentials.email.trim().toLowerCase();
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
           include: { tenant: true },
         });
 
         if (!user) {
-          throw new Error("Usuário não encontrado");
+          throw new Error(INVALID_CREDENTIALS_ERROR);
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) {
-          throw new Error("Senha incorreta");
+          throw new Error(INVALID_CREDENTIALS_ERROR);
         }
 
-        // Check tenant status for non-super-admin users
-        if (user.role !== "SUPER_ADMIN" && user.tenant) {
+        if (user.role !== "SUPER_ADMIN") {
+          if (!user.tenantId || !user.tenant) {
+            throw new Error("Conta sem farmácia vinculada. Entre em contato com o administrador.");
+          }
+
           if (user.tenant.status === "PENDENTE") {
             throw new Error("Aguardando aprovação do cadastro");
           }
@@ -87,4 +93,3 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
-
