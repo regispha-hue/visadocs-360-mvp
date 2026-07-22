@@ -9,6 +9,7 @@ Este pacote fecha a primeira camada operacional dos complementos que ainda falta
 - Inbox regulatorio em `/api/regulatorio/inbox`, com listagem de alertas de norma e mudanca de status por RT/admin.
 - Scorecard de conformidade em `/api/conformidade/scorecard`, consolidando POPs, versoes aprovadas, treinamentos, certificados, nao conformidades, alertas regulatorios e acervo.
 - Pacote inicial de tarefas recorrentes em `/api/conformidade/tarefas-recorrentes`, cobrindo temperatura, cadeia fria, limpeza, agua, calibracao, autoinspecao, treinamentos e triagem regulatoria.
+- Rate limit em memoria para login e chat IA direto, reduzindo brute force e abuso basico em producao restrita.
 
 ## Limite intencional
 

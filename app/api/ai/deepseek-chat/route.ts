@@ -1,7 +1,11 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { checkRateLimit, getRateLimitKey, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const limit = checkRateLimit(getRateLimitKey(request, "ai-chat"), 20, 10 * 60 * 1000);
+    if (!limit.allowed) return rateLimitResponse(limit.retryAfterSeconds);
+
     const { message } = await request.json();
     const apiKey = process.env.GOOGLE_API_KEY || "";
 

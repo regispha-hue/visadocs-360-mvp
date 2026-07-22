@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { checkRateLimit, getRateLimitKey, rateLimitResponse } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const limit = checkRateLimit(getRateLimitKey(request, "auth-login"), 8, 10 * 60 * 1000);
+    if (!limit.allowed) return rateLimitResponse(limit.retryAfterSeconds);
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
